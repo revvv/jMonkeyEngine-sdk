@@ -16,6 +16,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Quad;
+import java.util.logging.Logger;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -155,14 +156,22 @@ public class PickManager {
     /**
      * Get the Rotation into a specific custom space.
      *
-     * @param transforme the rotation to the custom space (World to Custom
+     * @param transform the rotation to the custom space (World to Custom
      * space)
      * @return the Rotation in the custom space
      */
-    public Quaternion getRotation(Quaternion transforme) {
+    public Quaternion getRotation(Quaternion transform) {
+        if (startPickLoc == null) {
+            Logger.getLogger(this.getClass().getSimpleName()).warning("startPickLoc null in PickManager#getRotation()");
+            return transform;
+        } else if (finalPickLoc == null) {
+            Logger.getLogger(this.getClass().getSimpleName()).warning("finalPickLoc null in PickManager#getRotation()");
+            return transform;
+        }
+        
         Vector3f v1, v2;
-        v1 = transforme.mult(startPickLoc.subtract(startSpatialLocation).normalize());
-        v2 = transforme.mult(finalPickLoc.subtract(startSpatialLocation).normalize());
+        v1 = transform.mult(startPickLoc.subtract(startSpatialLocation).normalize());
+        v2 = transform.mult(finalPickLoc.subtract(startSpatialLocation).normalize());
         Vector3f axis = v1.cross(v2);
         float angle = v1.angleBetween(v2);
         return new Quaternion().fromAngleAxis(angle, axis);
