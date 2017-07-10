@@ -29,7 +29,7 @@ public class PickManager {
     private Vector3f startPickLoc;
     private Vector3f finalPickLoc;
     private Vector3f startSpatialLocation;
-    private Quaternion origineRotation;
+    private Quaternion originRotation;
     private final Node plane;
     private Spatial spatial;
     private SceneComposerToolController.TransformationType transformationType;
@@ -72,15 +72,15 @@ public class PickManager {
                 case local:
                     rot.set(spatial.getWorldRotation());
                     rot.multLocal(planeRotation);
-                    origineRotation = spatial.getWorldRotation().clone();
+                    originRotation = spatial.getWorldRotation().clone();
                     break;
                 case global:
                     rot.set(planeRotation);
-                    origineRotation = new Quaternion(Quaternion.IDENTITY);
+                    originRotation = new Quaternion(Quaternion.IDENTITY);
                     break;
                 case camera:
                     rot.set(camera.getRotation());
-                    origineRotation = camera.getRotation();
+                    originRotation = camera.getRotation();
                     break;
                 default:
                     break;
@@ -150,7 +150,7 @@ public class PickManager {
      * @return the Quaternion rotation in the ToolSpace
      */
     public Quaternion getLocalRotation() {
-        return getRotation(origineRotation.inverse());
+        return getRotation(originRotation.inverse());
     }
 
     /**
@@ -187,22 +187,22 @@ public class PickManager {
 
     /**
      *
-     * @param axisConstrainte
+     * @param axisConstraint
      * @return
      */
-    public Vector3f getTranslation(Vector3f axisConstrainte) {
-        Vector3f localConstrainte = (origineRotation.mult(axisConstrainte)).normalize(); // according to the "plane" rotation
-        Vector3f constrainedTranslation = localConstrainte.mult(getTranslation().dot(localConstrainte));
+    public Vector3f getTranslation(Vector3f axisConstraint) {
+        Vector3f localConstraint = (originRotation.mult(axisConstraint)).normalize(); // according to the "plane" rotation
+        Vector3f constrainedTranslation = localConstraint.mult(getTranslation().dot(localConstraint));
         return constrainedTranslation;
     }
 
     /**
      *
-     * @param axisConstrainte
+     * @param axisConstraint
      * @return
      */
-    public Vector3f getLocalTranslation(Vector3f axisConstrainte) {
-        return getTranslation(origineRotation.inverse().mult(axisConstrainte));
+    public Vector3f getLocalTranslation(Vector3f axisConstraint) {
+        return getTranslation(originRotation.inverse().mult(axisConstraint));
     }
 
 }
