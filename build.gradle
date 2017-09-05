@@ -25,9 +25,6 @@ repositories {
 
 }
 
-println System.env.TRAVIS_PULL_REQUEST
-println System.env.TRAVIS_PULL_REQUEST_BRANCH
-
 if (System.getenv('TRAVIS') != null) {
     if (System.env.TRAVIS_TAG != "") {
         ext.jmeEngineVersion = "3.2.0-" + System.env.TRAVIS_TAG + "-SNAPSHOT"
