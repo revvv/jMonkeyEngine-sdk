@@ -32,24 +32,30 @@
 package com.jme3.gde.core.assets.actions;
 
 import com.jme3.export.Savable;
+import com.jme3.gde.core.assets.AssetDataObject;
 import com.jme3.gde.core.assets.BinaryModelDataObject;
 import com.jme3.gde.core.assets.SpatialAssetDataObject;
+import com.jme3.gde.core.util.notify.MessageUtil;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.progress.ProgressHandle;
 import org.openide.util.Exceptions;
 
 public final class ConvertModel implements ActionListener {
-
+    protected static final Logger logger = Logger.getLogger(ConvertModel.class.getName());
     private final List<SpatialAssetDataObject> context;
 
     public ConvertModel(List<SpatialAssetDataObject> context) {
         this.context = context;
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev) {
         Runnable run = new Runnable() {
+            @Override
             public void run() {
                 ProgressHandle progressHandle = ProgressHandle.createHandle("Converting Model");
                 progressHandle.start();
@@ -62,7 +68,13 @@ public final class ConvertModel implements ActionListener {
                                 spatialAssetDataObject.closeAsset();
                             }
                         } catch (Exception ex) {
-                            Exceptions.printStackTrace(ex);
+                            //Exceptions.printStackTrace(ex); // does only print the stacktrace when launching the sdk in debug mode
+                            //bad for user reports, so we use error() and loggers
+                            MessageUtil.error("Unable to convert the model: An Exception has occured.\n"
+                                    + "Please look into the Output Window and report that Exception\n"
+                                    + "(including the full stacktrace) to us at \n"
+                                    + "https://github.com/jMonkeyEngine/sdk/issues", ex);
+                            logger.log(Level.SEVERE, "An Exception has occured.", ex);
                         }
                     }
                 }
