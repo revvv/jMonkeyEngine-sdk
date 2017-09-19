@@ -73,7 +73,7 @@ public final class ConvertModel implements ActionListener {
                             MessageUtil.error("Unable to convert the model: An Exception has occured.\n"
                                     + "Please look into the Output Window and report that Exception\n"
                                     + "(including the full stacktrace) to us at \n"
-                                    + "https://github.com/jMonkeyEngine/sdk/issues", ex);
+                                    + "https://github.com/jMonkeyEngine/sdk/issues");
                             logger.log(Level.SEVERE, "An Exception has occured.", ex);
                         }
                     }
