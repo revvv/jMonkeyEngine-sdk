@@ -49,7 +49,9 @@ import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
 /**
- *
+ * The ApplicationLogHandler manages the Central Output/Logging Window and
+ * changes to it's logging level as well as formats the output to the window
+ * (Only {@link Level#SEVERE} leads to a print of the stacktrace).
  * @author normenhansen
  */
 public class ApplicationLogHandler extends Handler implements Callable<JButton> {
@@ -71,23 +73,27 @@ public class ApplicationLogHandler extends Handler implements Callable<JButton> 
     InputOutput io;
     JmeFormatter formatter = new JmeFormatter();
     ActionListener listener = new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             io.select();
         }
     };
     Action levelFine = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             Logger.getLogger("com.jme3").setLevel(Level.FINE);
             NotifyUtil.info("Changed logging level", "Changed logging level to FINE");
         }
     };
     Action levelInfo = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             Logger.getLogger("com.jme3").setLevel(Level.INFO);
             NotifyUtil.info("Changed logging level", "Changed logging level to INFO");
         }
     };
     Action levelWarning = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             Logger.getLogger("com.jme3").setLevel(Level.WARNING);
             NotifyUtil.info("Changed logging level", "Changed logging level to WARNING");
@@ -133,6 +139,7 @@ public class ApplicationLogHandler extends Handler implements Callable<JButton> 
         }
     }
 
+    @Override
     public JButton call() throws Exception {
         return new JButton("Report");
     }
