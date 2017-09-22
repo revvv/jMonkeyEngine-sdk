@@ -133,8 +133,7 @@ public class RunAppStateAction implements ContextAwareAction {
             attachState(app);
         } else {
             DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message("No Scene opened to attach to,\nopen a j3o scene."));
-            if(5==5)
-            return;
+            /*
             if (config.manager != null) {
                 logger.log(Level.INFO, "Try request scene..");
                 //TODO: rootNode is assigned in SceneApplication.. more elegant system (with scene lookup)
@@ -161,7 +160,7 @@ public class RunAppStateAction implements ContextAwareAction {
                 SceneApplication.getApplication().openScene(sceneRequest);
             } else {
                 DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message("Not a jME project!"));
-            }
+            }*/
         }
     }
 
