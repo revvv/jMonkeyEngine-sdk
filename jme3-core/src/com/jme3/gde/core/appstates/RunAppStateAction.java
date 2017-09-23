@@ -92,11 +92,13 @@ public class RunAppStateAction implements ContextAwareAction {
         this.config = config;
     }
 
+    @Override
     public Action createContextAwareInstance(Lookup actionContext) {
         ActionConfig config = checkData(actionContext, "com.jme3.app.state.AppState");
         return new RunAppStateAction(config);
     }
 
+    @Override
     public Object getValue(String key) {
         if (Action.NAME.equals(key)) {
             return "Run AppState";
@@ -104,22 +106,28 @@ public class RunAppStateAction implements ContextAwareAction {
         return null;
     }
 
+    @Override
     public void putValue(String key, Object value) {
     }
 
+    @Override
     public void setEnabled(boolean b) {
     }
 
+    @Override
     public boolean isEnabled() {
         return config != null ? config.className != null : false;
     }
 
+    @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
     }
 
+    @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         //TODO: better way to access scene request        
         if (config == null) {
@@ -189,6 +197,7 @@ public class RunAppStateAction implements ContextAwareAction {
                 return null;
             }
             CancellableTask task = new CancellableTask<CompilationController>() {
+                @Override
                 public void run(CompilationController controller) throws IOException {
                     controller.toPhase(JavaSource.Phase.PARSED);
                     CompilationUnitTree cut = controller.getCompilationUnit();
@@ -205,6 +214,11 @@ public class RunAppStateAction implements ContextAwareAction {
                     for (Tree typeDecl : cut.getTypeDecls()) {
                         if (Tree.Kind.CLASS == typeDecl.getKind()) {
                             ClassTree clazz = (ClassTree) typeDecl;
+                            if (cut.getPackageName() == null) {
+                                logger.log(Level.WARNING, "Found class {0} in default package. "
+                                        + "This is discouraged, specify a package name!", clazz.getSimpleName().toString());
+                                continue; // When someone uses the default package
+                            }
                             String elementName = cut.getPackageName().toString() + "." + clazz.getSimpleName();
                             TypeElement myElement = controller.getElements().getTypeElement(elementName);
                             if (myElement != null) {
