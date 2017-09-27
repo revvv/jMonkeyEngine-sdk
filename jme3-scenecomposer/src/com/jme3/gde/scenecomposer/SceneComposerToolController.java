@@ -216,7 +216,7 @@ public class SceneComposerToolController extends SceneToolController {
         if (scm.isActive()) {
             scm.getActiveShortcut().setCamera(camera);
             scm.getActiveShortcut().mouseMoved(mouseLoc, rootNode, editorController.getCurrentDataObject());
-        } else if (editTool != null) {
+        } else if (editTool != null && editorController != null) {
             editTool.setCamera(camera);
             editTool.mouseMoved(mouseLoc, rootNode, editorController.getCurrentDataObject());
         }
