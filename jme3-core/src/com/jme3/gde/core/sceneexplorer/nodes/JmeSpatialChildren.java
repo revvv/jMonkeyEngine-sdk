@@ -46,6 +46,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
 import com.jme3.ui.Picture;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,6 +70,7 @@ public class JmeSpatialChildren extends Children.Keys<Object> {
     protected boolean readOnly = true;
     protected HashMap<Object, Node> map = new HashMap<Object, Node>();
     private DataObject dataObject;
+    boolean hasKeys; // We use this to cache the keys, unless refresh is called
 
     public JmeSpatialChildren() {
     }
@@ -95,7 +97,14 @@ public class JmeSpatialChildren extends Children.Keys<Object> {
     @Override
     protected void addNotify() {
         super.addNotify();
-        setKeys(createKeys());
+        /* addNotify might be called multiple times, however it's purpose is to
+         * just build the Keys (once), so in case we already did that, we will
+         * only rebuild the keys again, when someone calls refresh()
+         */
+        if (!hasKeys) {
+            setKeys(createKeys());
+            hasKeys = true;
+        }
     }
 
     /**
@@ -106,14 +115,24 @@ public class JmeSpatialChildren extends Children.Keys<Object> {
      */
     protected List<Object> createKeys() {
         try {
-            return SceneApplication.getApplication().enqueue(new Callable<List<Object>>() {
-
+            //return SceneApplication.getApplication().enqueue(new Callable<List<Object>>() {
+            return new Callable<List<Object>>() {
                 @Override
                 public List<Object> call() throws Exception {
-                    List<Object> keys = new LinkedList<Object>();
-                    if (spatial != null && spatial instanceof com.jme3.scene.Node) {
-                        keys.addAll(((com.jme3.scene.Node) spatial).getChildren());
+                    List<Object> keys;
+                    
+                    if (spatial == null) {
+                        return new LinkedList<Object>(); // Empty list
+                    }
+                    
+                    if (spatial instanceof com.jme3.scene.Node) {
+                        com.jme3.scene.Node n = (com.jme3.scene.Node)spatial;
+                        keys = new ArrayList<Object>(spatial.getLocalLightList().size() + spatial.getNumControls() + n.getChildren().size());
+                        keys.addAll(n.getChildren());
 //                        return keys;
+                    } else {
+                        // we only build keys when we now how many elements there will be.
+                        keys = new ArrayList<Object>(spatial.getLocalLightList().size() + spatial.getNumControls() + 1);
                     }
                     if (spatial instanceof Geometry) {
                         Geometry geom = (Geometry) spatial;
@@ -135,10 +154,12 @@ public class JmeSpatialChildren extends Children.Keys<Object> {
                     }
                     return keys;
                 }
-            }).get();
+            }.call();
         } catch (InterruptedException ex) {
             Exceptions.printStackTrace(ex);
         } catch (ExecutionException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
         return null;
