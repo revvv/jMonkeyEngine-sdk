@@ -87,13 +87,4 @@ public class GLTFDataObject extends SpatialAssetDataObject {
     public GLTFDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException, IOException {
         super(pf, loader);
     }
-
-    @Override
-    public ModelKey getAssetKey() {
-        if (assetKey != null) {
-            return (ModelKey)assetKey; // since there is no GLTFKey
-        } else {
-            return super.getAssetKey();
-        }
-    }
 }
