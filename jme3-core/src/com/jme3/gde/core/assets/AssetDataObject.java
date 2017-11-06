@@ -256,7 +256,9 @@ public class AssetDataObject extends MultiDataObject {
             for (Iterator<AssetKey> it = assetKeyList.iterator(); it.hasNext();) {
                 AssetKey assetKey1 = it.next();
                 logger.log(Level.INFO, "Removing asset {0}, from cache via main asset {1}.", new Object[]{assetKey1.getName(), getName()});
-                mgr.deleteFromCache(assetKey1);
+                if (assetKey1.getCacheType() != null) {
+                    mgr.deleteFromCache(assetKey1);
+                }
             }
             savable = null;
         } else if (mgr == null) {
