@@ -91,16 +91,15 @@ function unpack_mac_jdk {
         hdiutil detach /Volumes/JDK*
     else # Linux
         7z x ../downloads/jdk-macosx-x64.dmg 
-        # The following seems dependent of the 7zip version. If not they also changed their MacOSX Installer
-        #7z x 4.hfs > /dev/null
+        # The following seems dependent of the 7zip version. Travis on Version 9.20 extracts all partitions, where as at least version 16.02 is automatically extracting 4.hfs
+        7z x 4.hfs > /dev/null
         #install_xar
         #./xar-1.5.2/src/xar -xf JDK*/JDK*.pkg
-    cd JDK*
-    
-    7z x JDK*.pkg 
-    cd jdk1*.pkg
-    
+        7z x JDK*.pkg 
+        cd jdk1*.pkg
     fi
+
+    cd JDK*
 
     cat Payload | gunzip -dc | cpio -i
     #mkdir -p Contents/jdk/
