@@ -95,6 +95,7 @@ function unpack_mac_jdk {
         7z x 4.hfs > /dev/null
         #install_xar
         #./xar-1.5.2/src/xar -xf JDK*/JDK*.pkg
+        ls -lsh
         7z x JDK*.pkg 
         ls -lsh
         cd jdk1*.pkg
