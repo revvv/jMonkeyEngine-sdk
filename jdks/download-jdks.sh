@@ -63,7 +63,7 @@ function download_jdk {
     then
         echo "<<< Already existing, SKIPPING."
     else
-        curl -v -o downloads/jdk-$1 -L -b oraclelicense=accept-securebackup-cookie http://download.oracle.com/otn-pub/java/jdk/$jdk_version-$jdk_build_version/$jdk_hash/jdk-$jdk_version-$1 #--progress-bar
+        curl -s -o downloads/jdk-$1 -L -b oraclelicense=accept-securebackup-cookie http://download.oracle.com/otn-pub/java/jdk/$jdk_version-$jdk_build_version/$jdk_hash/jdk-$jdk_version-$1 #--progress-bar
         echo "<<< OK!"
     fi
 }
@@ -90,12 +90,12 @@ function unpack_mac_jdk {
         xar -xf /Volumes/JDK*/JDK*.pkg
         hdiutil detach /Volumes/JDK*
     else # Linux
-        7z x ../downloads/jdk-macosx-x64.dmg 
+        7z x ../downloads/jdk-macosx-x64.dmg > /dev/null
         # The following seems dependent of the 7zip version. Travis on Version 9.20 extracts all partitions, where as at least version 16.02 is automatically extracting 4.hfs
         7z x 4.hfs > /dev/null
         #install_xar
         #./xar-1.5.2/src/xar -xf JDK*/JDK*.pkg
-        7z x JDK*/JDK*.pkg 
+        7z x JDK*/JDK*.pkg  > /dev/null
         cd jdk1*.pkg
     fi
 
