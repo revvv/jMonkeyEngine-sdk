@@ -74,6 +74,7 @@ public final class SceneComposerTopComponent extends TopComponent implements Sce
     ComposerCameraController camController;
     SceneComposerToolController toolController;
     SceneEditorController editorController;
+    CameraPositionTrackerAppState cameraPositionTrackerAppState;
     private SceneRequest sentRequest;
     private SceneRequest currentRequest;
     private final HelpCtx ctx = new HelpCtx("sdk.scene_composer");
@@ -106,6 +107,10 @@ public final class SceneComposerTopComponent extends TopComponent implements Sce
         jSpinner2 = new javax.swing.JSpinner();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
         jToolBar1 = new javax.swing.JToolBar();
         transformationTypeComboBox = new javax.swing.JComboBox();
         jSeparator9 = new javax.swing.JToolBar.Separator();
@@ -194,6 +199,14 @@ public final class SceneComposerTopComponent extends TopComponent implements Sce
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel8, org.openide.util.NbBundle.getMessage(SceneComposerTopComponent.class, "SceneComposerTopComponent.jLabel8.text")); // NOI18N
 
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel9, org.openide.util.NbBundle.getMessage(SceneComposerTopComponent.class, "SceneComposerTopComponent.jLabel9.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel10, org.openide.util.NbBundle.getMessage(SceneComposerTopComponent.class, "SceneComposerTopComponent.jLabel10.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel11, org.openide.util.NbBundle.getMessage(SceneComposerTopComponent.class, "SceneComposerTopComponent.jLabel11.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel12, org.openide.util.NbBundle.getMessage(SceneComposerTopComponent.class, "SceneComposerTopComponent.jLabel12.text")); // NOI18N
+
         javax.swing.GroupLayout sceneInfoPanelLayout = new javax.swing.GroupLayout(sceneInfoPanel);
         sceneInfoPanel.setLayout(sceneInfoPanelLayout);
         sceneInfoPanelLayout.setHorizontalGroup(
@@ -201,7 +214,6 @@ public final class SceneComposerTopComponent extends TopComponent implements Sce
             .addComponent(sceneInfoLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(sceneInfoLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(sceneInfoPanelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7)
                     .addComponent(jLabel8))
@@ -211,19 +223,31 @@ public final class SceneComposerTopComponent extends TopComponent implements Sce
                     .addComponent(jSlider2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jSpinner2, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
-                    .addComponent(jSpinner1))
-                .addGap(36, 36, 36))
+                    .addComponent(jSpinner2)
+                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
+            .addGroup(sceneInfoPanelLayout.createSequentialGroup()
+                .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel9)
+                    .addComponent(jLabel10))
+                .addGap(34, 34, 34)
+                .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(sceneInfoPanelLayout.createSequentialGroup()
+                        .addComponent(jLabel12)
+                        .addGap(105, 105, 105))
+                    .addGroup(sceneInfoPanelLayout.createSequentialGroup()
+                        .addComponent(jLabel11)
+                        .addContainerGap(105, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
         sceneInfoPanelLayout.setVerticalGroup(
             sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(sceneInfoPanelLayout.createSequentialGroup()
+                .addComponent(sceneInfoLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(sceneInfoLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(sceneInfoPanelLayout.createSequentialGroup()
-                        .addComponent(sceneInfoLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(sceneInfoLabel2)
-                        .addGap(18, 18, 18)
+                        .addGap(4, 4, 4)
                         .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel7)))
@@ -236,7 +260,15 @@ public final class SceneComposerTopComponent extends TopComponent implements Sce
                             .addComponent(jSlider2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel8))
                         .addGap(1, 1, 1)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(jLabel11))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(jLabel12))
+                .addGap(22, 22, 22))
         );
 
         jToolBar1.setFloatable(false);
@@ -801,6 +833,9 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
     private javax.swing.JButton jButton3;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -808,6 +843,7 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JToolBar.Separator jSeparator1;
@@ -1153,6 +1189,7 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
     /*
      * SceneListener
      */
+    @Override
     public void sceneOpened(SceneRequest request) {
         if (request.equals(sentRequest)) {
             currentRequest = request;
@@ -1175,6 +1212,9 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
             camController.setToolController(toolController);
             camController.setMaster(this);
             camController.enable();
+            
+            cameraPositionTrackerAppState = new CameraPositionTrackerAppState(jLabel11, jLabel12);
+            SceneApplication.getApplication().getStateManager().attach(cameraPositionTrackerAppState);
 
             toolController.createOnTopToolNode();
             SelectTool tool = new SelectTool();
@@ -1208,6 +1248,7 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
                     }
                     Runnable call = new Runnable() {
 
+                        @Override
                         public void run() {
                             ProgressHandle progressHandle = ProgressHandle.createHandle("Reloading Scene..");
                             progressHandle.start();
@@ -1217,6 +1258,7 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
                                 if (asset != null) {
                                     java.awt.EventQueue.invokeLater(new Runnable() {
 
+                                        @Override
                                         public void run() {
                                             SceneComposerTopComponent composer = SceneComposerTopComponent.findInstance();
                                             composer.openScene(asset, dobj, manager);
@@ -1241,6 +1283,7 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
         }
     }
 
+    @Override
     public void sceneClosed(SceneRequest request) {
         if (request.equals(currentRequest)) {
             setActivatedNodes(new org.openide.nodes.Node[]{});
@@ -1249,12 +1292,14 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
                 listener = null;
             }
             SceneApplication.getApplication().removeSceneListener(this);
+            SceneApplication.getApplication().getStateManager().detach(cameraPositionTrackerAppState);
             currentRequest = null;
             setSceneInfo(null, null, false);
             cleanupControllers();
         }
     }
 
+    @Override
     public void previewCreated(PreviewRequest request) {
     }
 
