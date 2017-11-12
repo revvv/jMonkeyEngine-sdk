@@ -95,11 +95,8 @@ function unpack_mac_jdk {
         7z x 4.hfs > /dev/null
         #install_xar
         #./xar-1.5.2/src/xar -xf JDK*/JDK*.pkg
-        ls -lsh
         7z x JDK*/JDK*.pkg 
-        ls -lsh
         cd jdk1*.pkg
-        ls -lsh
     fi
 
     #cd JDK*
@@ -109,8 +106,8 @@ function unpack_mac_jdk {
     cd Contents/
     # FROM HERE: build-osx-zip.sh by normen (with changes)
     mv Home jdk # rename folder
-    zip -9 -r -y -q ../../../../compiled/jdk-macosx.zip jdk
-    cd ../../../../
+    zip -9 -r -y -q ../../../compiled/jdk-macosx.zip jdk
+    cd ../../../
     rm -rf MacOS/
 
     if [ "$TRAVIS" == "true" ]; then
