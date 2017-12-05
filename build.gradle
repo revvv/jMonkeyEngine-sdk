@@ -23,6 +23,10 @@ repositories {
     }
     maven { url "https://jitpack.io" }
 
+    // See Engine Commit caf91c47df2e5687b3e9ecf2009ee22014bf4ac1
+    flatDir {
+        dirs rootProject.file('lib')
+    }
 }
 
 if (System.getenv('TRAVIS') != null) {
