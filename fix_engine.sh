@@ -12,9 +12,10 @@ for d in *; do
     popd > /dev/null
   fi
 done
+popd > /dev/null
 
 echo "Installing our local jbullet.jar and stack-alloc.jar into the maven local repository"
-pushd lib/ > /dev/null
+pushd lib > /dev/null
 mvn install:install-file -Dfile=jbullet.jar -DgroupId=jbullet -DartifactId=jbullet -Dversion=0.0.1 -Dpackaging=jar
 mvn install:install-file -Dfile=stack-alloc.jar -DgroupId=stack-alloc -DartifactId=stack-alloc -Dversion=0.0.1 -Dpackaging=jar
 popd > /dev/null

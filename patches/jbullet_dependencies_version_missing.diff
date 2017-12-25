@@ -1,0 +1,16 @@
+--- jbullet.pom.old 2017-12-25 11:09:55.814731762 +0000
++++ jbullet.pom     2017-12-25 11:09:27.535527327 +0000
+@@ -37,11 +37,13 @@
+     <dependency>
+       <groupId>jbullet</groupId>
+       <artifactId>jbullet</artifactId>
++      <version>0.0.1</version>
+       <scope>compile</scope>
+     </dependency>
+     <dependency>
+       <groupId>stack-alloc</groupId>
+       <artifactId>stack-alloc</artifactId>
++      <version>0.0.1</version>
+       <scope>compile</scope>
+     </dependency>
+     <dependency> 
