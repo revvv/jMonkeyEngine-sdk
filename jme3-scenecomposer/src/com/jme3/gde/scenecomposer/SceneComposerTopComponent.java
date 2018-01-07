@@ -1011,6 +1011,7 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
     private void setSelectedObjectText(final String text) {
         java.awt.EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 if (text != null) {
                     ((TitledBorder) jPanel4.getBorder()).setTitle("Utilities - " + text);
@@ -1230,6 +1231,7 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
             final SpatialAssetDataObject dobj = ((SpatialAssetDataObject) currentRequest.getDataObject());
             listener = new ProjectAssetManager.ClassPathChangeListener() {
 
+                @Override
                 public void classPathChanged(final ProjectAssetManager manager) {
                     if (dobj.isModified()) {
                         Confirmation msg = new NotifyDescriptor.Confirmation(
@@ -1306,5 +1308,9 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
     public void displayInfo(String info) {
         Message msg = new NotifyDescriptor.Message(info);
         DialogDisplayer.getDefault().notifyLater(msg);
+    }
+
+    public SceneComposerToolController getToolController() {
+        return toolController;
     }
 }

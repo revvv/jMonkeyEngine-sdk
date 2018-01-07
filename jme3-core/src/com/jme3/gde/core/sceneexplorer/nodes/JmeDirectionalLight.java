@@ -32,6 +32,7 @@
 
 package com.jme3.gde.core.sceneexplorer.nodes;
 
+import com.jme3.gde.core.sceneexplorer.nodes.gizmo.DirectionalLightGizmoInterface;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -43,8 +44,9 @@ import org.openide.nodes.Sheet;
  */
 @org.openide.util.lookup.ServiceProvider(service=SceneExplorerNode.class)
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class JmeDirectionalLight extends JmeLight{
+public class JmeDirectionalLight extends JmeLight {
     protected DirectionalLight directionalLight;
+    protected DirectionalLightGizmoInterface gizmo;
 
     public JmeDirectionalLight() {
     }
@@ -68,7 +70,7 @@ public class JmeDirectionalLight extends JmeLight{
             return sheet;
         }
 
-        set.put(makeProperty(obj, Vector3f.class, "getDirection", "setDirection", "Direction"));
+        set.put(makeEmbedProperty(this, JmeDirectionalLight.class, Vector3f.class, "getDirection", "setDirection", "Direction"));
 
         sheet.put(set);
         return sheet;
@@ -85,4 +87,20 @@ public class JmeDirectionalLight extends JmeLight{
         return JmeDirectionalLight.class;
     }
 
+    public void setGizmo(DirectionalLightGizmoInterface gizmo) {
+        this.gizmo = gizmo;
+    }
+
+    public void setDirection(Vector3f direction) {
+        // Don't directly pass it on to the Light
+        if (gizmo == null) {
+            directionalLight.setDirection(direction.normalize());
+        } else {
+            gizmo.onSetDirection(direction.normalize());
+        }
+    }
+    
+    public Vector3f getDirection() {
+        return directionalLight.getDirection();
+    }
 }

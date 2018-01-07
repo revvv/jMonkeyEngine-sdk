@@ -13,7 +13,10 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 /**
- *
+ * This Class allows "hooking" transformation events of a Node.
+ * As such it is used to update gizmos and others to react to
+ * Property Panel Input.
+ * 
  * @author dokthar
  */
 public abstract class NodeCallback extends Node {

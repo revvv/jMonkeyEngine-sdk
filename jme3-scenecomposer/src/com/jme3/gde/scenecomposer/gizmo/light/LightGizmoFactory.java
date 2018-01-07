@@ -100,6 +100,7 @@ public class LightGizmoFactory {
         
         gizmo.attachChild(arrow);
         
+        jmeLight.setGizmo(gizmo);
         return gizmo;
     }
     

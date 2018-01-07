@@ -129,7 +129,8 @@ public abstract class SceneEditTool {
 
     /**
      * Called when the selected spatial has been modified outside of the tool.
-     * TODO: why? just move the tool where the object is each frame?
+     * @TODO: why? just move the tool where the object is each frame?
+     * Proposed Answer: Performance.
      */
     public void updateToolsTransformation() {
 

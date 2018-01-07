@@ -156,6 +156,7 @@ public class JmeLight extends AbstractSceneExplorerNode {
     
     
 
+    @Override
     public Class getExplorerObjectClass() {
         return Light.class;
     }
