@@ -420,6 +420,7 @@
                 <package>com.jme3.gde.core.sceneexplorer.nodes</package>
                 <package>com.jme3.gde.core.sceneexplorer.nodes.actions</package>
                 <package>com.jme3.gde.core.sceneexplorer.nodes.actions.impl</package>
+                <package>com.jme3.gde.core.sceneexplorer.nodes.gizmo</package>
                 <package>com.jme3.gde.core.sceneviewer</package>
                 <package>com.jme3.gde.core.sceneviewer.actions</package>
                 <package>com.jme3.gde.core.texture</package>
