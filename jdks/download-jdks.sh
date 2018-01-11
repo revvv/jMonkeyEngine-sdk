@@ -277,7 +277,7 @@ cd local/$jdk_version-$jdk_build_version
 
 if [ "x$TRAVIS" != "x" ]; then
     if [ "x$BUILD_X64" != "x" ]; then
-        build_other_jdk windows x64 BUILD_X64
+        build_other_jdk windows x64 x64
         build_other_jdk linux x64 x64
     fi
     if [ "x$BUILD_X86" != "x" ]; then
