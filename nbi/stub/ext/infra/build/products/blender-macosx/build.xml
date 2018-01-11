@@ -57,6 +57,9 @@
     <import file="${common.dir}/product.xml" optional="false"/>
     
     <target name="-pre-package">
+        <untar src="${data.directory}/${product.data.tar}" dest="${data.directory}" compression="bzip2"/>
+        <delete file="${data.directory}/${product.data.tar}"/>
+
         <mkdir dir="${data.directory}/__tmpdir__"/>
 
         <move todir="${data.directory}/__tmpdir__">
@@ -65,7 +68,7 @@
             </fileset>
         </move>
         
-        <delete dir="${data.directory}/${product.data.root}" includeemptydirs="true"/>
+        <delete dir="${data.directory}/${product.data.sub.dir}" includeemptydirs="true"/>
 
         <move todir="${data.directory}">
             <fileset dir="${data.directory}/__tmpdir__">
