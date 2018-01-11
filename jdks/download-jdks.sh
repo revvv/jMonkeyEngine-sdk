@@ -275,9 +275,23 @@ mkdir -p local/$jdk_version-$jdk_build_version/compiled
 
 cd local/$jdk_version-$jdk_build_version
 
-build_mac_jdk
-build_other_jdk windows x86 i586
-build_other_jdk windows x64 x64
-build_other_jdk linux x86 i586
-build_other_jdk linux x64 x64
+if [ "x$TRAVIS" != "x" ]; then
+    if [ "x$BUILD_X64" != "x" ]; then
+        build_other_jdk windows x64 BUILD_X64
+        build_other_jdk linux x64 x64
+    fi
+    if [ "x$BUILD_X86" != "x" ]; then
+        build_other_jdk windows x86 i586
+        build_other_jdk linux x86 i586
+    fi
+    if [ "x$BUILD_OTHER" != "x" ]; then
+        build_mac_jdk
+    fi
+else
+    build_mac_jdk
+    build_other_jdk windows x86 i586
+    build_other_jdk windows x64 x64
+    build_other_jdk linux x86 i586
+    build_other_jdk linux x64 x64
+fi
 cd ../../
