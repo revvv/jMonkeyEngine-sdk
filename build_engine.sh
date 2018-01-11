@@ -5,7 +5,7 @@
 echo "Downloading the Engine, this may take some time"
 if [ "x$TRAVIS" != "x" ] && [ "x$TRAVIS_TAG" != "x" ]; then
     # Extract the engine version from the sdk branch tag.
-    git clone -b $(echo "$TRAVIS_TAG" | sed -n 's/v\(.\+\)-sdk.\+/\1/p') --single-branch --depth 10 https://github.com/jMonkeyEngine/jMonkeyEngine/ engine # single-branch requires git > 1.7.10, if you see an error, just leave it out.
+    git clone -b $(echo "$TRAVIS_TAG" | sed -n 's/\(v.\+\)-sdk.\+/\1/p') --single-branch --depth 10 https://github.com/jMonkeyEngine/jMonkeyEngine/ engine # single-branch requires git > 1.7.10, if you see an error, just leave it out.
 else
     git clone -b master --single-branch --depth 10 https://github.com/jMonkeyEngine/jMonkeyEngine/ engine # single-branch requires git > 1.7.10, if you see an error, just leave it out.
 fi
