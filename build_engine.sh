@@ -1,9 +1,14 @@
 #!/bin/sh
 # This Shell Script will build and use the latest jMonkeyEngine git version, so there might be some undiscovered engine bugs, watch out!
 # Also if you want to revert to releases and bintray builds, you need to uninstall them from your local maven repo...
+
 echo "Downloading the Engine, this may take some time"
-# To have the latest Commit on 3.1 use "-b v3.1". If you want a certain tag, use "-b v3.1.0-beta2"
-git clone -b v3.2.0-stable --single-branch --depth 10 http://github.com/jMonkeyEngine/jMonkeyEngine/ engine # single-branch requires git > 1.7.10, if you see an error, just leave it out.
+if [ "x$TRAVIS" != "x" ] && [ "x$TRAVIS_TAG" != "x" ]; then
+    # Extract the engine version from the sdk branch tag.
+    git clone -b $(echo "$TRAVIS_TAG" | sed -n 's/v\(.\+\)-sdk.\+/\1/p') --single-branch --depth 10 https://github.com/jMonkeyEngine/jMonkeyEngine/ engine # single-branch requires git > 1.7.10, if you see an error, just leave it out.
+else
+    git clone -b master --single-branch --depth 10 https://github.com/jMonkeyEngine/jMonkeyEngine/ engine # single-branch requires git > 1.7.10, if you see an error, just leave it out.
+fi
 cd engine
 # git checkout tags/v3.1.0-beta2 # To use this, leave out depth and change -b to a branch.
 
