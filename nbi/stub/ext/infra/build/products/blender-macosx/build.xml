@@ -57,7 +57,7 @@
     <import file="${common.dir}/product.xml" optional="false"/>
     
     <target name="-pre-package">
-        <untar src="${data.directory}/${product.data.tar}" dest="${data.directory}" compression="bzip2"/>
+        <untar src="${data.directory}/${product.data.tar}" dest="${data.directory}" compression="gzip"/>
         <delete file="${data.directory}/${product.data.tar}"/>
 
         <mkdir dir="${data.directory}/__tmpdir__"/>
