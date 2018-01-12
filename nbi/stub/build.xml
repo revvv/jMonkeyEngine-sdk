@@ -154,16 +154,18 @@ jarsigner.enabled=${jarsigner.enabled}
 
         </ant>
         <!--normen-->
-	<echo message="BUILDING MAC JDK PRODUCT =================================="/>
-        <ant dir="${nbi.ext.dir}/infra/build/products/jdk" target="release-all">
-            <property name="basedir" value="${nbi.ext.dir}/infra/build/products/jdk"/>
-            <property name="environment.properties" value="${environment.properties}"/>
-            <property name="dist.dir" value="${output.dir}/components"/>
-            <property name="release.parent.uid" value=""/>
-            <property name="release.parent.version" value=""/>
-            <property name="release.parent.platforms" value=""/>
-            <property name="engine.dist.file" value="${output.dir}/registry-temp/engine.jar"/>
-        </ant>
+        <if property="platform" value="macosx"> 
+            <echo message="BUILDING MAC JDK PRODUCT =================================="/>
+            <ant dir="${nbi.ext.dir}/infra/build/products/jdk" target="release-all">
+                <property name="basedir" value="${nbi.ext.dir}/infra/build/products/jdk"/>
+                <property name="environment.properties" value="${environment.properties}"/>
+                <property name="dist.dir" value="${output.dir}/components"/>
+                <property name="release.parent.uid" value=""/>
+                <property name="release.parent.version" value=""/>
+                <property name="release.parent.platforms" value=""/>
+                <property name="engine.dist.file" value="${output.dir}/registry-temp/engine.jar"/>
+            </ant>
+        </if>
         <!--normen-build blender for platforms-->
         <for-each property="platform" list="${target.platforms}" separator=" ">
             <echo message="BUILDING BLENDER ${platform} PRODUCT =================================="/>
