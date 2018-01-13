@@ -154,18 +154,20 @@ jarsigner.enabled=${jarsigner.enabled}
 
         </ant>
         <!--normen-->
-        <if property="platform" value="macosx"> 
-            <echo message="BUILDING MAC JDK PRODUCT =================================="/>
-            <ant dir="${nbi.ext.dir}/infra/build/products/jdk" target="release-all">
-                <property name="basedir" value="${nbi.ext.dir}/infra/build/products/jdk"/>
-                <property name="environment.properties" value="${environment.properties}"/>
-                <property name="dist.dir" value="${output.dir}/components"/>
-                <property name="release.parent.uid" value=""/>
-                <property name="release.parent.version" value=""/>
-                <property name="release.parent.platforms" value=""/>
-                <property name="engine.dist.file" value="${output.dir}/registry-temp/engine.jar"/>
-            </ant>
-        </if>
+        <for-each property="platform" list="${target.platforms}" seperator=" ">
+            <if property="platform" value="macosx"> 
+                <echo message="BUILDING MAC JDK PRODUCT =================================="/>
+                <ant dir="${nbi.ext.dir}/infra/build/products/jdk" target="release-all">
+                    <property name="basedir" value="${nbi.ext.dir}/infra/build/products/jdk"/>
+                    <property name="environment.properties" value="${environment.properties}"/>
+                    <property name="dist.dir" value="${output.dir}/components"/>
+                    <property name="release.parent.uid" value=""/>
+                    <property name="release.parent.version" value=""/>
+                    <property name="release.parent.platforms" value=""/>
+                    <property name="engine.dist.file" value="${output.dir}/registry-temp/engine.jar"/>
+                </ant>
+            </if>
+        </for-each>
         <!--normen-build blender for platforms-->
         <for-each property="platform" list="${target.platforms}" separator=" ">
             <echo message="BUILDING BLENDER ${platform} PRODUCT =================================="/>
@@ -183,7 +185,7 @@ jarsigner.enabled=${jarsigner.enabled}
 
     <target name="-generate-bundles">
         <for-each property="platform" list="${target.platforms}" separator=" ">
-
+            
             <condition property="bundle.extention.${platform}" value="exe">
                  <contains string="${platform}" substring="windows"/>
             </condition>
@@ -240,7 +242,7 @@ jarsigner.enabled=${jarsigner.enabled}
                                    target="${bundles.release.dir}/${bundle.files.prefix}-${platform}.${bundle.extention}">
                     <component uid="${main.product.uid}" version="${main.product.version}"/>
                     <component uid="blender" version="${main.product.version}"/>
-                    <component uid="jdk" version="${main.product.version}"/>
+                    <!--<component uid="jdk" version="${main.product.version}"/>-->
                     <!--property name="nbi.bundled.jvm.file" value="${basedir}/../../jdks/mac_jdk.bin"/-->
                 </create-bundle>
             </if>
