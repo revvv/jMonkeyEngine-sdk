@@ -47,7 +47,7 @@ install:
   - cd jdks
   - ./download-jdks.sh
   # Reduce Diskspace by 3G
-  - rm -rf jdks/local/8*/{downloads,linux-i586,linux-x64,windows-i586,windows-x64}
+  - rm -rf jdks/local/*/{downloads,linux-i586,linux-x64,windows-i586,windows-x64}
   - cd ../
   #- '[ -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && ant -Dstorepass="$NBM_SIGN_PASS" hudson-nightly | awk "{printf(\".\"); fflush(stdout)}" || :'
   #- '[ -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && scp -rp -i nbproject/private/www-updater.key build/updates/* www-updater@updates.jmonkeyengine.org:/var/www/updates/nightly/3.1/plugins || :'
@@ -60,6 +60,9 @@ before_deploy:
   # In case of STABLE (see hudson-stable target)
   # the above gradlew already sets the correct ant properties to build
   # Include suite.nbms again, when we upload nbms again.
+  
+  # Force Freeing Space.
+  - rm -rf build/
   - ant -Dstorepass="$NBM_SIGN_PASS" -Dpack200.enabled=true set-spec-version build-installers unset-spec-version | awk '{printf("."); fflush(stdout)}'
   
   # Has to be done before deploy (due to the rm command)
