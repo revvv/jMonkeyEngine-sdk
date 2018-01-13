@@ -154,7 +154,7 @@ jarsigner.enabled=${jarsigner.enabled}
 
         </ant>
         <!--normen-->
-        <for-each property="platform" list="${target.platforms}" seperator=" ">
+        <for-each property="platform" list="${target.platforms}" separator=" ">
             <if property="platform" value="macosx"> 
                 <echo message="BUILDING MAC JDK PRODUCT =================================="/>
                 <ant dir="${nbi.ext.dir}/infra/build/products/jdk" target="release-all">
