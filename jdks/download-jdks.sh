@@ -279,13 +279,21 @@ if [ "x$TRAVIS" != "x" ]; then
     if [ "x$BUILD_X64" != "x" ]; then
         build_other_jdk windows x64 x64
         build_other_jdk linux x64 x64
+    else
+        # We have to save space at all cost, so force-delete x64 jdks, which might come from the build cache.
+        # that's bad because they won't be cached anymore, but we have to trade time for space.
+        rm -rf compiled/jdk-windows-x64.exe compiled/jdk-linux-x64.bin
     fi
     if [ "x$BUILD_X86" != "x" ]; then
         build_other_jdk windows x86 i586
         build_other_jdk linux x86 i586
+    else
+        rm -rf compiled/jdk-windows-x86.exe compiled/jdk-linux-x86.bin
     fi
     if [ "x$BUILD_OTHER" != "x" ]; then
         build_mac_jdk
+    else
+        rm -rf compiled/jdk-macosx.zip
     fi
 else
     build_mac_jdk
