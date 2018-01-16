@@ -200,7 +200,8 @@ public class NewLightPopup extends AbstractAction implements Presenter.Popup {
                     }
                     LightProbe lightProbe = LightProbeFactory.makeProbe(envCam, node, new JmeLightProbeProgressHandler());                                
                     node.addLight(lightProbe);
-                    ((BoundingSphere)lightProbe.getBounds()).setRadius(10);
+                    ((BoundingSphere) lightProbe.getBounds()).setRadius(10);
+                    node.updateModelBound();
                     addLightUndo(node, lightProbe);
                     setModified();
                     
