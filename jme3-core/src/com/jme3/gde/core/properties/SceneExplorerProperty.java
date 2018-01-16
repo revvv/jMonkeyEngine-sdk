@@ -36,6 +36,7 @@ import com.jme3.effect.shapes.EmitterShape;
 import com.jme3.gde.core.scene.SceneApplication;
 import com.jme3.gde.core.undoredo.AbstractUndoableSceneEdit;
 import com.jme3.gde.core.undoredo.SceneUndoRedoManager;
+import com.jme3.light.Light;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
@@ -117,6 +118,8 @@ public class SceneExplorerProperty<T> extends PropertySupport.Reflection<T> {
             setPropertyEditorClass(Vector2fPropertyEditor.class);
         } else if (valueType == ParticleInfluencer.class) {
             setPropertyEditorClass(ParticleInfluencerPropertyEditor.class);
+        } else if (Light.class.isAssignableFrom(valueType)) {
+            setPropertyEditorClass(LightPropertyEditor.class);
         }
 
         for (SceneExplorerPropertyEditor di : Lookup.getDefault().lookupAll(SceneExplorerPropertyEditor.class)) {
