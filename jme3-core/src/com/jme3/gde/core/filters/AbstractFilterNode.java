@@ -36,6 +36,7 @@ import com.jme3.gde.core.icons.IconList;
 import com.jme3.gde.core.properties.SceneExplorerProperty;
 import com.jme3.gde.core.properties.ScenePropertyChangeListener;
 import com.jme3.gde.core.scene.SceneSyncListener;
+import com.jme3.gde.core.sceneexplorer.nodes.AbstractSceneExplorerNode;
 import com.jme3.gde.core.util.PropertyUtils;
 import com.jme3.post.Filter;
 import java.awt.Image;
@@ -234,6 +235,7 @@ public abstract class AbstractFilterNode extends AbstractNode implements FilterN
      * {@link #createMethods(java.lang.Class, org.openide.nodes.Sheet.Set,
      * java.lang.Object, java.lang.reflect.Method[]) }
      * @throws SecurityException When Inspecting using Reflection failed
+     * @see AbstractSceneExplorerNode#createFields(java.lang.Class, org.openide.nodes.Sheet.Set, java.lang.Object) 
      */
     protected Method[] createFields(Class c, Sheet.Set set, Object obj) throws SecurityException {
         ArrayList<Method> methodList = new ArrayList<Method>(c.getDeclaredFields().length);
