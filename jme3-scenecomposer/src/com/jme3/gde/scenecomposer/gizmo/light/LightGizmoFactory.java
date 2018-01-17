@@ -167,18 +167,48 @@ public class LightGizmoFactory {
         return lightBulb;
     }
     
-    private static Spatial createLightProbeGizmo(AssetManager assetManager, Light light){
-        Node debugNode = new Node("Environment debug Node");
-        Sphere s = new Sphere(16, 16, 0.5f);
-        Geometry debugGeom = new Geometry(light.getName(), s);
-        Material debugMaterial = new Material(assetManager, "Common/MatDefs/Misc/reflect.j3md");
-        debugGeom.setMaterial(debugMaterial);
-        Spatial debugBounds = ProbeRadiusShape.createShape(assetManager);
+    /**
+     * Helper Method to convert a Vector3f Scale into a radius. This is required,
+     * because the Gizmos are scaled like regular jME Nodes.
+     *
+     * Note: In case of non-uniform scaling, the code picks the minimum or maximum
+     * of all three components.
+     * 
+     * @param scale The Scale to convert
+     * @return The Radius
+     */
+    protected static float scaleToRadius(Vector3f scale) {
+        final float eps = 0.0000125f;        
+        float m;
+
+        float x = FastMath.abs(scale.x);
+        float y = FastMath.abs(scale.y);
+        float z = FastMath.abs(scale.z);
+        float max = Math.max(Math.max(x, y), z);
+        float min = Math.min(Math.min(x, y), z);
+
+        if (max - min <= eps) {
+            // x == y == z
+            m = x;
+        } else {
+            int nbMax = 0;
+            if (max - x <= eps) {
+                nbMax++;
+            }
+            if (max - y <= eps) {
+                nbMax++;
+            }
+            if (max - z <= eps) {
+                nbMax++;
+            }
+            if (nbMax >= 2) {
+                m = min;
+            } else {
+                m = max;
+            }
+        }
         
-        debugNode.attachChild(debugGeom);
-        debugNode.attachChild(debugBounds);
-        debugNode.addControl(new LightProbeGizmoControl((LightProbe)light));
-        
-        return debugNode;        
+        return m;
     }
+    
 }
