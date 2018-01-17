@@ -10,6 +10,7 @@ import com.jme3.environment.util.BoundingSphereDebug;
 import com.jme3.gde.scenecomposer.gizmo.light.shape.ProbeRadiusShape;
 import com.jme3.gde.core.sceneexplorer.nodes.JmeDirectionalLight;
 import com.jme3.gde.core.sceneexplorer.nodes.JmeLight;
+import com.jme3.gde.core.sceneexplorer.nodes.JmeLightProbe;
 import com.jme3.gde.core.sceneexplorer.nodes.JmePointLight;
 import com.jme3.gde.core.sceneexplorer.nodes.JmeSpotLight;
 import com.jme3.gde.scenecomposer.gizmo.shape.RadiusShape;
@@ -56,7 +57,7 @@ public class LightGizmoFactory {
                 return createDirectionalGizmo(assetManager, (JmeDirectionalLight) lightNode, light);
                 
             case Probe:
-                return createLightProbeGizmo(assetManager, light);
+                return createLightProbeGizmo(assetManager, (JmeLightProbe)lightNode);
 
             //  default:
             //      return createDefaultGizmo(assetManager, lightNode);
@@ -71,7 +72,7 @@ public class LightGizmoFactory {
         Node billboardNode = new Node("billboard lightGizmo");
         billboardNode.addControl(new BillboardControl());
         gizmo.attachChild(billboardNode);
-        billboardNode.attachChild(createLightBulbe(assetManager));
+        billboardNode.attachChild(createLightBulb(assetManager));
         
         Geometry radius = RadiusShape.createShape(assetManager, "radius shape");
         radius.addControl(new LightRadiusUpdate((PointLight) light));
@@ -88,7 +89,7 @@ public class LightGizmoFactory {
         Node billboardNode = new Node("billboard lightGizmo");
         billboardNode.addControl(new BillboardControl());
         gizmo.attachChild(billboardNode);
-        billboardNode.attachChild(createLightBulbe(assetManager));
+        billboardNode.attachChild(createLightBulb(assetManager));
         
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.White);
@@ -112,7 +113,7 @@ public class LightGizmoFactory {
         Node billboardNode = new Node("billboard lightGizmo");
         gizmo.attachChild(billboardNode);
         billboardNode.addControl(new BillboardControl());
-        billboardNode.attachChild(createLightBulbe(assetManager));
+        billboardNode.attachChild(createLightBulb(assetManager));
         
         Node radiusNode = new Node("radius Node");
         gizmo.attachChild(radiusNode);
@@ -152,7 +153,24 @@ public class LightGizmoFactory {
         return gizmo;
     }
     
-    protected static Geometry createLightBulbe(AssetManager assetManager) {
+    private static Spatial createLightProbeGizmo(AssetManager assetManager, JmeLightProbe probe){
+        LightProbeGizmo gizmo = new LightProbeGizmo(probe);//new Node("Environment debug Node");
+        gizmo.addControl(new LightPositionUpdate(probe.getLightProbe(), gizmo));
+        gizmo.addControl(new LightProbeUpdate(probe));
+        
+        Sphere s = new Sphere(16, 16, 0.5f);
+        Geometry debugGeom = new Geometry(probe.getLightProbe().getName(), s);
+        Material debugMaterial = new Material(assetManager, "Common/MatDefs/Misc/reflect.j3md");
+        debugGeom.setMaterial(debugMaterial);
+        Spatial debugBounds = ProbeRadiusShape.createShape(assetManager);
+        
+        gizmo.attachChild(debugGeom);
+        gizmo.attachChild(debugBounds);
+        
+        return gizmo;        
+    }
+    
+    protected static Geometry createLightBulb(AssetManager assetManager) {
         Quad q = new Quad(0.5f, 0.5f);
         Geometry lightBulb = new Geometry("light bulb", q);
         lightBulb.move(-q.getHeight() / 2f, -q.getWidth() / 2f, 0);
