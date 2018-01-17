@@ -158,8 +158,6 @@ public class JmeLight extends AbstractSceneExplorerNode {
         return spatial;
     }
     
-    
-
     @Override
     public Class getExplorerObjectClass() {
         return Light.class;
@@ -168,5 +166,14 @@ public class JmeLight extends AbstractSceneExplorerNode {
     @Override
     public Class getExplorerNodeClass() {
         return JmeLight.class;
+    }
+    
+    protected void setModified(){
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                fireSave(true);
+            }
+        });
     }
 }

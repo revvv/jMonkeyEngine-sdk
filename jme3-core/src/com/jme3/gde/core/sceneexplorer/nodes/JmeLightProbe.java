@@ -93,16 +93,6 @@ public class JmeLightProbe extends JmeLight{
         return JmeLightProbe.class;
     }
     
-    protected void setModified(){
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                fireSave(true);
-            }
-        });
-        
-    }
-
      private Property createButtonProperty() {
         return new PropertySupport.ReadWrite<Object>("update", Object.class, "Refresh maps", "Click here to refresh environment maps ") {
             JmeLightProbeButtonProperty pe;
