@@ -48,11 +48,14 @@ public class ExceptionUtils {
     protected static String newLine = System.lineSeparator();//getProperty("line.separator");
     public static final String ISSUE_TRACKER_URL = "https://github.com/jMonkeyEngine/sdk/issues";
     
-    public static void caughtException(Throwable t) {
+    public static void caughtException(Throwable t, String comment) {
         StringBuilder sB = new StringBuilder();
         sB.append("jMonkeyEngine SDK Exception Report");
         sB.append(newLine);
         sB.append("Please submit me to the Issue Tracker");
+        sB.append(newLine);
+        sB.append("Comment: ");
+        sB.append(comment);
         sB.append(newLine);
         sB.append(Throwables.getStackTraceAsString(t));
         sB.append(newLine);
@@ -72,5 +75,9 @@ public class ExceptionUtils {
         DialogDescriptor d = new DialogDescriptor(ep, "Oops! An Exception has occured.", true, new Object[] { DialogDescriptor.OK_OPTION }, DialogDescriptor.DEFAULT_OPTION, DialogDescriptor.DEFAULT_ALIGN, null, null);
         DialogDisplayer.getDefault().notifyLater(d);
    }
+    
+    public static void caughtException(Throwable t) {
+        caughtException(t, "");
+    }
 }
 
