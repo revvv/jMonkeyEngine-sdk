@@ -85,10 +85,11 @@ public class LightGizmoFactory {
     private static Node createDirectionalGizmo(AssetManager assetManager, JmeDirectionalLight jmeLight, Light light) {
         DirectionalLightGizmo gizmo = new DirectionalLightGizmo(jmeLight);
         gizmo.move(0, 5, 0);
+        gizmo.addControl(new LightDirectionUpdate(light, gizmo));
         
         Node billboardNode = new Node("billboard lightGizmo");
         billboardNode.addControl(new BillboardControl());
-        gizmo.attachChild(billboardNode);
+        
         billboardNode.attachChild(createLightBulb(assetManager));
         
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -100,6 +101,7 @@ public class LightGizmoFactory {
         arrow.addControl(new LightColorUpdate(light, arrow.getMaterial(), "Color"));
         
         gizmo.attachChild(arrow);
+        gizmo.attachChild(billboardNode);
         
         jmeLight.setGizmo(gizmo);
         return gizmo;

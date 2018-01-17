@@ -34,6 +34,7 @@ package com.jme3.gde.scenecomposer.gizmo.light;
 import com.jme3.gde.core.errorreport.ExceptionUtils;
 import com.jme3.gde.scenecomposer.gizmo.NodeCallback;
 import com.jme3.light.Light;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
@@ -55,6 +56,7 @@ public class LightDirectionUpdate extends AbstractControl {
     private Method getDirection = null;
 
     private final Vector3f lastDir = new Vector3f();
+    private final Vector3f initialDir = new Vector3f();
     private Vector3f lightDir;
 
     public LightDirectionUpdate(Light light, NodeCallback gizmo) {
@@ -69,6 +71,9 @@ public class LightDirectionUpdate extends AbstractControl {
                 + "have a direction. This means someone has seriously "
                 + "fucked up. I just hope it's not me ;)");
         }
+        
+        refreshLightDirection();
+        initialDir.set(lightDir);
     }
     
     protected void refreshLightDirection() {
@@ -90,9 +95,12 @@ public class LightDirectionUpdate extends AbstractControl {
             Vector3f axis = Vector3f.UNIT_Y.cross(lastDir);
             float angle = Vector3f.UNIT_Y.angleBetween(lastDir);
             //Quaternion rotation = gizmo.getWorldRotation().inverse().mult(new Quaternion().fromAngleAxis(angle, axis));
-            Quaternion rotation = new Quaternion().fromAngleAxis(angle, axis);
-            gizmo.silentLocalRotation(rotation); /* silent, because otherwise
-            the gizmo would call light.setDirection() and update the property */
+            
+            if (angle > 1f * FastMath.DEG_TO_RAD) { // Anti Flickering
+                Quaternion rotation = new Quaternion().fromAngleAxis(angle, axis);
+                gizmo.silentLocalRotation(rotation); /* silent, because otherwise
+                the gizmo would call light.setDirection() and update the property */
+            }
         }
     }
 
