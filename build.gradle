@@ -37,7 +37,7 @@ if (System.getenv('TRAVIS') != null) {
         // The old way doesn't work anymore, not sure why.
         //ext.jmeEngineVersion = "3.3.0-" + System.env.TRAVIS_TAG + "-SNAPSHOT"
     } else {
-        if (System.env.TRAVIS_PULL_REQUEST == "false") {
+        if (System.env.TRAVIS_PULL_REQUEST == null || System.env.TRAVIS_PULL_REQUEST == "" || System.env.TRAVIS_PULL_REQUEST == "false") {
             ext.jmeEngineVersion = "3.3.0-SNAPSHOT" // Use Beta 2 instead of 3.1.0-master-SNAPSHOT
         } else {
             ext.jmeEngineVersion = "3.3.0-" + System.env.TRAVIS_PULL_REQUEST_BRANCH + "-pr-" + System.env.TRAVIS_PULL_REQUEST + "-SNAPSHOT"
