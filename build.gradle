@@ -31,20 +31,20 @@ repositories {
 
 if (System.getenv('TRAVIS') != null) {
     if (System.env.TRAVIS_TAG != null) {
-        // v3.2.0-stable-sdk1 becomes 3.2.0-stable
+        // v3.3.0-stable-sdk1 becomes 3.3.0-stable
         // Intentionally not using lastIndexOf here, we want the second "-".
         ext.jmeEngineVersion = System.env.TRAVIS_TAG.substring(1, System.env.TRAVIS_TAG.indexOf("-", System.env.TRAVIS_TAG.indexOf("-") + 1));
         // The old way doesn't work anymore, not sure why.
-        //ext.jmeEngineVersion = "3.2.0-" + System.env.TRAVIS_TAG + "-SNAPSHOT"
+        //ext.jmeEngineVersion = "3.3.0-" + System.env.TRAVIS_TAG + "-SNAPSHOT"
     } else {
         if (System.env.TRAVIS_PULL_REQUEST == "false") {
-            ext.jmeEngineVersion = "3.2.0-SNAPSHOT" // Use Beta 2 instead of 3.1.0-master-SNAPSHOT
+            ext.jmeEngineVersion = "3.3.0-SNAPSHOT" // Use Beta 2 instead of 3.1.0-master-SNAPSHOT
         } else {
-            ext.jmeEngineVersion = "3.2.0-" + System.env.TRAVIS_PULL_REQUEST_BRANCH + "-pr-" + System.env.TRAVIS_PULL_REQUEST + "-SNAPSHOT"
+            ext.jmeEngineVersion = "3.3.0-" + System.env.TRAVIS_PULL_REQUEST_BRANCH + "-pr-" + System.env.TRAVIS_PULL_REQUEST + "-SNAPSHOT"
         }
     }
 } else {
-    ext.jmeEngineVersion = "3.2.0-SNAPSHOT" // In case you build of the HEAD of 3.1, you need to change that to 3.1.0-SNAPSHOT again
+    ext.jmeEngineVersion = "3.3.0-SNAPSHOT" // In case you build of the HEAD of 3.1, you need to change that to 3.1.0-SNAPSHOT again
 }
 
 configurations {
