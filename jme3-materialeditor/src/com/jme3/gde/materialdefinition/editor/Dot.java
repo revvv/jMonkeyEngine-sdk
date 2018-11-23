@@ -42,7 +42,6 @@ public class Dot extends JPanel implements MouseInputListener {
     }
 
     public enum ParamType {
-
         Input,
         Output,
         Both
@@ -60,7 +59,7 @@ public class Dot extends JPanel implements MouseInputListener {
        
     }
     
-    public void setShaderTypr(Shader.ShaderType shaderType){
+    public void setShaderType(Shader.ShaderType shaderType){
          this.shaderType = shaderType;
     }
 

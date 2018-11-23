@@ -407,7 +407,7 @@ public class NodePanel extends DraggablePanel implements Selectable, PropertyCha
 
     public Dot createDot(String type, Dot.ParamType paramType, String paramName) {
         Dot dot1 = new Dot();
-        dot1.setShaderTypr(shaderType);
+        dot1.setShaderType(shaderType);
         dot1.setNode(this);
         dot1.setText(paramName);
         dot1.setParamType(paramType);
