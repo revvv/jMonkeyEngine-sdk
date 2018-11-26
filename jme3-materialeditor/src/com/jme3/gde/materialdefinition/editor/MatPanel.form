@@ -83,7 +83,7 @@
             <Property name="borderPainted" type="boolean" value="false"/>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
             <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-              <Color id="Curseur par d&#xe9;faut"/>
+              <Color id="Standardcursor"/>
             </Property>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="iconTextGap" type="int" value="0"/>
@@ -118,7 +118,7 @@
             <Property name="borderPainted" type="boolean" value="false"/>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
             <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-              <Color id="Curseur par d&#xe9;faut"/>
+              <Color id="Standardcursor"/>
             </Property>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="iconTextGap" type="int" value="0"/>
@@ -153,7 +153,7 @@
             <Property name="borderPainted" type="boolean" value="false"/>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
             <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-              <Color id="Curseur par d&#xe9;faut"/>
+              <Color id="Standardcursor"/>
             </Property>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="iconTextGap" type="int" value="0"/>
@@ -188,7 +188,7 @@
             <Property name="borderPainted" type="boolean" value="false"/>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
             <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-              <Color id="Curseur par d&#xe9;faut"/>
+              <Color id="Standardcursor"/>
             </Property>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="iconTextGap" type="int" value="0"/>
@@ -223,7 +223,7 @@
             <Property name="borderPainted" type="boolean" value="false"/>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
             <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-              <Color id="Curseur par d&#xe9;faut"/>
+              <Color id="Standardcursor"/>
             </Property>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="iconTextGap" type="int" value="0"/>

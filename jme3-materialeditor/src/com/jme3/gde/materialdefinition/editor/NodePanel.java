@@ -1,6 +1,33 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *  Copyright (c) 2009-2018 jMonkeyEngine
+ *  All rights reserved.
+ * 
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are
+ *  met:
+ * 
+ *  * Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 
+ *  * Neither the name of 'jMonkeyEngine' nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ *  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.jme3.gde.materialdefinition.editor;
 
@@ -9,9 +36,7 @@ import com.jme3.gde.materialdefinition.fileStructure.leaves.DefinitionBlock;
 import com.jme3.gde.materialdefinition.fileStructure.leaves.InputMappingBlock;
 import com.jme3.gde.materialdefinition.fileStructure.leaves.OutputMappingBlock;
 import com.jme3.gde.materialdefinition.icons.Icons;
-import com.jme3.shader.Shader;
 import com.jme3.shader.ShaderNodeDefinition;
-import com.jme3.shader.ShaderNodeVariable;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -23,136 +48,56 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.GroupLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import org.openide.util.WeakListeners;
 
 /**
- *
+ * The NodePanel is the actual implementation of a Node.
  * @author Nehon
  */
-public class NodePanel extends DraggablePanel implements Selectable, PropertyChangeListener, InOut, KeyListener {
-
+public abstract class NodePanel extends DraggablePanel implements Selectable, InOut, KeyListener {
     List<JLabel> inputLabels = new ArrayList<JLabel>();
     List<JLabel> outputLabels = new ArrayList<JLabel>();
-    List<Dot> inputDots = new ArrayList<Dot>();
-    List<Dot> outputDots = new ArrayList<Dot>();
-    private NodeType type = NodeType.Vertex;
+    List<ConnectionEndpoint> inputDots = new ArrayList<ConnectionEndpoint>();
+    List<ConnectionEndpoint> outputDots = new ArrayList<ConnectionEndpoint>();
     private JPanel content;
-    private JLabel header;
-    private Color color;
-    private String name;
-    private String techName;
-    private NodeToolBar toolBar;
-    protected List<String> filePaths = new ArrayList<String>();
-    protected Shader.ShaderType shaderType;
-
-    public enum NodeType {
-
-        Vertex(new Color(220, 220, 70)),//yellow
-        Fragment(new Color(114, 200, 255)),//bleue
-        Attribute(Color.WHITE),
-        MatParam(new Color(70, 220, 70)),//green
-        WorldParam(new Color(220, 70, 70)); //red
-        private Color color;
-
-        private NodeType() {
-        }
-
-        private NodeType(Color color) {
-            this.color = color;
-        }
-
-        public Color getColor() {
-            return color;
-        }
-    }
+    protected JLabel header;
+    protected Color color;
+    protected String name;
+    protected NodeToolBar toolBar = null;
 
     /**
      * Creates new form NodePanel
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public NodePanel(ShaderNodeBlock node, ShaderNodeDefinition def) {
+    public NodePanel() {
         super();
-        shaderType = def.getType();
-        if (def.getType() == Shader.ShaderType.Vertex) {
-            type = NodePanel.NodeType.Vertex;
-        } else {
-            type = NodePanel.NodeType.Fragment;
-        }
-        init(def.getInputs(), def.getOutputs());
-
-        node.addPropertyChangeListener(WeakListeners.propertyChange(this, node));
-        this.addPropertyChangeListener(WeakListeners.propertyChange(node, this));
-        refresh(node);
         addKeyListener(this);
-        this.filePaths.addAll(def.getShadersPath());
-        String defPath = ((DefinitionBlock) node.getContents().get(0)).getPath();
-        this.filePaths.add(defPath);
-        toolBar = new NodeToolBar(this);        
+    }
+    
+    /*
+     * Sets the Toolbar associated with this node (as it was impossible to do
+     * in the constructor). Don't construct a toolbar before this class' AWT
+     * parts have been initialized.
+    */
+    public void setToolbar(NodeToolBar toolBar) {
+        this.toolBar = toolBar;
     }
 
     /**
-     * Creates new form NodePanel
+     * Set this node's name, title and tooltipText
+     * Note: This name is different from AWTs setName()
+     * @param s The Name
      */
-    @SuppressWarnings("LeakingThisInConstructor")
-    public NodePanel(ShaderNodeVariable singleOut, NodePanel.NodeType type) {
-        super();
-        List<ShaderNodeVariable> outputs = new ArrayList<ShaderNodeVariable>();
-        outputs.add(singleOut);
-        this.type = type;
-        init(new ArrayList<ShaderNodeVariable>(), outputs);
-        addKeyListener(this);
-        toolBar = new NodeToolBar(this);
-    }
-
-    public final void refresh(ShaderNodeBlock node) {
-        name = node.getName();
-        header.setText(node.getName());
-        header.setToolTipText(node.getName());
-
-    }
-
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals("name")) {
-            refresh((ShaderNodeBlock) evt.getSource());
-        }
-    }
-
-    private void init(List<ShaderNodeVariable> inputs, List<ShaderNodeVariable> outputs) {
-
-        setBounds(0, 0, 120, 30 + inputs.size() * 20 + outputs.size() * 20);
-
-        for (ShaderNodeVariable input : inputs) {
-
-            JLabel label = createLabel(input.getType(), input.getName(), Dot.ParamType.Input);
-            Dot dot = createDot(input.getType(), Dot.ParamType.Input, input.getName());
-            inputLabels.add(label);
-            inputDots.add(dot);
-        }
-        int index = 0;
-        for (ShaderNodeVariable output : outputs) {
-            String outName = output.getName();
-            JLabel label = createLabel(output.getType(), outName, Dot.ParamType.Output);
-            Dot dot = createDot(output.getType(), Dot.ParamType.Output, outName);
-            dot.setIndex(index++);
-            outputLabels.add(label);
-            outputDots.add(dot);
-        }
-
-        initComponents();
-        updateType();
-        setOpaque(false);
-
+    public void setNameAndTitle(String s) {
+        name = s;
+        setTitle(name);
     }
 
     public void setTitle(String s) {
@@ -160,21 +105,21 @@ public class NodePanel extends DraggablePanel implements Selectable, PropertyCha
         header.setToolTipText(s);
     }
 
-    public Dot getInputConnectPoint(String varName) {
-        return getConnectPoint(inputLabels, varName, inputDots);
+    public ConnectionEndpoint getInputConnectPoint(String name) {
+        return getConnectPoint(inputLabels, name, inputDots);
     }
 
-    public Dot getOutputConnectPoint(String varName) {
-        return getConnectPoint(outputLabels, varName, outputDots);
+    public ConnectionEndpoint getOutputConnectPoint(String name) {
+        return getConnectPoint(outputLabels, name, outputDots);
     }
 
-    private Dot getConnectPoint(List<JLabel> list, String varName, List<Dot> listDot) {
+    private ConnectionEndpoint getConnectPoint(List<JLabel> list, String varName, List<ConnectionEndpoint> listDot) {
         //This has been commented out because it was causing issues when a variable name was explicitely starting with m_ or g_ in the j3md.
         //I can't remember why it was done in the first place, but I can't see any case where the m_ should be stripped out.
         //I'm letting this commented in case this comes to light some day, and something more clever will have to be done.
-//        if (varName.startsWith("m_") || varName.startsWith("g_")) {
-//            varName = varName.substring(2);
-//        }
+        //if (varName.startsWith("m_") || varName.startsWith("g_")) {
+        //   varName = varName.substring(2);
+        //}
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).getText().equals(varName)) {
                 return listDot.get(i);
@@ -183,62 +128,25 @@ public class NodePanel extends DraggablePanel implements Selectable, PropertyCha
         return null;
     }
 
-    @Override
-    protected void paintComponent(Graphics g1) {
-        Graphics2D g = (Graphics2D) g1;
-        Color boderColor = Color.BLACK;
-        if (getDiagram().getSelectedItems().contains(this)) {
-            boderColor = Color.WHITE;
-        }
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, // Anti-alias!
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        // Color[] colors = {new Color(0, 0, 0, 0.7f), new Color(0, 0, 0, 0.15f)};
-        if (getDiagram().getSelectedItems().contains(this)) {
-            Color[] colors = new Color[]{new Color(0.6f, 0.6f, 1.0f, 0.8f), new Color(0.6f, 0.6f, 1.0f, 0.5f)};
-            float[] factors = {0f, 1f};
-            g.setPaint(new RadialGradientPaint(getWidth() / 2, getHeight() / 2, getWidth() / 2, factors, colors));
-            g.fillRoundRect(8, 3, getWidth() - 10, getHeight() - 6, 15, 15);
-        }else{
-            if(toolBar.isVisible()){
-                toolBar.setVisible(false);
-            }
-        }
-
-        g.setColor(new Color(170, 170, 170, 120));
-        g.fillRoundRect(5, 1, getWidth() - 9, getHeight() - 6, 15, 15);
-        g.setColor(boderColor);
-
-        g.drawRoundRect(4, 0, getWidth() - 9, getHeight() - 6, 15, 15);
-        g.setColor(new Color(170, 170, 170, 120));
-        g.fillRect(4, 1, 10, 10);
-        g.setColor(boderColor);
-        g.drawLine(4, 0, 14, 0);
-        g.drawLine(4, 0, 4, 10);
-        g.setColor(Color.BLACK);
-        g.drawLine(5, 15, getWidth() - 6, 15);
-        g.setColor(new Color(190, 190, 190));
-        g.drawLine(5, 16, getWidth() - 6, 16);
-
-        Color c1 = new Color(color.getRed(), color.getGreen(), color.getBlue(), 150);
-        Color c2 = new Color(color.getRed(), color.getGreen(), color.getBlue(), 0);
-        g.setPaint(new GradientPaint(0, 15, c1, getWidth(), 15, c2));
-        g.fillRect(5, 1, getWidth() - 10, 14);
-
+    /**
+     * Create a Label used for TODO.
+     * @param txt The text on the label
+     * @param type The ParameterType (Input, Output, Both)
+     * @return 
+     */
+    protected JLabel createLabel(String txt, ConnectionEndpoint.ParamType type) {
+        JLabel label = new JLabel(txt);
+        label.setForeground(Color.BLACK);
+        label.setOpaque(false);
+        //label.setPreferredSize(new Dimension(50, 15));        
+        label.setHorizontalAlignment(type == ConnectionEndpoint.ParamType.Output ? SwingConstants.RIGHT : SwingConstants.LEFT);
+        label.setFont(new Font("Tahoma", 0, 10));
+        label.addMouseListener(labelMouseMotionListener);
+        label.addMouseMotionListener(labelMouseMotionListener);
+        // label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        return label;
     }
-
-    public String getKey() {
-        switch (type) {
-            case Attribute:
-                return "Attr." + outputLabels.get(0).getText();
-            case WorldParam:
-                return "WorldParam." + outputLabels.get(0).getText();
-            case MatParam:
-                return "MatParam." + outputLabels.get(0).getText();
-            default:
-                return techName + "/" + name;
-        }
-    }
-
+    
     @Override
     public String getName() {
         return name;
@@ -252,11 +160,9 @@ public class NodePanel extends DraggablePanel implements Selectable, PropertyCha
     }
     
     private void showToolBar(){
-        toolBar.display();
-    }
-
-    public NodeType getType() {
-        return type;
+        if (toolBar != null) {
+            toolBar.display();
+        }
     }
 
     @Override
@@ -268,45 +174,29 @@ public class NodePanel extends DraggablePanel implements Selectable, PropertyCha
         }
     }
 
-    public final void updateType() {
-
-        switch (type) {
-            case Vertex:
-                header.setIcon(Icons.vert);
-                break;
-            case Fragment:
-                header.setIcon(Icons.frag);
-                break;
-            case Attribute:
-                header.setIcon(Icons.attrib);
-                header.setText("Attribute");
-                header.setToolTipText("Attribute");
-                name = "Attr";
-                break;
-            case WorldParam:
-                header.setIcon(Icons.world);
-                header.setText("WorldParam");
-                header.setToolTipText("WorldParam");
-                name = "WorldParam";
-                break;
-            case MatParam:
-                header.setIcon(Icons.mat);
-                header.setText("MatParam");
-                header.setToolTipText("MatParam");
-                name = "MatParam";
-                break;
-        }
-        color = type.getColor();
-    }
-
+    /**
+     * Try to open an edit dialog for this node (if supported)
+     */
     public void edit() {
-        if (type == NodeType.Fragment || type == NodeType.Vertex) {
-            diagram.showEdit(NodePanel.this);
+        if (canEdit()) {
+            diagram.showEdit(this);
         }
     }
     
+    /**
+     * Whether this node shall trigger an edit dialog in the diagram
+     * @see Diagram#showEdit(com.jme3.gde.materialdefinition.editor.NodePanel) 
+     * @return Whether this Node can be edited
+     */
+    protected abstract boolean canEdit();
+    
+    @Override
+    public abstract String getKey(); // satisfy Selectable interface
+    
     public void cleanup(){
-        toolBar.getParent().remove(toolBar);
+        if (toolBar != null) {
+            toolBar.getParent().remove(toolBar);
+        }
     }
 
     /**
@@ -316,13 +206,8 @@ public class NodePanel extends DraggablePanel implements Selectable, PropertyCha
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
-    private void initComponents() {
-
-        ImageIcon icon = Icons.vert;
-        if (type == NodeType.Fragment) {
-            icon = Icons.frag;
-        }
-        header = new JLabel(icon);
+    protected void initComponents() {
+        header = new JLabel(Icons.vert);
         header.setForeground(Color.BLACK);
         header.addMouseListener(labelMouseMotionListener);
         header.addMouseMotionListener(labelMouseMotionListener);
@@ -390,54 +275,81 @@ public class NodePanel extends DraggablePanel implements Selectable, PropertyCha
                         .addComponent(content, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                 .addGap(10, 10, 10));
     }
+    
+    @Override
+    protected void paintComponent(Graphics g1) {
+        Graphics2D g = (Graphics2D) g1;
+        Color borderColor = Color.BLACK;
+        if (getDiagram().getSelectedItems().contains(this)) {
+            borderColor = Color.WHITE;
+        }
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, // Anti-alias!
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        // Color[] colors = {new Color(0, 0, 0, 0.7f), new Color(0, 0, 0, 0.15f)};
+        if (getDiagram().getSelectedItems().contains(this)) {
+            Color[] colors = new Color[]{ new Color(0.6f, 0.6f, 1.0f, 0.8f),
+                new Color(0.6f, 0.6f, 1.0f, 0.5f) };
+            
+            float[] factors = {0f, 1f};
+            g.setPaint(new RadialGradientPaint(getWidth() / 2,
+                    getHeight() / 2, getWidth() / 2, factors, colors));
+            
+            g.fillRoundRect(8, 3, getWidth() - 10, getHeight() - 6, 15, 15);
+        } else if (toolBar != null) {
+            // Hide the toolBar when we've been unselected
+            if(toolBar.isVisible()){
+                toolBar.setVisible(false);
+            }
+        }
 
-    public JLabel createLabel(String glslType, String txt, Dot.ParamType type) {
-        JLabel label = new JLabel(txt);
-        label.setForeground(Color.BLACK);
-        label.setToolTipText(glslType + " " + txt);
-        label.setOpaque(false);
-        //label.setPreferredSize(new Dimension(50, 15));        
-        label.setHorizontalAlignment(type == Dot.ParamType.Output ? SwingConstants.RIGHT : SwingConstants.LEFT);
-        label.setFont(new Font("Tahoma", 0, 10));
-        label.addMouseListener(labelMouseMotionListener);
-        label.addMouseMotionListener(labelMouseMotionListener);
-        // label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        return label;
+        g.setColor(new Color(170, 170, 170, 120));
+        g.fillRoundRect(5, 1, getWidth() - 9, getHeight() - 6, 15, 15);
+        g.setColor(borderColor);
+
+        g.drawRoundRect(4, 0, getWidth() - 9, getHeight() - 6, 15, 15);
+        g.setColor(new Color(170, 170, 170, 120));
+        g.fillRect(4, 1, 10, 10);
+        g.setColor(borderColor);
+        g.drawLine(4, 0, 14, 0);
+        g.drawLine(4, 0, 4, 10);
+        g.setColor(Color.BLACK);
+        g.drawLine(5, 15, getWidth() - 6, 15);
+        g.setColor(new Color(190, 190, 190));
+        g.drawLine(5, 16, getWidth() - 6, 16);
+
+        Color c1 = new Color(color.getRed(), color.getGreen(), color.getBlue(), 150);
+        Color c2 = new Color(color.getRed(), color.getGreen(), color.getBlue(), 0);
+        g.setPaint(new GradientPaint(0, 15, c1, getWidth(), 15, c2));
+        g.fillRect(5, 1, getWidth() - 10, 14);
+
     }
 
-    public Dot createDot(String type, Dot.ParamType paramType, String paramName) {
-        Dot dot1 = new Dot();
-        dot1.setShaderType(shaderType);
-        dot1.setNode(this);
-        dot1.setText(paramName);
-        dot1.setParamType(paramType);
-        dot1.setType(type);
-        return dot1;
-    }
+    public abstract ConnectionEndpoint createConnectionEndpoint(String type, 
+            ConnectionEndpoint.ParamType paramType, String paramName);
 
+    @Override
     public void keyTyped(KeyEvent e) {
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-
         if (e.getKeyCode() == KeyEvent.VK_DELETE) {
             delete();
         }
     }
 
     public void delete() {
-        Diagram diag = getDiagram();
-        diag.removeSelected();
+        getDiagram().removeSelected();
     }
 
+    @Override
     public void keyReleased(KeyEvent e) {
     }
-    // used to pass press and drag events to the NodePanel when they occur on the label
+    
+// used to pass press and drag events to the NodePanel when they occur on the label
     private LabelMouseMotionListener labelMouseMotionListener = new LabelMouseMotionListener();
 
     private class LabelMouseMotionListener extends MouseAdapter {
-
         @Override
         public void mousePressed(MouseEvent e) {
             MouseEvent me = SwingUtilities.convertMouseEvent(e.getComponent(), e, NodePanel.this);
@@ -457,22 +369,23 @@ public class NodePanel extends DraggablePanel implements Selectable, PropertyCha
         }
     }
 
-    public void setTechName(String techName) {
-        this.techName = techName;
-    }
-
+    //@TODO: Solve the mistery about these methods
+    @Override
     public void addInputMapping(InputMappingBlock block) {
         firePropertyChange(ShaderNodeBlock.INPUT, null, block);
     }
 
+    @Override
     public void removeInputMapping(InputMappingBlock block) {
         firePropertyChange(ShaderNodeBlock.INPUT, block, null);
     }
 
+    @Override
     public void addOutputMapping(OutputMappingBlock block) {
         firePropertyChange(ShaderNodeBlock.OUTPUT, null, block);
     }
 
+    @Override
     public void removeOutputMapping(OutputMappingBlock block) {
         firePropertyChange(ShaderNodeBlock.OUTPUT, block, null);
     }

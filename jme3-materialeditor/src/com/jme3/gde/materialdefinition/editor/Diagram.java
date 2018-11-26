@@ -1,6 +1,33 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *  Copyright (c) 2009-2018 jMonkeyEngine
+ *  All rights reserved.
+ * 
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are
+ *  met:
+ * 
+ *  * Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 
+ *  * Neither the name of 'jMonkeyEngine' nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ *  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.jme3.gde.materialdefinition.editor;
 
@@ -48,50 +75,60 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 /**
- *
+ * The Diagram is the main canvas where all nodes {@link NodePanel} and
+ * their connections {@link ConnectionEndpoint} {@link Connection} are added onto.
  * @author Nehon
  */
-public class Diagram extends JPanel implements MouseListener, MouseMotionListener, ComponentListener {
-
-    protected Dot draggedFrom;
-    protected Dot draggedTo;
+public abstract class Diagram extends JPanel implements MouseListener, 
+        MouseMotionListener, ComponentListener {
+    // Content
     protected List<Selectable> selectedItems = new ArrayList<Selectable>();
     protected List<Connection> connections = new ArrayList<Connection>();
     protected List<NodePanel> nodes = new ArrayList<NodePanel>();
-    protected List<OutBusPanel> outBuses = new ArrayList<OutBusPanel>();
-    private final MyMenu contextMenu = new MyMenu("Add");
-    private MatDefEditorlElement parent;
-    private String currentTechniqueName;
-    private final BackdropPanel backDrop = new BackdropPanel();
+    
+    // UI
+    protected final JPopupMenu contextMenu = new JPopupMenu("Add");
+    protected NodeEditor parent;
+    
+    // drag stuff
+    protected ConnectionEndpoint draggedFrom;
+    protected ConnectionEndpoint draggedTo;  
+    private final Point pp = new Point();
+    protected Point clickLoc = new Point(0, 0);    
+    
+    // dynamic switching between the regular and the move cursor (MMB)
     private final Cursor defCursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
     private final Cursor hndCursor = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
-    private final Point pp = new Point();
+    
+    // filled in from componentResize()
+    protected int minWidth = 0;
+    protected int minHeight = 0;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public Diagram() {
-
         addMouseListener(this);
         addMouseMotionListener(this);
         createPopupMenu();
     }
+    
+    /**
+     * This method is called from within the mousePressed event when the Left 
+     * Mouse Button is pressed. Use this if you need to run before the regular
+     * connection logic. The return value determines whether the event was consumed
+     * 
+     * @param e The Event
+     * @return Whether to continue passing the event (true) or to quit (false) 
+     */
+    protected abstract boolean mouseLMBPrePressedEvent(MouseEvent e);
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-    }
+    public void mouseClicked(MouseEvent e) {}
 
     @Override
     public void mousePressed(MouseEvent e) {
-
-        if (e.getButton() == MouseEvent.BUTTON1) {
-            for (OutBusPanel outBusPanel : outBuses) {
-                Point p = SwingUtilities.convertPoint(this, e.getX(), e.getY(), outBusPanel);
-                if (outBusPanel.contains(p)) {
-                    MouseEvent me = SwingUtilities.convertMouseEvent(this, e, outBusPanel);
-                    outBusPanel.dispatchEvent(me);
-                    if (me.isConsumed()) {
-                        return;
-                    }
-                }
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            if (mouseLMBPrePressedEvent(e)) {
+                return; // event already consumed
             }
 
             for (Connection connection : connections) {
@@ -105,48 +142,16 @@ public class Diagram extends JPanel implements MouseListener, MouseMotionListene
             selectedItems.clear();
             repaint();
         } else if (e.getButton() == MouseEvent.BUTTON2) {
+            // change to "move using mouse wheel button" and set the cursor
             setCursor(hndCursor);
             pp.setLocation(e.getPoint());
-            ((JScrollPane) getParent().getParent()).setWheelScrollingEnabled(false);
+            ((JScrollPane)getParent().getParent()).setWheelScrollingEnabled(false);
         }
     }
-
-    public void refreshPreviews(Material mat, String technique) {
-        for (OutBusPanel outBusPanel : outBuses) {
-            outBusPanel.updatePreview(mat, technique);
-        }
-        if (backDrop.isVisible()) {
-            backDrop.showMaterial(mat, technique);
-        }
-    }
-
-    public void displayBackdrop() {
-        if (backDrop.getParent() == null) {
-            add(backDrop);
-            ((JViewport) getParent()).addChangeListener(backDrop);
-        }
-
-        backDrop.setVisible(true);
-        backDrop.update(((JViewport) getParent()));
-    }
-
-    Point clickLoc = new Point(0, 0);
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
         switch (e.getButton()) {
-            case MouseEvent.BUTTON1:
-                if (draggedFrom != null && draggedFrom.getNode() instanceof OutBusPanel) {
-                    MouseEvent me = SwingUtilities.convertMouseEvent(this, e, draggedFrom.getNode());
-                    draggedFrom.getNode().dispatchEvent(me);
-                    if (me.isConsumed()) {
-                        return;
-                    }
-                }
-
-                dispatchToOutBuses(e);
-                break;
             case MouseEvent.BUTTON2:
                 setCursor(defCursor);
                 ((JScrollPane) getParent().getParent()).setWheelScrollingEnabled(true);
@@ -158,23 +163,65 @@ public class Diagram extends JPanel implements MouseListener, MouseMotionListene
         }
 
     }
+    
+    @Override
+    public void mouseEntered(MouseEvent e) {}
 
-    public MatDefEditorlElement getEditorParent() {
-        return parent;
+    @Override
+    public void mouseExited(MouseEvent e) {}
+    
+    @Override
+    public void mouseMoved(MouseEvent e) {}
+    
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        if (SwingUtilities.isLeftMouseButton(e)) {
+        } else if (SwingUtilities.isMiddleMouseButton(e)) {
+            JViewport vport = (JViewport) getParent();
+            Point cp = e.getPoint();
+            Point vp = vport.getViewPosition();
+            vp.translate(pp.x - cp.x, pp.y - cp.y);
+            scrollRectToVisible(new Rectangle(vp, vport.getSize()));
+            //pp.setLocation(cp);
+        }
     }
 
+    public NodeEditor getEditorParent() {
+        return parent;
+    }
+    
+    public void setEditorParent(NodeEditor parent) {
+        this.parent = parent;
+    }
+    
+    /**
+     * Create a unique key for this connection based on implementation specifc
+     * data (obj)
+     * @param con the connection
+     * @param obj implementation specific data
+     * @return the key
+     */
+    public abstract String makeKeyForConnection(Connection con, Object obj);
+
+    /**
+     * Add a Connection to this Diagram.
+     * Usecode: Call {@link #connect(com.jme3.gde.materialdefinition.editor.ConnectionEndpoint,
+     * com.jme3.gde.materialdefinition.editor.ConnectionEndpoint) } where
+     * possible instead.
+     * @param conn The connection to add
+     */
     public void addConnection(Connection conn) {
         connections.add(conn);
         add(conn);
-        for (OutBusPanel bus : outBuses) {
-            setComponentZOrder(bus, getComponentCount() - 1);
-        }
         repaint();
     }
 
-    protected void showEdit(NodePanel node) {
-        parent.showShaderEditor(node.getName(), node.getType(), node.filePaths);
-    }
+    /**
+     * This is called when an Editor should be shown for that Node.
+     * Called by {@link NodePanel#edit() }
+     * @param node The node in question
+     */
+    protected abstract void showEdit(NodePanel node);
 
     public void notifyMappingCreation(Connection conn) {
         parent.makeMapping(conn);
@@ -182,29 +229,10 @@ public class Diagram extends JPanel implements MouseListener, MouseMotionListene
 
     public void addNode(NodePanel node) {
         add(node);
-        node.setTechName(currentTechniqueName);
         node.setDiagram(this);
         nodes.add(node);
         setComponentZOrder(node, 0);
         node.addComponentListener(this);
-    }
-
-    public void addOutBus(OutBusPanel bus) {
-        outBuses.add(bus);
-        bus.setDiagram(this);
-        add(bus);
-        setComponentZOrder(bus, getComponentCount() - 1);
-        addComponentListener(bus);
-        bus.componentResized(new ComponentEvent(this, ActionEvent.ACTION_PERFORMED));
-        bus.revalidate();
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
     }
 
     protected void removeSelectedConnection(Selectable selectedItem) {        
@@ -212,73 +240,11 @@ public class Diagram extends JPanel implements MouseListener, MouseMotionListene
         removeConnection(selectedConnection);
         parent.notifyRemoveConnection(selectedConnection);
     }
-
-    private String fixNodeName(String name) {
-        return fixNodeName(name, 0);
-    }
-
-    private String fixNodeName(String name, int count) {
-        for (NodePanel nodePanel : nodes) {
-            if ((name + (count == 0 ? "" : count)).equals(nodePanel.getName())) {
-                return fixNodeName(name, count + 1);
-            }
-        }
-        return name + (count == 0 ? "" : count);
-    }
-
-    public void addNodesFromDefs(List<ShaderNodeDefinition> defList, String path, Point clickPosition) {
-        int i = 0;
-        for (ShaderNodeDefinition def : defList) {
-            ShaderNodeBlock sn = new ShaderNodeBlock(def, path);
-            sn.setName(fixNodeName(sn.getName()));
-
-            NodePanel np = new NodePanel(sn, def);
-            addNode(np);
-            np.setLocation(clickPosition.x + i * 150, clickPosition.y);
-            sn.setSpatialOrder(np.getLocation().x);
-            i++;
-            np.revalidate();
-            getEditorParent().notifyAddNode(sn, def);
-        }
-        repaint();
-    }
-
-    public void addMatParam(String type, String name, Point point) {
-        String fixedType = type;
-        if (type.equals("Color")) {
-            fixedType = "Vector4";
-        }
-        ShaderNodeVariable param = new ShaderNodeVariable(VarType.valueOf(fixedType).getGlslType(), name);
-        NodePanel np = new NodePanel(param, NodePanel.NodeType.MatParam);
-        addNode(np);
-        np.setLocation(point.x, point.y);
-        np.revalidate();
-        repaint();
-        getEditorParent().notifyAddMapParam(type, name);
-    }
-
-    public void addWorldParam(UniformBinding binding, Point point) {
-
-        ShaderNodeVariable param = new ShaderNodeVariable(binding.getGlslType(), binding.name());
-        NodePanel np = new NodePanel(param, NodePanel.NodeType.WorldParam);
-        addNode(np);
-        np.setLocation(point.x, point.y);
-        np.revalidate();
-        repaint();
-        getEditorParent().notifyAddWorldParam(binding.name());
-    }
-
-    public void addAttribute(String name, String type, Point point) {
-        ShaderNodeVariable param = new ShaderNodeVariable(type, "Attr", name);
-        NodePanel np = new NodePanel(param, NodePanel.NodeType.Attribute);
-        addNode(np);
-        np.setLocation(point.x, point.y);
-        np.revalidate();
-        repaint();
-    }
     
-    protected void removeSelected(){
-        
+    /**
+     * Called when user pressed delete after having selected something
+     */
+    protected void removeSelected() {
         int result = JOptionPane.showConfirmDialog(null, "Delete all selected items, nodes and mappings?", "Delete Selected", JOptionPane.OK_CANCEL_OPTION);
         
         if (result == JOptionPane.OK_OPTION) {
@@ -294,8 +260,13 @@ public class Diagram extends JPanel implements MouseListener, MouseMotionListene
         }
     }
 
+    /**
+     * Called from {@link #removeSelected() } to also disconnect all the 
+     * connections made to the node in question
+     * 
+     * @param selectedItem The item to remove
+     */
     private void removeSelectedNode(Selectable selectedItem) {
-
         NodePanel selectedNode = (NodePanel) selectedItem;
         nodes.remove(selectedNode);
         for (Iterator<Connection> it = connections.iterator(); it.hasNext();) {
@@ -318,54 +289,34 @@ public class Diagram extends JPanel implements MouseListener, MouseMotionListene
         return selectedItems;
     }
 
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        if (SwingUtilities.isLeftMouseButton(e)) {
-            if (draggedFrom == null) {
-                for (Selectable selectedItem : selectedItems) {
-                    if (selectedItem instanceof OutBusPanel) {
-                        OutBusPanel bus = (OutBusPanel) selectedItem;
-                        MouseEvent me = SwingUtilities.convertMouseEvent(this, e, bus);
-                        bus.dispatchEvent(me);
-                    }
-                }
-            }
-        } else if (SwingUtilities.isMiddleMouseButton(e)) {
-            JViewport vport = (JViewport) getParent();
-            Point cp = e.getPoint();
-            Point vp = vport.getViewPosition();
-            vp.translate(pp.x - cp.x, pp.y - cp.y);
-            scrollRectToVisible(new Rectangle(vp, vport.getSize()));
-            //pp.setLocation(cp);
+    /**
+     * Called by {@link ConnectionEndpoint} when a Curve has been dragged
+     */
+    protected void draggingDot(MouseEvent e) {}
 
-        }
-    }
-
-    protected void draggingDot(MouseEvent e) {
-        for (OutBusPanel outBusPanel : outBuses) {
-            Point p = SwingUtilities.convertPoint(this, e.getX(), e.getY(), outBusPanel);
-            if (outBusPanel.contains(p)) {
-                MouseEvent me = SwingUtilities.convertMouseEvent(this, e, outBusPanel);
-                outBusPanel.draggingDot(me);
-                if (me.isConsumed()) {
-                    return;
-                }
-            }
-        }
-    }
-
-    public Connection connect(Dot start, Dot end) {
+    /**
+     * Connect two Dots to form a Connection
+     * @param start The Start
+     * @param end The End
+     * @return The Connection
+     */
+    public Connection connect(ConnectionEndpoint start, ConnectionEndpoint end) {
         Connection conn = new Connection(start, end);
         start.connect(conn);
         end.connect(conn);
-
         addConnection(conn);
-
         return conn;
     }
 
+    /**
+     * Find a panel which corresponds to the given key (unique id). Use this to
+     * locate nodes on the diagram
+     * 
+     * @param key The key
+     * @return hopefully the correct node
+     */
     public NodePanel getNodePanel(String key) {
-        for (NodePanel nodePanel : nodes) {
+        for (NodePanel nodePanel: nodes) {
             if (nodePanel.getKey().equals(key)) {
                 return nodePanel;
             }
@@ -373,39 +324,38 @@ public class Diagram extends JPanel implements MouseListener, MouseMotionListene
         return null;
     }
 
-    public OutBusPanel getOutBusPanel(String key) {
-        for (OutBusPanel out : outBuses) {
-            if (out.getKey().equals(key)) {
-                return out;
-            }
-        }
-        return null;
-    }
-
     /**
-     * selection from the editor. Select the item and notify the topComponent
-     *
-     * @param selectable
+     * Selection from the editor. Select the item and notify the topComponent
+     * @param selectable the item to select
      */
     public void select(Selectable selectable, boolean multi) {
         parent.selectionChanged(doSelect(selectable, multi));
     }
     
-    public void multiMove(DraggablePanel movedPanel ,int xOffset, int yOffset){
-        
-        for (Selectable selectedItem : selectedItems) {
-            if(selectedItem != movedPanel){
-                if(selectedItem instanceof DraggablePanel){
+    /**
+     * Move one of the selected panels by a given offset
+     * @param movedPanel the panel in question
+     * @param xOffset the movement in x direction
+     * @param yOffset the movement in y direction
+     */
+    public void multiMove(DraggablePanel movedPanel, int xOffset, int yOffset) {
+        for (Selectable selectedItem: selectedItems) {
+            if (selectedItem != movedPanel) {
+                if (selectedItem instanceof DraggablePanel) {
                     ((DraggablePanel)selectedItem).movePanel(xOffset, yOffset);
                 }
             }
         }
     }
 
+    /**
+     * Prepare dragging multiple selected panels
+     * @param movedPanel The Panel which has been moved.
+     */
     public void multiStartDrag(DraggablePanel movedPanel){
-        for (Selectable selectedItem : selectedItems) {
-            if(selectedItem != movedPanel){
-                if(selectedItem instanceof DraggablePanel){
+        for (Selectable selectedItem: selectedItems) {
+            if (selectedItem != movedPanel) {
+                if (selectedItem instanceof DraggablePanel) {
                     ((DraggablePanel)selectedItem).saveLocation();
                 }
             }
@@ -413,79 +363,107 @@ public class Diagram extends JPanel implements MouseListener, MouseMotionListene
     }
     
     /**
-     * do select the item and repaint the diagram
+     * Select the specified item and repaint the window to reflect selection
+     * outlines.
      *
-     * @param selectable
-     * @return
+     * @param selectable The item which shall be selected
+     * @param multi Whether multiple selection is allowed or if this should
+     * clear previous selections
+     * @return The selected item
      */
     private Selectable doSelect(Selectable selectable, boolean multi) {
-        
-
         if (!multi && !selectedItems.contains(selectable)) {
             selectedItems.clear();
         }
-
         if (selectable != null) {
             selectedItems.add(selectable);
         }
-
         if (selectable instanceof Component) {
-            ((Component) selectable).requestFocusInWindow();
+            ((Component)selectable).requestFocusInWindow();
         }
         repaint();
-
         return selectable;
     }
 
     /**
-     * find the item with the given key and select it without notifying the
-     * topComponent
-     *
-     * @param key
-     * @return
+     * Subclasses which add selectable items to the Diagram have to lookup 
+     * items by their key and return them here for regular dragging/selecting
+     * to work.<br>
+     * If nothing was found (or you don't add custom elements to the diagram),
+     * return null.
+     * 
+     * @param key the unique key
+     * @return The Selectable item or null
      */
-    public Selectable select(String key) {
-
-        for (NodePanel nodePanel : nodes) {
+    protected abstract Selectable trySelect(String key);
+    
+    /**
+     * find the item with the given key and select it without notifying the
+     * topComponent. Since this iterates over all possible panels, subclasses
+     * have to implement {@link #trySelect(java.lang.String) }
+     *
+     * @param key The unique key
+     * @return The selected item
+     */
+    protected Selectable select(String key) {
+        for (NodePanel nodePanel: nodes) {
             if (nodePanel.getKey().equals(key)) {
                 return doSelect(nodePanel, false);
             }
         }
 
-        for (Connection connection : connections) {
+        for (Connection connection: connections) {
             if (connection.getKey().equals(key)) {
                 return doSelect(connection, false);
             }
         }
-
-        for (OutBusPanel outBusPanel : outBuses) {
-            if (outBusPanel.getKey().equals(key)) {
-                return doSelect(outBusPanel, false);
-            }
+        
+        Selectable s = trySelect(key);
+        if (s != null) {
+            return doSelect(s, false);
         }
 
         return null;
     }
 
-    @Override
-    public void mouseMoved(MouseEvent e) {
-        dispatchToOutBuses(e);
+    public void clear() {
+        removeAll();
+        connections.clear();
+        nodes.clear();
     }
 
-    private JMenuItem createMenuItem(String text, Icon icon) {
+    /**
+     * Creates a horizontal separator with a black background
+     * @return the separator
+     */
+    protected JSeparator createSeparator() {
+        JSeparator jsep = new JSeparator(JSeparator.HORIZONTAL);
+        jsep.setBackground(Color.BLACK);
+        return jsep;
+    }
+    
+    /**
+     * Creates a MenuItem with the given text and icon.<br>
+     * In addition to calling the constructor this sets the font to Tahoma 10px.
+     * 
+     * @param text The text
+     * @param icon The icon
+     * @return The MenuItem with Tahoma as Font
+     */
+    protected JMenuItem createMenuItem(String text, Icon icon) {
         JMenuItem item = new JMenuItem(text, icon);
         item.setFont(new Font("Tahoma", 1, 10)); // NOI18N
         return item;
     }
 
-    public void clear() {
-        removeAll();
-        outBuses.clear();
-        connections.clear();
-        nodes.clear();
-    }
-
-    private void createPopupMenu() {
+    /**
+     * Override this method to fill the popup/context menu available via 
+     * right clicking the diagram.<br>
+     * It's important to call this (super) first. It will setup fonts and borders.<br>
+     * You can use {@link #createMenuItem(java.lang.String, javax.swing.Icon) }
+     * and {@link #createSeparator() } as helper methods.
+     */
+    protected void createPopupMenu() {
         contextMenu.setFont(new Font("Tahoma", 1, 10)); // NOI18N
         contextMenu.setOpaque(true);
         Border titleUnderline = BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK);
@@ -496,81 +474,6 @@ public class Diagram extends JPanel implements MouseListener, MouseMotionListene
         contextMenu.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         contextMenu.setBorder(BorderFactory.createCompoundBorder(contextMenu.getBorder(),
                 labelBorder));
-
-        JMenuItem nodeItem = createMenuItem("Node", Icons.node);
-        nodeItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                AddNodeDialog d = new AddNodeDialog(null, true, parent.obj.getLookup().lookup(ProjectAssetManager.class), Diagram.this, clickLoc);
-                d.setLocationRelativeTo(null);
-                d.setVisible(true);
-            }
-        });
-
-        contextMenu.add(nodeItem);
-        contextMenu.add(createSeparator());
-        JMenuItem matParamItem = createMenuItem("Material Parameter", Icons.mat);
-        matParamItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                AddMaterialParameterDialog d = new AddMaterialParameterDialog(null, true, Diagram.this, clickLoc);
-                d.setLocationRelativeTo(null);
-                d.setVisible(true);
-            }
-        });
-        contextMenu.add(matParamItem);
-        JMenuItem worldParamItem = createMenuItem("World Parameter", Icons.world);
-        worldParamItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                AddWorldParameterDialog d = new AddWorldParameterDialog(null, true, Diagram.this, clickLoc);
-                d.setLocationRelativeTo(null);
-                d.setVisible(true);
-            }
-        });
-        contextMenu.add(worldParamItem);
-        JMenuItem attributeItem = createMenuItem("Attribute", Icons.attrib);
-        attributeItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                AddAttributeDialog d = new AddAttributeDialog(null, true, Diagram.this, clickLoc);
-                d.setLocationRelativeTo(null);
-                d.setVisible(true);
-            }
-        });
-        contextMenu.add(attributeItem);
-        contextMenu.add(createSeparator());
-        JMenuItem outputItem = createMenuItem("Output color", Icons.output);
-        contextMenu.add(outputItem);
-        outputItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                OutBusPanel p2 = new OutBusPanel("color" + (outBuses.size() - 1), Shader.ShaderType.Fragment);
-                p2.setBounds(0, 350 + 50 * (outBuses.size() - 1), p2.getWidth(), p2.getHeight());
-
-                addOutBus(p2);
-
-            }
-        });
-    }
-
-    private JSeparator createSeparator() {
-        JSeparator jsep = new JSeparator(JSeparator.HORIZONTAL);
-        jsep.setBackground(Color.BLACK);
-        return jsep;
-    }
-
-    private void dispatchToOutBuses(MouseEvent e) {
-        for (OutBusPanel outBusPanel : outBuses) {
-            Point p = SwingUtilities.convertPoint(this, e.getX(), e.getY(), outBusPanel);
-            if (outBusPanel.contains(p)) {
-                MouseEvent me = SwingUtilities.convertMouseEvent(this, e, outBusPanel);
-                outBusPanel.dispatchEvent(me);
-                if (me.isConsumed()) {
-                    return;
-                }
-            }
-        }
     }
 
     private void removeConnection(Connection selectedConnection) {
@@ -580,14 +483,34 @@ public class Diagram extends JPanel implements MouseListener, MouseMotionListene
         remove(selectedConnection);
     }
 
-    private class MyMenu extends JPopupMenu {
-
-        public MyMenu(String label) {
-            super(label);
-        }
-
-    }
-
+    /**
+     * As part of the semi-automatical layout, the maximum height of the diagram
+     * has to be calculated.<br>
+     * That means for each custom panel (no nodes), calculate the location.y
+     * and add the element's height.<br>
+     * Then find the largest value over all the custom panels.
+     * 
+     * @return The maximum height for all custom elements (or 0 if none are
+     * present).
+     */
+    protected abstract int calcMaxHeight();
+    
+    /**
+     * As part of the semi-automatical layout, the maximum width of the diagram
+     * has to be calculated.<br>
+     * That means for each custom panel (no nodes), calculate the location.x
+     * and add the element's width.<br>
+     * Then find the largest value over all the custom panels.
+     * 
+     * @return The maximum width for all custom elements (or 0 if none are
+     * present).
+     */
+    protected abstract int calcMaxWidth();
+    
+    /**
+     * This is called on multiple occassions to ensure that the size of this 
+     * diagram is just large enough.
+     */
     public void fixSize() {
         int maxWidth = minWidth;
         int maxHeight = minHeight;
@@ -602,101 +525,44 @@ public class Diagram extends JPanel implements MouseListener, MouseMotionListene
                 maxHeight = h;
             }
         }
-        for (OutBusPanel outBusPanel : outBuses) {
-            int h = outBusPanel.getLocation().y + outBusPanel.getHeight();
-            if (h > maxHeight) {
-                maxHeight = h;
-            }
+        
+        // Custom Nodes        
+        int w = calcMaxWidth();
+        int h = calcMaxHeight();
+        
+        if (w > maxWidth) {
+            maxWidth = w;
         }
+        
+        if (h > maxHeight) {
+            maxHeight = h;
+        }
+        
         setPreferredSize(new Dimension(maxWidth, maxHeight));
         revalidate();
     }
-    int minWidth = 0;
-    int minHeight = 0;
 
+    /**
+     * Use this method to layout your elements. Have a look at 
+     * {@link ShaderNodeDiagram#autoLayout() } for an example. Maybe you can
+     * come up with a better/easier solution
+     */
+    public abstract void autoLayout();
+    
+    @Override
     public void componentResized(ComponentEvent e) {
         minWidth = e.getComponent().getWidth() - 2;
         minHeight = e.getComponent().getHeight() - 2;
         fixSize();
     }
 
-    public void autoLayout() {
+    @Override
+    public void componentMoved(ComponentEvent e) {}
 
-        int offset = 550;
-        for (OutBusPanel outBus : outBuses) {
-            if (outBus.getKey().equalsIgnoreCase("position")) {
-                outBus.setLocation(0, 100);
-                
-            } else {
-                outBus.setLocation(0, offset);
-                offset += 260;
-            }
-            getEditorParent().savePositionToMetaData(outBus.getKey(), outBus.getLocation().x, outBus.getLocation().y);
-        }
-        offset = 0;
-        String keys = "";
-        for (NodePanel node : nodes) {
+    @Override
+    public void componentShown(ComponentEvent e) {}
 
-            if (node.getType() == NodePanel.NodeType.Vertex || node.getType() == NodePanel.NodeType.Fragment) {
-                node.setLocation(offset + 200, getNodeTop(node));
-                getEditorParent().savePositionToMetaData(node.getKey(), node.getLocation().x, node.getLocation().y);
-                int pad = getNodeTop(node);
-                for (Connection connection : connections) {
-                    if (connection.getEnd().getNode() == node) {
-                        if (connection.getStart().getNode() instanceof NodePanel) {
-                            NodePanel startP = (NodePanel) connection.getStart().getNode();
-                            if (startP.getType() != NodePanel.NodeType.Vertex && startP.getType() != NodePanel.NodeType.Fragment) {
-                                startP.setLocation(offset + 30, pad);
-                                getEditorParent().savePositionToMetaData(startP.getKey(), startP.getLocation().x, startP.getLocation().y);
-                                keys += startP.getKey() + "|";
-                                pad += 50;
-                            }
-                        }
-                    }
-                }
-            }
-            offset += 320;
-        }
-        offset = 0;
-        for (NodePanel node : nodes) {
-            if (node.getType() != NodePanel.NodeType.Vertex && node.getType() != NodePanel.NodeType.Fragment && !(keys.contains(node.getKey()))) {
-                node.setLocation(offset + 10, 0);
-                getEditorParent().savePositionToMetaData(node.getKey(), node.getLocation().x, node.getLocation().y);
-                offset += 130;
-            }
-        }
+    @Override
+    public void componentHidden(ComponentEvent e) {}
 
-    }
-
-    private int getNodeTop(NodePanel node) {
-        if (node.getType() == NodePanel.NodeType.Vertex) {
-            return 150;
-        }
-        if (node.getType() == NodePanel.NodeType.Fragment) {
-            return 400;
-        }
-        return 0;
-
-    }
-
-    public void componentMoved(ComponentEvent e) {
-    }
-
-    public void componentShown(ComponentEvent e) {
-    }
-
-    public void componentHidden(ComponentEvent e) {
-    }
-
-    public void setParent(MatDefEditorlElement parent) {
-        this.parent = parent;
-    }
-
-    public void setCurrentTechniqueName(String currentTechniqueName) {
-        this.currentTechniqueName = currentTechniqueName;
-    }
-
-    public String getCurrentTechniqueName() {
-        return currentTechniqueName;
-    }
 }

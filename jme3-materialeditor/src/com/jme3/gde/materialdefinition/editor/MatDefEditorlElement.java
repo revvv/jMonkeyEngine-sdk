@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 jMonkeyEngine
+ * Copyright (c) 2009-2018 jMonkeyEngine
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,10 @@ package com.jme3.gde.materialdefinition.editor;
 
 import com.jme3.asset.ShaderNodeDefinitionKey;
 import com.jme3.gde.core.assets.ProjectAssetManager;
-import com.jme3.gde.core.scene.SceneApplication;
 import com.jme3.gde.materialdefinition.EditableMatDefFile;
 import com.jme3.gde.materialdefinition.MatDefDataObject;
 import com.jme3.gde.materialdefinition.MatDefMetaData;
+import com.jme3.gde.materialdefinition.editor.ShaderNodePanel.NodeType;
 import com.jme3.gde.materialdefinition.fileStructure.MatDefBlock;
 import com.jme3.gde.materialdefinition.fileStructure.ShaderNodeBlock;
 import com.jme3.gde.materialdefinition.fileStructure.TechniqueBlock;
@@ -98,8 +98,8 @@ import org.openide.windows.TopComponent;
         preferredID = "MatDefVisual",
         position = 2000)
 @Messages("LBL_MatDef_EDITOR=Editor")
-public final class MatDefEditorlElement extends JPanel implements MultiViewElement {
-
+public final class MatDefEditorlElement extends JPanel implements 
+        MultiViewElement, NodeEditor {
     protected MatDefDataObject obj;
     private final MatDefEditorToolBar toolbar = new MatDefEditorToolBar();
     private transient MultiViewElementCallback callback;
@@ -125,9 +125,12 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
     }
 
     private void initDiagram(Lookup lkp) throws NumberFormatException {
-
+        /* Note: I don't know if the following could also be done by calling
+         * {@link ShaderNodeDiagram#addNodesFromDefs()} etc
+         */
+        
         diagram1.clear();
-        diagram1.setParent(this);
+        diagram1.setEditorParent(this);
 
         Material mat = lkp.lookup(Material.class);
 
@@ -146,7 +149,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         int i = 0;
         for (ShaderNodeBlock sn : technique.getShaderNodes()) {
             ShaderNodeDefinition def = MaterialUtils.loadShaderNodeDefinition(sn, manager);
-            NodePanel np = new NodePanel(sn, def);
+            NodePanel np = new ShaderNodePanel(sn, def);
             diagram1.addNode(np);
             Point position = getPositionFromMetaData(np.getKey(), 150 * i + 20, 190);
             np.setLocation(position);
@@ -155,7 +158,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         }
         //  TechniqueDef tech = def.getDefaultTechniques().get(0);
         for (ShaderNodeVariable shaderNodeVariable : vertexGlobals) {
-            OutBusPanel out = new OutBusPanel(shaderNodeVariable.getName(), Shader.ShaderType.Vertex);
+            ShaderOutBusPanel out = new ShaderOutBusPanel(shaderNodeVariable.getName(), Shader.ShaderType.Vertex);
             diagram1.addOutBus(out);
             Point position = getPositionFromMetaData(out.getKey(), 0, 125);
             out.setLocation(position);
@@ -163,7 +166,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
 
         i = 2;
         for (ShaderNodeVariable var : fragmentGlobals) {
-            OutBusPanel out2 = new OutBusPanel(var.getName(), Shader.ShaderType.Fragment);
+            ShaderOutBusPanel out2 = new ShaderOutBusPanel(var.getName(), Shader.ShaderType.Fragment);
             diagram1.addOutBus(out2);
             Point position = getPositionFromMetaData(out2.getKey(), 0, 150 * i + 190);
             out2.setLocation(position);
@@ -173,7 +176,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         for (ShaderNodeVariable shaderNodeVariable : attributes) {
             NodePanel np = diagram1.getNodePanel(shaderNodeVariable.getNameSpace() + "." + shaderNodeVariable.getName());
             if (np == null) {
-                np = new NodePanel(shaderNodeVariable, NodePanel.NodeType.Attribute);
+                np = new ShaderNodePanel(shaderNodeVariable, NodeType.Attribute);
                 diagram1.addNode(np);
                 Point position = getPositionFromMetaData(np.getKey(), 150 * i + 20, 5);
                 np.setLocation(position);
@@ -184,7 +187,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         for (ShaderNodeVariable shaderNodeVariable : uniforms) {
             NodePanel np = diagram1.getNodePanel(shaderNodeVariable.getNameSpace() + "." + shaderNodeVariable.getName());
             if (np == null) {
-                np = new NodePanel(shaderNodeVariable, shaderNodeVariable.getNameSpace().equals("MatParam") ? NodePanel.NodeType.MatParam : NodePanel.NodeType.WorldParam);
+                np = new ShaderNodePanel(shaderNodeVariable, shaderNodeVariable.getNameSpace().equals("MatParam") ? NodeType.MatParam : NodeType.WorldParam);
                 diagram1.addNode(np);
                 Point position = getPositionFromMetaData(np.getKey(), 150 * i + 20, 65);
                 np.setLocation(position);
@@ -229,6 +232,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         diagram1.refreshPreviews(mat,obj.getEditableFile().getCurrentTechnique().getName());
         final Lookup.Result<Material> resMat = obj.getLookup().lookupResult(Material.class);
         resMat.addLookupListener(new LookupListener() {
+            @Override
             public void resultChanged(LookupEvent ev) {
                 Collection<? extends Material> col = (Collection<? extends Material>) resMat.allInstances();
                 if (!col.isEmpty()) {
@@ -243,6 +247,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
 
             Lookup.Result<Selectable> res = nav.getLookup().lookupResult(Selectable.class);
             res.addLookupListener(new LookupListener() {
+                @Override
                 public void resultChanged(LookupEvent ev) {
                     Selectable selected = nav.getLookup().lookup(Selectable.class);
                     if (selected != null && (prevNode == null || !(selected.getKey().equals(prevNode.getKey())))) {
@@ -270,7 +275,8 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         return "MatDefVisualElement";
     }
 
-    protected void selectionChanged(Selectable selectable) {
+    @Override
+    public void selectionChanged(Selectable selectable) {
         MatDefNavigatorPanel nav = obj.getLookup().lookup(MatDefNavigatorPanel.class);
         //It's possible that the navigator is null if it's collapsed in the ui.
         //In that case we early return to avoid further issues
@@ -314,7 +320,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         return obj.getLookup().lookup(ProjectAssetManager.class);
     }
 
-    public void showShaderEditor(String nodeName, NodePanel.NodeType type, List<String> pathList) {
+    public void showShaderEditor(String nodeName, ShaderNodePanel.NodeType type, List<String> pathList) {
 
         List<FileObject> fos = new ArrayList<FileObject>();
         Map<String, String> readOnlyFiles = new HashMap<String, String>();
@@ -385,7 +391,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         jSplitPane = new javax.swing.JSplitPane();
         shaderEditPanel1 = new com.jme3.gde.materialdefinition.editor.ShaderEditPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        diagram1 = new com.jme3.gde.materialdefinition.editor.Diagram();
+        diagram1 = new com.jme3.gde.materialdefinition.editor.ShaderNodeDiagram();
 
         jSplitPane.setDividerLocation(1);
         jSplitPane.setDividerSize(6);
@@ -425,7 +431,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private com.jme3.gde.materialdefinition.editor.Diagram diagram1;
+    private com.jme3.gde.materialdefinition.editor.ShaderNodeDiagram diagram1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane jSplitPane;
     private com.jme3.gde.materialdefinition.editor.ShaderEditPanel shaderEditPanel1;
@@ -502,7 +508,8 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         return CloseOperationState.STATE_OK;
     }
 
-    protected void makeMapping(Connection conn) {
+    @Override
+    public void makeMapping(Connection conn) {
         InOut startNode = (InOut) conn.start.getNode();
         InOut endNode = (InOut) conn.end.getNode();
         String leftVarName = conn.end.getText();
@@ -519,7 +526,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
             leftVarSwizzle = swizzle.substring(0, startCard);
         }
 
-        if (endNode instanceof OutBusPanel) {
+        if (endNode instanceof ShaderOutBusPanel) {
             OutputMappingBlock mapping = new OutputMappingBlock(leftVarName, rightVarName, leftVarSwizzle, rightVarSwizzle, endNode.getName(), startNode.getName(), null);
             startNode.addOutputMapping(mapping);
             conn.makeKey(mapping, diagram1.getCurrentTechniqueName());
@@ -530,10 +537,11 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         }
     }
 
-    protected void notifyRemoveConnection(Connection conn) {
+    @Override
+    public void notifyRemoveConnection(Connection conn) {
         InOut startNode = (InOut) conn.start.getNode();
         InOut endNode = (InOut) conn.end.getNode();
-        if (endNode instanceof OutBusPanel) {
+        if (endNode instanceof ShaderOutBusPanel) {
             startNode.removeOutputMapping((OutputMappingBlock) conn.mapping);
         } else {
             endNode.removeInputMapping((InputMappingBlock) conn.mapping);
@@ -550,7 +558,6 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
     }
 
     public void notifyAddTechnique(TechniqueBlock tech) {
-       
         String path = "Common/MatDefs/ShaderNodes/Common/Unshaded.j3sn";
         ShaderNodeDefinitionKey key =  new ShaderNodeDefinitionKey(path);
         List<ShaderNodeDefinition> defs = getAssetManager().loadAsset(key);
@@ -592,25 +599,36 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         getTechnique().addWorldParam(param);
     }
 
+    @Override
     public void notifyRemoveNode(NodePanel node) {
         MatDefBlock matDef = obj.getLookup().lookup(MatDefBlock.class);
-        if (node.getType() == NodePanel.NodeType.Fragment || node.getType() == NodePanel.NodeType.Vertex) {
-            TechniqueBlock technique = getTechnique();
-            for (ShaderNodeBlock shaderNodeBlock : technique.getShaderNodes()) {
-                if (shaderNodeBlock.getName().equals(node.getName())) {
-                    technique.removeShaderNode(shaderNodeBlock);
-                }
+        if (node instanceof ShaderNodePanel && 
+                ((ShaderNodePanel)node).getType() != null) {
+            switch (((ShaderNodePanel)node).getType()) {
+                case Fragment:
+                case Vertex:
+                    TechniqueBlock technique = getTechnique();
+                    for (ShaderNodeBlock shaderNodeBlock : technique.getShaderNodes()) {
+                        if (shaderNodeBlock.getName().equals(node.getName())) {
+                            technique.removeShaderNode(shaderNodeBlock);
+                        }
+                    }   break;
+                case MatParam:
+                    matDef.removeMatParam(new MatParamBlock("", node.getKey().replaceAll("MatParam.", ""), "", ""));
+                    break;
+                case WorldParam:
+                    getTechnique().removeWorldParam(new WorldParamBlock(node.getKey().replaceAll("WorldParam.", "")));
+                    break;
+                case Attribute:
+                    getTechnique().cleanupMappings("Attr", node.getKey().replaceAll("Attr.", ""));
+                    break;
+                default:
+                    break;
             }
-        } else if (node.getType() == NodePanel.NodeType.MatParam) {
-            matDef.removeMatParam(new MatParamBlock("", node.getKey().replaceAll("MatParam.", ""), "", ""));
-        } else if (node.getType() == NodePanel.NodeType.WorldParam) {
-            getTechnique().removeWorldParam(new WorldParamBlock(node.getKey().replaceAll("WorldParam.", "")));
-        } else if (node.getType() == NodePanel.NodeType.Attribute) {
-            getTechnique().cleanupMappings("Attr", node.getKey().replaceAll("Attr.", ""));
         }
     }
 
-    private Dot findConnectPoint(String nameSpace, String name, boolean isInput) {
+    private ConnectionEndpoint findConnectPoint(String nameSpace, String name, boolean isInput) {
 
         if (nameSpace.equals("MatParam")
                 || nameSpace.equals("WorldParam")
@@ -618,7 +636,7 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
             NodePanel np = diagram1.getNodePanel(nameSpace + "." + name);
             return isInput ? np.getInputConnectPoint(name) : np.getOutputConnectPoint(name);
         } else if (nameSpace.equals("Global")) {
-            OutBusPanel outBus = diagram1.getOutBusPanel(name);
+            ShaderOutBusPanel outBus = diagram1.getOutBusPanel(name);
             return outBus.getConnectPoint();
         } else {
             NodePanel np = diagram1.getNodePanel(diagram1.getCurrentTechniqueName() + "/" + nameSpace);
@@ -627,9 +645,8 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
     }
 
     private void makeConnection(MappingBlock mapping) {
-
-        Dot leftDot = findConnectPoint(mapping.getLeftNameSpace(), mapping.getLeftVar(), true);
-        Dot rightDot = findConnectPoint(mapping.getRightNameSpace(), mapping.getRightVar(), false);
+        ConnectionEndpoint leftDot = findConnectPoint(mapping.getLeftNameSpace(), mapping.getLeftVar(), true);
+        ConnectionEndpoint rightDot = findConnectPoint(mapping.getRightNameSpace(), mapping.getRightVar(), false);
         Connection conn = diagram1.connect(leftDot, rightDot);
         mapping.addPropertyChangeListener(WeakListeners.propertyChange(conn, mapping));
         conn.makeKey(mapping, diagram1.getCurrentTechniqueName());
@@ -700,7 +717,8 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         return technique;
     }
 
-    protected Point getPositionFromMetaData(String key, int defaultx, int defaulty) throws NumberFormatException {
+    @Override
+    public Point getPositionFromMetaData(String key, int defaultx, int defaulty) throws NumberFormatException {
         Point position = new Point();
         String pos = metaData.getProperty(diagram1.getCurrentTechniqueName() + "/" + key, defaultx + "," + defaulty);
 
@@ -712,8 +730,8 @@ public final class MatDefEditorlElement extends JPanel implements MultiViewEleme
         return position;
     }
 
-    protected void savePositionToMetaData(String key, int x, int y) throws NumberFormatException {
-
+    @Override
+    public void savePositionToMetaData(String key, int x, int y) throws NumberFormatException {
         metaData.setProperty(diagram1.getCurrentTechniqueName() + "/" + key, x + "," + y);
 
     }
