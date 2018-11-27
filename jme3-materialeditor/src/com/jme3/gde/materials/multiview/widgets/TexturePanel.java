@@ -247,6 +247,12 @@ public class TexturePanel extends MaterialPropertyWidget {
             displayPreview();
             updateFlipRepeat();
             fireChanged();
+        } else { // "No Texture" has been clicked
+            textureName = "";
+            texturePreview.setIcon(null);
+            texturePreview.setToolTipText("");
+            property.setValue("");
+            fireChanged();
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
