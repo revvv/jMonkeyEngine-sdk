@@ -70,8 +70,7 @@ import javax.swing.SwingUtilities;
  * their connections {@link ConnectionEndpoint} {@link Connection} are added onto.
  * @author Nehon
  */
-public class ShaderNodeDiagram extends Diagram implements
-        MouseMotionListener, ComponentListener {
+public class ShaderNodeDiagram extends Diagram implements ComponentListener {
 
     protected List<ShaderOutBusPanel> outBuses = new ArrayList<ShaderOutBusPanel>();
     private String currentTechniqueName;
@@ -80,9 +79,7 @@ public class ShaderNodeDiagram extends Diagram implements
 
     @SuppressWarnings("LeakingThisInConstructor")
     public ShaderNodeDiagram() {
-        addMouseListener(this);
-        addMouseMotionListener(this);
-        createPopupMenu();
+        super();
     }
     
     @Override
@@ -328,7 +325,6 @@ public class ShaderNodeDiagram extends Diagram implements
     @Override
     protected void createPopupMenu() {
         super.createPopupMenu();
-        System.err.println("YES");
         JMenuItem nodeItem = createMenuItem("Node", Icons.node);
         nodeItem.addActionListener(new ActionListener() {
             @Override
