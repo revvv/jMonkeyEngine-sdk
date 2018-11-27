@@ -118,13 +118,22 @@ public final class MatDefEditorlElement extends JPanel implements
         initComponents();
         obj = lkp.lookup(MatDefDataObject.class);
         metaData = lkp.lookup(MatDefMetaData.class);
-        assert obj != null;
+        if (obj == null) { // This happens when there was an error or maybe the object
+            // has already been freed
+            throw new IllegalArgumentException("Cannot build MatDefEditorlElement: obj null");
+        }
+        
         final EditableMatDefFile file = obj.getEditableFile();
         shaderEditPanel1.setVisible(false);
         shaderEditPanel1.setParent(this);
         if(!file.isLoaded()){
             file.load(lkp);
         }
+
+        if (!file.isLoaded()) {
+            throw new IllegalArgumentException("Cannot build MatDefEditorlElement: Failed at loading the EditableMatDefFile");
+        }
+        
         reload(file, lkp);        
         toolbar.setParent(this);
         toolbar.addTechnique(lkp.lookup(MatDefBlock.class).getTechniques());
