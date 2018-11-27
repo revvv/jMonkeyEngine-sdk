@@ -49,6 +49,7 @@ import org.openide.util.Exceptions;
  */
 public final class ExceptionPanel extends JPanel {
     
+    protected boolean wantIssue = true;
     /**
      * Creates new form ExceptionPanel.
      * 
@@ -58,7 +59,8 @@ public final class ExceptionPanel extends JPanel {
         initComponents();
     }
 
-    public ExceptionPanel(String text) {
+    public ExceptionPanel(String text, boolean wantIssue) {
+        this.wantIssue = wantIssue;
         initComponents();
         setText(text);
     }
@@ -102,8 +104,6 @@ public final class ExceptionPanel extends JPanel {
 
         jPanelExReport.setName("panelExceptionReport"); // NOI18N
 
-        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
         jTextArea1.setEditable(false);
         jTextArea1.setColumns(20);
         jTextArea1.setLineWrap(true);
@@ -133,7 +133,7 @@ public final class ExceptionPanel extends JPanel {
             .addGroup(jPanelExReportLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 251, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 230, Short.MAX_VALUE)
                 .addComponent(jButton2)
                 .addContainerGap())
             .addGroup(jPanelExReportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -215,18 +215,19 @@ public final class ExceptionPanel extends JPanel {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         try {
             Desktop desk = Desktop.getDesktop();
+            String uri = wantIssue ? ExceptionUtils.ISSUE_TRACKER_URL : ExceptionUtils.FORUMS_URL;            
             
             if (desk.isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().browse(new URI(ExceptionUtils.ISSUE_TRACKER_URL));
+                Desktop.getDesktop().browse(new URI(uri));
             } else {
                 // Linux does not seem to be supported very well with Desktop.
                 String os = System.getProperty("os.name");
                 if (os.startsWith("Windows")) {
-                    Runtime.getRuntime().exec(new String[] { "explorer", ExceptionUtils.ISSUE_TRACKER_URL});
+                    Runtime.getRuntime().exec(new String[] { "explorer", uri});
                 } else if (os.startsWith("Mac OS")) {
-                    Runtime.getRuntime().exec(new String[] { "open", ExceptionUtils.ISSUE_TRACKER_URL});
+                    Runtime.getRuntime().exec(new String[] { "open", uri});
                 } else if (os.startsWith("Linux"))  {
-                    Runtime.getRuntime().exec(new String[] { "xdg-open", ExceptionUtils.ISSUE_TRACKER_URL});
+                    Runtime.getRuntime().exec(new String[] { "xdg-open", uri});
                 }
             }
         } catch (Exception e) {
