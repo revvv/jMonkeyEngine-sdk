@@ -29,21 +29,8 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.materialdefinition.editor;
+package com.jme3.gde.core.editor.nodes;
 
-import com.jme3.gde.core.assets.ProjectAssetManager;
-import com.jme3.gde.materialdefinition.dialog.AddAttributeDialog;
-import com.jme3.gde.materialdefinition.dialog.AddMaterialParameterDialog;
-import com.jme3.gde.materialdefinition.dialog.AddNodeDialog;
-import com.jme3.gde.materialdefinition.dialog.AddWorldParameterDialog;
-import com.jme3.gde.materialdefinition.fileStructure.ShaderNodeBlock;
-import com.jme3.gde.materialdefinition.icons.Icons;
-import com.jme3.material.Material;
-import com.jme3.shader.Shader;
-import com.jme3.shader.ShaderNodeDefinition;
-import com.jme3.shader.ShaderNodeVariable;
-import com.jme3.shader.UniformBinding;
-import com.jme3.shader.VarType;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -51,8 +38,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
@@ -405,7 +390,7 @@ public abstract class Diagram extends JPanel implements MouseListener,
      * @param key The unique key
      * @return The selected item
      */
-    protected Selectable select(String key) {
+    public Selectable select(String key) {
         for (NodePanel nodePanel: nodes) {
             if (nodePanel.getKey().equals(key)) {
                 return doSelect(nodePanel, false);

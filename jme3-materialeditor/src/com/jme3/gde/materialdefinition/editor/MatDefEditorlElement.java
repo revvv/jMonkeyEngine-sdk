@@ -31,6 +31,12 @@
  */
 package com.jme3.gde.materialdefinition.editor;
 
+import com.jme3.gde.core.editor.nodes.ConnectionEndpoint;
+import com.jme3.gde.core.editor.nodes.Connection;
+import com.jme3.gde.core.editor.nodes.NodeEditor;
+import com.jme3.gde.core.editor.nodes.Diagram;
+import com.jme3.gde.core.editor.nodes.NodePanel;
+import com.jme3.gde.core.editor.nodes.Selectable;
 import com.jme3.asset.ShaderNodeDefinitionKey;
 import com.jme3.gde.core.assets.ProjectAssetManager;
 import com.jme3.gde.materialdefinition.EditableMatDefFile;
@@ -92,7 +98,7 @@ import org.openide.windows.TopComponent;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_MatDef_EDITOR",
-        iconBase = "com/jme3/gde/materialdefinition/icons/matdef.png",
+        iconBase = "com/jme3/gde/core/editor/icons/matdef.png",
         mimeType = "text/jme-materialdefinition",
         persistenceType = TopComponent.PERSISTENCE_ONLY_OPENED,
         preferredID = "MatDefVisual",
@@ -510,15 +516,15 @@ public final class MatDefEditorlElement extends JPanel implements
 
     @Override
     public void makeMapping(Connection conn) {
-        InOut startNode = (InOut) conn.start.getNode();
-        InOut endNode = (InOut) conn.end.getNode();
-        String leftVarName = conn.end.getText();
-        String rightVarName = conn.start.getText();
+        InOut startNode = (InOut) conn.getStart().getNode();
+        InOut endNode = (InOut) conn.getEnd().getNode();
+        String leftVarName = conn.getEnd().getText();
+        String rightVarName = conn.getStart().getText();
         String leftVarSwizzle = null;
         String rightVarSwizzle = null;
 
-        int endCard = ShaderUtils.getCardinality(conn.end.getType(), "");
-        int startCard = ShaderUtils.getCardinality(conn.start.getType(), "");
+        int endCard = ShaderUtils.getCardinality(conn.getEnd().getType(), "");
+        int startCard = ShaderUtils.getCardinality(conn.getStart().getType(), "");
         String swizzle = "xyzw";
         if (startCard > endCard) {
             rightVarSwizzle = swizzle.substring(0, endCard);
@@ -539,12 +545,12 @@ public final class MatDefEditorlElement extends JPanel implements
 
     @Override
     public void notifyRemoveConnection(Connection conn) {
-        InOut startNode = (InOut) conn.start.getNode();
-        InOut endNode = (InOut) conn.end.getNode();
+        InOut startNode = (InOut) conn.getStart().getNode();
+        InOut endNode = (InOut) conn.getEnd().getNode();
         if (endNode instanceof ShaderOutBusPanel) {
-            startNode.removeOutputMapping((OutputMappingBlock) conn.mapping);
+            startNode.removeOutputMapping((OutputMappingBlock) conn.getMapping());
         } else {
-            endNode.removeInputMapping((InputMappingBlock) conn.mapping);
+            endNode.removeInputMapping((InputMappingBlock) conn.getMapping());
         }
     }
 
@@ -733,7 +739,6 @@ public final class MatDefEditorlElement extends JPanel implements
     @Override
     public void savePositionToMetaData(String key, int x, int y) throws NumberFormatException {
         metaData.setProperty(diagram1.getCurrentTechniqueName() + "/" + key, x + "," + y);
-
     }
 
     public void reload() {

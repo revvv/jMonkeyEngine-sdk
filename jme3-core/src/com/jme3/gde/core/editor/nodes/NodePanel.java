@@ -29,14 +29,9 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.materialdefinition.editor;
+package com.jme3.gde.core.editor.nodes;
 
-import com.jme3.gde.materialdefinition.fileStructure.ShaderNodeBlock;
-import com.jme3.gde.materialdefinition.fileStructure.leaves.DefinitionBlock;
-import com.jme3.gde.materialdefinition.fileStructure.leaves.InputMappingBlock;
-import com.jme3.gde.materialdefinition.fileStructure.leaves.OutputMappingBlock;
-import com.jme3.gde.materialdefinition.icons.Icons;
-import com.jme3.shader.ShaderNodeDefinition;
+import com.jme3.gde.core.editor.icons.Icons;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -61,11 +56,11 @@ import javax.swing.SwingUtilities;
  * The NodePanel is the actual implementation of a Node.
  * @author Nehon
  */
-public abstract class NodePanel extends DraggablePanel implements Selectable, InOut, KeyListener {
-    List<JLabel> inputLabels = new ArrayList<JLabel>();
-    List<JLabel> outputLabels = new ArrayList<JLabel>();
-    List<ConnectionEndpoint> inputDots = new ArrayList<ConnectionEndpoint>();
-    List<ConnectionEndpoint> outputDots = new ArrayList<ConnectionEndpoint>();
+public abstract class NodePanel extends DraggablePanel implements Selectable, KeyListener {
+    protected List<JLabel> inputLabels = new ArrayList<JLabel>();
+    protected List<JLabel> outputLabels = new ArrayList<JLabel>();
+    protected List<ConnectionEndpoint> inputDots = new ArrayList<ConnectionEndpoint>();
+    protected List<ConnectionEndpoint> outputDots = new ArrayList<ConnectionEndpoint>();
     private JPanel content;
     protected JLabel header;
     protected Color color;
@@ -169,7 +164,6 @@ public abstract class NodePanel extends DraggablePanel implements Selectable, In
     public void mouseReleased(MouseEvent e) {
         diagram.fixSize();
         if (svdx != getLocation().x) {
-            firePropertyChange(ShaderNodeBlock.POSITION, svdx, getLocation().x);
             getDiagram().getEditorParent().savePositionToMetaData(getKey(), getLocation().x, getLocation().y);
         }
     }
@@ -367,26 +361,5 @@ public abstract class NodePanel extends DraggablePanel implements Selectable, In
             MouseEvent me = SwingUtilities.convertMouseEvent(e.getComponent(), e, NodePanel.this);
             NodePanel.this.dispatchEvent(me);
         }
-    }
-
-    //@TODO: Solve the mistery about these methods
-    @Override
-    public void addInputMapping(InputMappingBlock block) {
-        firePropertyChange(ShaderNodeBlock.INPUT, null, block);
-    }
-
-    @Override
-    public void removeInputMapping(InputMappingBlock block) {
-        firePropertyChange(ShaderNodeBlock.INPUT, block, null);
-    }
-
-    @Override
-    public void addOutputMapping(OutputMappingBlock block) {
-        firePropertyChange(ShaderNodeBlock.OUTPUT, null, block);
-    }
-
-    @Override
-    public void removeOutputMapping(OutputMappingBlock block) {
-        firePropertyChange(ShaderNodeBlock.OUTPUT, block, null);
     }
 }

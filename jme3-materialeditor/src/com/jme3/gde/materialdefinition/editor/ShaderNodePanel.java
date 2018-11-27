@@ -31,13 +31,18 @@
  */
 package com.jme3.gde.materialdefinition.editor;
 
+import com.jme3.gde.core.editor.nodes.ConnectionEndpoint;
+import com.jme3.gde.core.editor.nodes.NodePanel;
 import com.jme3.gde.materialdefinition.fileStructure.ShaderNodeBlock;
 import com.jme3.gde.materialdefinition.fileStructure.leaves.DefinitionBlock;
-import com.jme3.gde.materialdefinition.icons.Icons;
+import com.jme3.gde.materialdefinition.fileStructure.leaves.InputMappingBlock;
+import com.jme3.gde.materialdefinition.fileStructure.leaves.OutputMappingBlock;
+import com.jme3.gde.core.editor.icons.Icons;
 import com.jme3.shader.Shader;
 import com.jme3.shader.ShaderNodeDefinition;
 import com.jme3.shader.ShaderNodeVariable;
 import java.awt.Color;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -50,7 +55,8 @@ import org.openide.util.WeakListeners;
  * {@link NodePanel}. 
  * @author MeFisto94
  */
-public class ShaderNodePanel extends NodePanel implements PropertyChangeListener {
+public class ShaderNodePanel extends NodePanel implements InOut, 
+        PropertyChangeListener {
     private NodeType type = NodeType.Vertex;
     protected Shader.ShaderType shaderType;
     // The Name of the currently active Technique
@@ -131,6 +137,14 @@ public class ShaderNodePanel extends NodePanel implements PropertyChangeListener
         initComponents();
         updateType();
         setOpaque(false);
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        super.mouseReleased(e);
+        if (svdx != getLocation().x) {
+            firePropertyChange(ShaderNodeBlock.POSITION, svdx, getLocation().x);
+        }
     }
 
     @Override
@@ -231,5 +245,26 @@ public class ShaderNodePanel extends NodePanel implements PropertyChangeListener
         dot1.setParamType(paramType);
         dot1.setType(type);
         return dot1;
+    }
+    
+    // Callbacks when Connections are formed and released
+    @Override
+    public void addInputMapping(InputMappingBlock block) {
+        firePropertyChange(ShaderNodeBlock.INPUT, null, block);
+    }
+
+    @Override
+    public void removeInputMapping(InputMappingBlock block) {
+        firePropertyChange(ShaderNodeBlock.INPUT, block, null);
+    }
+
+    @Override
+    public void addOutputMapping(OutputMappingBlock block) {
+        firePropertyChange(ShaderNodeBlock.OUTPUT, null, block);
+    }
+
+    @Override
+    public void removeOutputMapping(OutputMappingBlock block) {
+        firePropertyChange(ShaderNodeBlock.OUTPUT, block, null);
     }
 }
