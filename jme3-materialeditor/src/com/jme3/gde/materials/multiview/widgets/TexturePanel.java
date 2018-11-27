@@ -24,7 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The TexturePanel is a col in the material editor representing a special texture
+ * The TexturePanel is a row in the material editor representing a special texture
  * @author normenhansen
  */
 public class TexturePanel extends MaterialPropertyWidget {
