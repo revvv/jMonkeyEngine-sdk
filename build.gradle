@@ -2,9 +2,12 @@
 import groovy.xml.MarkupBuilder
 import java.util.zip.ZipFile
 
+plugins {
+    id "de.undercouch.download" version "3.4.3"
+}
+
 apply from: 'gradle/libs/digest.gradle'
 apply from: file('version.gradle')
-
 
 if (!hasProperty('mainClass')) {
     ext.mainClass = ''
@@ -111,13 +114,21 @@ task checkPlatformConfig {
         def netbeansFolder = file("netbeans")
         if(!netbeansFolder.exists() || netbeansFolder.list().length == 0){
             println "Downloading NetBeans Platform base, this only has to be done once.."
-            def f = file("netbeans.zip")
-            new URL(netbeansUrl).withInputStream{ i -> f.withOutputStream{ it << i }}
-            copy{
-                from zipTree(f)
+            /* The following method is discouraged as it does not handle HTTP 301 Redirects
+             * def f = file("netbeans.zip")
+             * new URL(netbeansUrl).withInputStream{ i -> f.withOutputStream{ it << i }}
+             */
+            download {
+                src netbeansUrl
+                dest "netbeans.zip"
+                overwrite false // however if overwrite matters the build failed anyway
+            }
+
+            copy {
+                from zipTree(file("netbeans.zip"))
                 into "."
             }
-            f.delete()
+            file("netbeans.zip").delete()
         }
         file("nbproject/private/").mkdirs()
         platformFile.createNewFile()
