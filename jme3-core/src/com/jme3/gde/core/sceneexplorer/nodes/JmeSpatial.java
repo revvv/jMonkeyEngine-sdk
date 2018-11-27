@@ -339,10 +339,15 @@ public class JmeSpatial extends AbstractSceneExplorerNode {
 
         set.put(makeProperty(obj, BoundingVolume.class, "getWorldBound", "World Bound"));
 
-        set.put(makeProperty(obj, CullHint.class, "getCullHint", "setCullHint", "Cull Hint"));
-        set.put(makeProperty(obj, CullHint.class, "getLocalCullHint", "Local Cull Hint"));
-        set.put(makeProperty(obj, ShadowMode.class, "getShadowMode", "setShadowMode", "Shadow Mode"));
-        set.put(makeProperty(obj, ShadowMode.class, "getLocalShadowMode", "Local Shadow Mode"));
+        /* Global CullHint and ShadowMode disabled because: A) they are confusing
+         * as users expect the local version to be shown and B) if the local mode
+         * is updated, the global property isn't automatically. This code has to
+         * be implemented if one wants the read-only globals.
+        */
+        //set.put(makeProperty(obj, CullHint.class, "getCullHint", "Cull Hint"));
+        set.put(makeProperty(obj, CullHint.class, "getLocalCullHint", "setCullHint", "Local Cull Hint"));
+        //set.put(makeProperty(obj, ShadowMode.class, "getShadowMode", "Shadow Mode"));
+        set.put(makeProperty(obj, ShadowMode.class, "getLocalShadowMode", "setShadowMode", "Local Shadow Mode"));
         set.put(makeProperty(obj, LightList.class, "getWorldLightList", "World Light List"));
 
         set.put(makeProperty(obj, RenderQueue.Bucket.class, "getQueueBucket", "setQueueBucket", "Queue Bucket"));
