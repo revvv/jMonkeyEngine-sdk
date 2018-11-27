@@ -29,9 +29,8 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.materialdefinition.editor;
+package com.jme3.gde.core.editor.nodes;
 
-import com.jme3.gde.materialdefinition.fileStructure.leaves.MappingBlock;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -573,7 +572,7 @@ public class ConnectionStraight extends JPanel implements ComponentListener,
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        mapping = (MappingBlock) evt.getSource();
+        mapping = (Object) evt.getSource();
         key = "error";
         //key = MaterialUtils.makeKey(mapping, getDiagram().getCurrentTechniqueName());
     }

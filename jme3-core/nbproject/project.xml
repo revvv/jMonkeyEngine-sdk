@@ -401,6 +401,8 @@
                 <package>com.jme3.gde.core.assets.nodes</package>
                 <package>com.jme3.gde.core.codeless</package>
                 <package>com.jme3.gde.core.completion</package>
+                <package>com.jme3.gde.core.editor.icons</package>
+                <package>com.jme3.gde.core.editor.nodes</package>
                 <package>com.jme3.gde.core.errorreport</package>
                 <package>com.jme3.gde.core.filters</package>
                 <package>com.jme3.gde.core.filters.actions</package>

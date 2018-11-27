@@ -29,7 +29,7 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.materialdefinition.editor;
+package com.jme3.gde.core.editor.nodes;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -134,7 +134,11 @@ public class ConnectionCurve extends JPanel implements ComponentListener,
         return key;
     }
 
-    protected void makeKey(Object mapping, String techName) {
+    public Object getMapping() {
+        return mapping;
+    }
+    
+    public void makeKey(Object mapping, String techName) {
         if (this instanceof Connection) {
             key = getDiagram().makeKeyForConnection((Connection)this, mapping);
             this.mapping = mapping;
