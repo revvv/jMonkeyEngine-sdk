@@ -29,42 +29,22 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.glsl.highlighter.lexer;
+package com.jme3.gde.glsl.highlighter.editor;
 
-import org.netbeans.api.lexer.TokenId;
+import org.netbeans.api.editor.mimelookup.MimeRegistration;
+import org.netbeans.modules.editor.indent.spi.Context;
+import org.netbeans.modules.editor.indent.spi.IndentTask;
 
 /**
  *
  * @author grizeldi
  */
-public enum GlslTokenID implements TokenId {
-    KEYWORD("keyword"),
-    INLINE_COMMENT("comment"),
-    BLOCK_COMMENT("comment"),
-    STRING("string"),
-    SPACE("whitespace"),
-    NEW_LINE("whitespace"),
-    OPERATOR("operator"),
-    TEXT("default"),
-    PREPROCESSOR("preprocessor"),
-    NUMBER("number"),
-    PRIMITIVE("basictype"),
-    BUILTIN_VARIABLE("builtinvar"),
-    BUILTIN_FUNCTION("builtinfunc"),
-
-    //Stuff that has to be recognized
-    LBRACKET("operator"), RBRACKET("operator"),
-    LPARENTHESIS("operator"), RPARENTHESIS("operator"),
-    LSQUARE("operator"), RSQUARE("operator");
-
-    private final String category;
-
-    private GlslTokenID(String category) {
-        this.category = category;
-    }
+@MimeRegistration(mimeType = "text/x-glsl", service = IndentTask.Factory.class)
+public class GlslIndentTaskFactory implements IndentTask.Factory {
 
     @Override
-    public String primaryCategory() {
-        return category;
+    public IndentTask createTask(Context cntxt) {
+        return new GlslIndentTask(cntxt);
     }
+
 }
