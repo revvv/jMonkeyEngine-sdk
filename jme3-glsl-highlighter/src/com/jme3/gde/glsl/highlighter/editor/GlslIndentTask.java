@@ -29,42 +29,52 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.glsl.highlighter.lexer;
+package com.jme3.gde.glsl.highlighter.editor;
 
-import org.netbeans.api.lexer.TokenId;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import org.netbeans.modules.editor.indent.api.IndentUtils;
+import org.netbeans.modules.editor.indent.spi.Context;
+import org.netbeans.modules.editor.indent.spi.ExtraLock;
+import org.netbeans.modules.editor.indent.spi.IndentTask;
 
 /**
  *
  * @author grizeldi
  */
-public enum GlslTokenID implements TokenId {
-    KEYWORD("keyword"),
-    INLINE_COMMENT("comment"),
-    BLOCK_COMMENT("comment"),
-    STRING("string"),
-    SPACE("whitespace"),
-    NEW_LINE("whitespace"),
-    OPERATOR("operator"),
-    TEXT("default"),
-    PREPROCESSOR("preprocessor"),
-    NUMBER("number"),
-    PRIMITIVE("basictype"),
-    BUILTIN_VARIABLE("builtinvar"),
-    BUILTIN_FUNCTION("builtinfunc"),
+public class GlslIndentTask implements IndentTask {
 
-    //Stuff that has to be recognized
-    LBRACKET("operator"), RBRACKET("operator"),
-    LPARENTHESIS("operator"), RPARENTHESIS("operator"),
-    LSQUARE("operator"), RSQUARE("operator");
+    private Context context;
 
-    private final String category;
-
-    private GlslTokenID(String category) {
-        this.category = category;
+    public GlslIndentTask(Context context) {
+        this.context = context;
     }
 
     @Override
-    public String primaryCategory() {
-        return category;
+    public void reindent() throws BadLocationException {
+        context.setCaretOffset(1);
+        final Document doc = context.document();
+        int indentModifier = 0;
+
+        //Check if previous line ends with a {
+        int previousLineLength = context.startOffset() - 1 - context.lineStartOffset(context.startOffset() - 1);
+        String previousLine = doc.getText(context.lineStartOffset(context.startOffset() - 1), previousLineLength);
+
+        //Hook other reasons for changes in indentation into this for loop
+        for (int i = previousLineLength - 1; i >= 0; i--) {
+            if (previousLine.charAt(i) == '}') {
+                break;
+            } else if (previousLine.charAt(i) == '{') {
+                indentModifier += IndentUtils.indentLevelSize(doc);
+                break;
+            }
+        }
+        int previousLineIndent = context.lineIndent(context.lineStartOffset(context.startOffset() - 1));
+        context.modifyIndent(context.startOffset(), previousLineIndent + indentModifier);
+    }
+
+    @Override
+    public ExtraLock indentLock() {
+        return null;
     }
 }
