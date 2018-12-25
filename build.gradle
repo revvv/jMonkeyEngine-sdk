@@ -60,6 +60,7 @@ configurations {
 dependencies {
 
     corelibs dep("com.github.xbuf:jme3_xbuf:0.9.1", false, false)
+    corelibs dep("com.badlogicgames.gdx:gdx-ai:1.8.1", true, true)
 
     corelibs dep("org.jmonkeyengine:jme3-core:$jmeEngineVersion", true, true)
     corelibs dep("org.jmonkeyengine:jme3-desktop:$jmeEngineVersion", true, true)
