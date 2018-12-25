@@ -31,6 +31,7 @@
  */
 package com.jme3.gde.core.editor.nodes;
 
+import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -47,7 +48,7 @@ import javax.swing.SwingUtilities;
  */
 public class DraggablePanel extends JPanel implements MouseListener, MouseMotionListener {
     protected int svdx, svdy, svdex, svdey;
-    private boolean vertical = false;
+    protected boolean vertical = false;
     protected Diagram diagram;
 
     public DraggablePanel(boolean vertical) {
@@ -56,6 +57,7 @@ public class DraggablePanel extends JPanel implements MouseListener, MouseMotion
     }
 
     public DraggablePanel() {
+        super();
         addMouseListener(this);
         addMouseMotionListener(this);
     }
@@ -107,13 +109,28 @@ public class DraggablePanel extends JPanel implements MouseListener, MouseMotion
             diagram.multiMove(this, xoffset, yoffset);
             e.consume();
         }
+       
     }
 
     protected void movePanel(int xoffset, int yoffset) {
         if (vertical) {
             xoffset = 0;
         }
-        setLocation(Math.max(0, svdx + xoffset), Math.max(0, svdy + yoffset));
+        if (getParent() != null) {
+            Dimension parentSize = getParent().getSize();
+            Dimension thisSize = getSize();
+            
+            // Support clamping to all dimensions
+            if (parentSize.height > 0 && parentSize.width > 0 && thisSize.height > 0 && thisSize.width > 0) {
+                setLocation(Math.max(0, Math.min(svdx + xoffset, parentSize.width - thisSize.width)), Math.max(0, Math.min(svdy + yoffset, parentSize.height - thisSize.height)));
+            } else {
+                // Only supports clamping to the left upper bound
+                setLocation(Math.max(0, svdx + xoffset), Math.max(0, svdy + yoffset));
+            }
+        } else {
+            // Only supports clamping to the left upper bound
+            setLocation(Math.max(0, svdx + xoffset), Math.max(0, svdy + yoffset));
+        }
     }
 
     /** 

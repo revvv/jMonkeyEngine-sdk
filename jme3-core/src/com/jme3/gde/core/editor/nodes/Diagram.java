@@ -198,6 +198,13 @@ public abstract class Diagram extends JPanel implements MouseListener,
     public void addConnection(Connection conn) {
         connections.add(conn);
         add(conn);
+        
+        if (conn.getStart().getNode() instanceof NodePanel) {
+            ((NodePanel)conn.getStart().getNode()).onConnect(conn);
+        }
+        if (conn.getEnd().getNode() instanceof NodePanel) {
+            ((NodePanel)conn.getEnd().getNode()).onConnect(conn);
+        }
         repaint();
     }
 
@@ -219,7 +226,7 @@ public abstract class Diagram extends JPanel implements MouseListener,
         setComponentZOrder(node, 0);
         node.addComponentListener(this);
     }
-
+    
     protected void removeSelectedConnection(Selectable selectedItem) {        
         Connection selectedConnection = (Connection) selectedItem;
         removeConnection(selectedConnection);
@@ -235,7 +242,7 @@ public abstract class Diagram extends JPanel implements MouseListener,
         if (result == JOptionPane.OK_OPTION) {
             for (Selectable selectedItem : selectedItems) {
                 if (selectedItem instanceof NodePanel) {
-                    removeSelectedNode(selectedItem);
+                    removeNode((NodePanel)selectedItem);
                 }
                 if (selectedItem instanceof Connection) {
                     removeSelectedConnection(selectedItem);
@@ -246,28 +253,24 @@ public abstract class Diagram extends JPanel implements MouseListener,
     }
 
     /**
-     * Called from {@link #removeSelected() } to also disconnect all the 
-     * connections made to the node in question
-     * 
-     * @param selectedItem The item to remove
+     * Remove a Node and all it's related connections from the diagram.
+     * @param node The node to remove
      */
-    private void removeSelectedNode(Selectable selectedItem) {
-        NodePanel selectedNode = (NodePanel) selectedItem;
-        nodes.remove(selectedNode);
+    public void removeNode(NodePanel node) {
+        nodes.remove(node);
         for (Iterator<Connection> it = connections.iterator(); it.hasNext();) {
             Connection conn = it.next();
-            if (conn.start.getNode() == selectedNode || conn.end.getNode() == selectedNode) {
+            if (conn.start.getNode() == node || conn.end.getNode() == node) {
                 it.remove();
-                conn.end.disconnect();
-                conn.start.disconnect();
-                remove(conn);
+                removeConnection(conn);
+                parent.notifyRemoveConnection(conn);
             }
         }
 
-        selectedNode.cleanup();
-        remove(selectedNode);
+        node.cleanup();
+        remove(node);
         repaint();
-        parent.notifyRemoveNode(selectedNode);
+        parent.notifyRemoveNode(node);
     }
 
     public List<Selectable> getSelectedItems() {
@@ -276,6 +279,7 @@ public abstract class Diagram extends JPanel implements MouseListener,
 
     /**
      * Called by {@link ConnectionEndpoint} when a Curve has been dragged
+     * @param e
      */
     protected void draggingDot(MouseEvent e) {}
 
@@ -312,8 +316,9 @@ public abstract class Diagram extends JPanel implements MouseListener,
     /**
      * Selection from the editor. Select the item and notify the topComponent
      * @param selectable the item to select
+     * @param multi Whether Multi Selection is allowed
      */
-    public void select(Selectable selectable, boolean multi) {
+    public void selectAndNotify(Selectable selectable, boolean multi) {
         parent.selectionChanged(doSelect(selectable, multi));
     }
     
@@ -388,27 +393,36 @@ public abstract class Diagram extends JPanel implements MouseListener,
      * have to implement {@link #trySelect(java.lang.String) }
      *
      * @param key The unique key
+     * @param multi Support Multi Selection?
      * @return The selected item
      */
-    public Selectable select(String key) {
+    public Selectable select(String key, boolean multi) {
         for (NodePanel nodePanel: nodes) {
             if (nodePanel.getKey().equals(key)) {
-                return doSelect(nodePanel, false);
+                return doSelect(nodePanel, multi);
             }
         }
 
         for (Connection connection: connections) {
             if (connection.getKey().equals(key)) {
-                return doSelect(connection, false);
+                return doSelect(connection, multi);
             }
         }
         
         Selectable s = trySelect(key);
         if (s != null) {
-            return doSelect(s, false);
+            return doSelect(s, multi);
         }
 
         return null;
+    }
+    
+    public Selectable select(String key) {
+        return select(key, false);
+    }
+    
+    public Selectable select(Selectable selectable, boolean multi) {
+        return doSelect(selectable, multi);
     }
 
     public void clear() {
@@ -462,10 +476,20 @@ public abstract class Diagram extends JPanel implements MouseListener,
     }
 
     private void removeConnection(Connection selectedConnection) {
+        ConnectionEndpoint start = selectedConnection.getStart();
+        ConnectionEndpoint end = selectedConnection.getEnd();
+        
         connections.remove(selectedConnection);
-        selectedConnection.end.disconnect();
-        selectedConnection.start.disconnect();
+        end.disconnect();
+        start.disconnect();
         remove(selectedConnection);
+        
+        if (start.getNode() instanceof NodePanel) {
+            ((NodePanel)start.getNode()).onDisconnect(selectedConnection);
+        }
+        if (end.getNode() instanceof NodePanel) {
+            ((NodePanel)end.getNode()).onDisconnect(selectedConnection);
+        }
     }
 
     /**

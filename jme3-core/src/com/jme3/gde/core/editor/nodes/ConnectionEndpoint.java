@@ -50,11 +50,12 @@ public abstract class ConnectionEndpoint extends JPanel implements MouseInputLis
     public static boolean pressed = false;
     protected ImageIcon img;
     protected ImageIcon prevImg;
-    private String type;
+    protected String type;
     protected ParamType paramType;
-    private String text = "";
+    protected String text = "";
     protected DraggablePanel node;
-    private int index = 1;
+    protected int index = 1;
+    protected Connection connection;
 
     public String getText() {
         return text;
@@ -156,6 +157,18 @@ public abstract class ConnectionEndpoint extends JPanel implements MouseInputLis
         e.consume();
     }
 
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        Diagram diag = getDiagram();
+        if (diag.draggedFrom != null && diag.draggedFrom != this) {
+            prevImg = img;
+            canConnect(diag.draggedFrom);
+            diag.draggedTo = this;
+            diag.draggedFrom.canConnect(this);
+        }
+
+    }
+    
     /**
      * Changes the look of this connector. Implies repainting
      * @param icon The Icon to use
@@ -177,20 +190,21 @@ public abstract class ConnectionEndpoint extends JPanel implements MouseInputLis
      */
     public void disconnect() {
         setIcon(Icons.imgGrey);
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-        Diagram diag = getDiagram();
-        if (diag.draggedFrom != null && diag.draggedFrom != this) {
-            prevImg = img;
-            canConnect(diag.draggedFrom);
-            diag.draggedTo = this;
-            diag.draggedFrom.canConnect(this);
+        
+        if (connection != null) {
+            getNode().removeComponentListener(connection);
+            connection = null;
         }
-
     }
 
+    public Connection getConnection() {
+        return connection;
+    }
+    
+    public boolean isConnected() {
+        return connection != null;
+    }
+    
     /**
      * Determines whether this dot can form a {@link Connection} with the other
      * specified dot. Subclasses should only override this, when they want to
@@ -218,8 +232,9 @@ public abstract class ConnectionEndpoint extends JPanel implements MouseInputLis
     
     protected abstract boolean allowConnection(ConnectionEndpoint pair);
 
-    protected void connect(Connection connection) {
+    public void connect(Connection connection) {
         getNode().addComponentListener(connection);
+        this.connection = connection;
         setIcon(Icons.imgGreen);
     }
 
