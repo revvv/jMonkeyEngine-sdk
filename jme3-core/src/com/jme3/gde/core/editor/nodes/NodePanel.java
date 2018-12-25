@@ -46,6 +46,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.GroupLayout;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle;
@@ -61,9 +62,10 @@ public abstract class NodePanel extends DraggablePanel implements Selectable, Ke
     protected List<JLabel> outputLabels = new ArrayList<JLabel>();
     protected List<ConnectionEndpoint> inputDots = new ArrayList<ConnectionEndpoint>();
     protected List<ConnectionEndpoint> outputDots = new ArrayList<ConnectionEndpoint>();
-    private JPanel content;
+    protected JPanel content;
     protected JLabel header;
     protected Color color;
+    protected Color backgroundColor = new Color(170, 170, 170, 120);
     protected String name;
     protected NodeToolBar toolBar = null;
 
@@ -142,6 +144,24 @@ public abstract class NodePanel extends DraggablePanel implements Selectable, Ke
         return label;
     }
     
+    /**
+     * This is called <b>after</b> a connection has been made in the editor.<br>
+     * This is because some nodes want to change their status when that happens
+     * (e.g. add another connection endpoint to use).
+     * @param conn The connection
+     * @see #onDisconnect(com.jme3.gde.core.editor.nodes.Connection) 
+     */
+    protected void onConnect(Connection conn) {}
+    
+    /**
+     * This is called <b>after</b> a connection has been disconnected in the editor.<br>
+     * This is because some nodes want to change their status when that happens
+     * (e.g. clean up connection endpoints).
+     * @param conn The connection
+     * @see #onConnect(com.jme3.gde.core.editor.nodes.Connection)
+     */
+    protected void onDisconnect(Connection conn) {}
+    
     @Override
     public String getName() {
         return name;
@@ -201,20 +221,32 @@ public abstract class NodePanel extends DraggablePanel implements Selectable, Ke
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     protected void initComponents() {
+        String oldHeaderText = null;
+        Icon oldHeaderIcon = null;
+        
+        if (getLayout() instanceof GroupLayout) {
+            removeAll();
+            oldHeaderText = header.getText();
+            oldHeaderIcon = header.getIcon();
+        }
+        
         header = new JLabel(Icons.vert);
         header.setForeground(Color.BLACK);
         header.addMouseListener(labelMouseMotionListener);
         header.addMouseMotionListener(labelMouseMotionListener);
         header.setHorizontalAlignment(SwingConstants.LEFT);
         header.setFont(new Font("Tahoma", Font.BOLD, 11));
+        
+        if (getLayout() instanceof GroupLayout) {
+            header.setText(oldHeaderText);
+            header.setIcon(oldHeaderIcon);
+        }
 
         content = new JPanel();
         content.setOpaque(false);
         GroupLayout contentLayout = new GroupLayout(content);
         content.setLayout(contentLayout);
-
         int txtLength = 100;
-
         GroupLayout.ParallelGroup grpHoriz = contentLayout.createParallelGroup(GroupLayout.Alignment.LEADING);
 
         for (int i = 0; i < outputDots.size(); i++) {
@@ -257,7 +289,7 @@ public abstract class NodePanel extends DraggablePanel implements Selectable, Ke
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                 .addGroup(GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGap(6, 6, 6)
-                        .addComponent(header, 100, 100, 100))
+                        .addComponent(header, 100, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
                 .addGroup(GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGap(6, 6, 6))
                 .addComponent(content, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
@@ -296,7 +328,7 @@ public abstract class NodePanel extends DraggablePanel implements Selectable, Ke
             }
         }
 
-        g.setColor(new Color(170, 170, 170, 120));
+        g.setColor(backgroundColor);
         g.fillRoundRect(5, 1, getWidth() - 9, getHeight() - 6, 15, 15);
         g.setColor(borderColor);
 
@@ -306,16 +338,19 @@ public abstract class NodePanel extends DraggablePanel implements Selectable, Ke
         g.setColor(borderColor);
         g.drawLine(4, 0, 14, 0);
         g.drawLine(4, 0, 4, 10);
+        paintTitleBar(g);
+    }
+    
+    protected void paintTitleBar(Graphics2D g) {
         g.setColor(Color.BLACK);
         g.drawLine(5, 15, getWidth() - 6, 15);
         g.setColor(new Color(190, 190, 190));
         g.drawLine(5, 16, getWidth() - 6, 16);
-
+        
         Color c1 = new Color(color.getRed(), color.getGreen(), color.getBlue(), 150);
         Color c2 = new Color(color.getRed(), color.getGreen(), color.getBlue(), 0);
         g.setPaint(new GradientPaint(0, 15, c1, getWidth(), 15, c2));
         g.fillRect(5, 1, getWidth() - 10, 14);
-
     }
 
     public abstract ConnectionEndpoint createConnectionEndpoint(String type, 
@@ -341,9 +376,9 @@ public abstract class NodePanel extends DraggablePanel implements Selectable, Ke
     }
     
 // used to pass press and drag events to the NodePanel when they occur on the label
-    private LabelMouseMotionListener labelMouseMotionListener = new LabelMouseMotionListener();
+    protected final LabelMouseMotionListener labelMouseMotionListener = new LabelMouseMotionListener();
 
-    private class LabelMouseMotionListener extends MouseAdapter {
+    protected class LabelMouseMotionListener extends MouseAdapter {
         @Override
         public void mousePressed(MouseEvent e) {
             MouseEvent me = SwingUtilities.convertMouseEvent(e.getComponent(), e, NodePanel.this);
