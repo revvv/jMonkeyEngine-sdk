@@ -5,7 +5,7 @@ set -e # Quit on Error
 
 jdk_version="8u192"
 jdk_build_version="b12"
-jdk_hash=2787e4a523244c269598db4e85c51e0c
+jdk_hash=750e1c8617c5452694857ad95c3ee230/
 platforms=( "linux-x64.tar.gz" "linux-i586.tar.gz" "windows-i586.exe" "windows-x64.exe" "macosx-x64.dmg" )
 
 function install_xar {
