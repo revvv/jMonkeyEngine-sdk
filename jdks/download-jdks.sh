@@ -3,9 +3,9 @@
 #Author MeFisto94
 set -e # Quit on Error
 
-jdk_version="8u161"
+jdk_version="8u192"
 jdk_build_version="b12"
-jdk_hash=2f38c3b165be4555a1fa6e98c45e0808
+jdk_hash=2787e4a523244c269598db4e85c51e0c
 platforms=( "linux-x64.tar.gz" "linux-i586.tar.gz" "windows-i586.exe" "windows-x64.exe" "macosx-x64.dmg" )
 
 function install_xar {
