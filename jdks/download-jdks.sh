@@ -149,11 +149,9 @@ function unpack_windows {
     mkdir -p $1
     7z x -o$1 "downloads/jdk-$1.exe" > /dev/null
     
-    if [ $2 == "x64" ]; then
-        cabextract $1/.rsrc/1033/JAVA_CAB*/* -d $1
-        rm $1/src.zip
-        rm $1/jre.exe # This is the JRE installer, however the jre is already in jre/ ?? 
-    fi
+    cabextract $1/.rsrc/1033/JAVA_CAB*/* -d $1
+    rm $1/src.zip
+    rm $1/jre.exe # This is the JRE installer, however the jre is already in jre/ ?? 
     
     unzip -qq $1/tools.zip -d $1/
     rm $1/tools.zip
