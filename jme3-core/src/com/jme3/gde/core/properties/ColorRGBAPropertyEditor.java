@@ -32,6 +32,8 @@
 package com.jme3.gde.core.properties;
 
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector4f;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -50,6 +52,7 @@ public class ColorRGBAPropertyEditor implements PropertyEditor {
     private LinkedList<PropertyChangeListener> listeners = new LinkedList<PropertyChangeListener>();
     private ColorRGBA color = new ColorRGBA();
 
+    @Override
     public void setValue(Object value) {
         if (value instanceof ColorRGBA) {
             if (color == null) {
@@ -60,39 +63,56 @@ public class ColorRGBAPropertyEditor implements PropertyEditor {
         }
     }
 
+    @Override
     public Object getValue() {
         return color;
     }
 
+    @Override
     public boolean isPaintable() {
         return true;
     }
+    
+    // See ColorRGBADialog#fromColor for comments
+    protected Color fromColor(ColorRGBA col) {
+        Vector4f vCol = new Vector4f(col.r, col.g, col.b, col.a);
+        float intensity = Math.max(Math.max(vCol.x, vCol.y), Math.max(vCol.z, vCol.w));
+        if (intensity > 1.0f) {
+            vCol.divideLocal(intensity);
+        }
+        
+        return new Color(vCol.x, vCol.y, vCol.z, vCol.w);
+    }
 
+    @Override
     public void paintValue(Graphics gfx, Rectangle box) {
         final int width = box.height - 2;
         final int height = box.height - 2;
         java.awt.Color oldColor = gfx.getColor();
         gfx.setColor(java.awt.Color.BLACK);
         gfx.drawRect(box.x, box.y + 1, width, height);
-        gfx.setColor(new java.awt.Color(color.asIntARGB(), true));
+        gfx.setColor(fromColor(color));
         gfx.fillRect(box.x + 1, box.y + 2, width - 1, height - 1);
         gfx.setColor(oldColor);
         gfx.drawString(getAsText(), box.x + width + 5, box.y + (box.height / 2) + 4);
     }
 
+    @Override
     public String getJavaInitializationString() {
         return null;
     }
 
+    @Override
     public String getAsText() {
         return "[" + color.r + ", " + color.g + ", " + color.b + ", " + color.a + "]";
     }
 
+    @Override
     public void setAsText(String text) throws IllegalArgumentException {
         text = text.replace('[', ' ');
         text = text.replace(']', ' ');
         String[] values = text.split(",");
-        ColorRGBA old=color;
+        ColorRGBA old = color;
         if (values.length != 4) {
             throw (new IllegalArgumentException("String not correct"));
         }
@@ -105,31 +125,35 @@ public class ColorRGBAPropertyEditor implements PropertyEditor {
         notifyListeners(old, color);
     }
 
+    @Override
     public String[] getTags() {
         return null;
     }
 
+    @Override
     public Component getCustomEditor() {
         ColorRGBADialog dialog = new ColorRGBADialog(null, true, this);
         dialog.setLocationRelativeTo(null);
         return dialog;
     }
 
+    @Override
     public boolean supportsCustomEditor() {
         return true;
     }
 
+    @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         listeners.add(listener);
     }
 
+    @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         listeners.remove(listener);
     }
 
     public void notifyListeners(ColorRGBA before, ColorRGBA after) {
-        for (Iterator<PropertyChangeListener> it = listeners.iterator(); it.hasNext();) {
-            PropertyChangeListener propertyChangeListener = it.next();
+        for (PropertyChangeListener propertyChangeListener : listeners) {
             //TODO: check what the "programmatic name" is supposed to be here.. for now its ColorRGBA
             propertyChangeListener.propertyChange(new PropertyChangeEvent(this, null, before, after));
         }

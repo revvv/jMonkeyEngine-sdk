@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2009-2010 jMonkeyEngine
+ *  Copyright (c) 2009-2019 jMonkeyEngine
  *  All rights reserved.
  * 
  *  Redistribution and use in source and binary forms, with or without
@@ -38,35 +38,66 @@
 package com.jme3.gde.core.properties;
 
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector4f;
 import java.awt.Color;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
 
 /**
- *
+ * Allow to edit ColorRGBAs (in constrast to regular colors, these consist of
+ * an additional alpha and values > 1 are permitted)
+ * 
  * @author normenhansen
  */
 public class ColorRGBADialog extends javax.swing.JDialog {
 
     private ColorRGBAPropertyEditor editor;
+    /** Sometimes UI Code sets other UI Code, that's synthetic. Don't react to them as events */
+    protected boolean syntheticCall;
 
-    /** Creates new form ColorRGBADialog */
+    /** Creates new form ColorRGBADialog
+     * @param parent The parental frame
+     * @param modal Whether we are a modal dialog
+     * @param editor The Property Editor
+     */
     public ColorRGBADialog(java.awt.Frame parent, boolean modal, ColorRGBAPropertyEditor editor) {
         super(parent, modal);
         this.editor = editor;
         initComponents();
-        jColorChooser1.setColor(new Color(((ColorRGBA)editor.getValue()).asIntARGB()));
-        alphaSlider.setValue(Math.round(((ColorRGBA)editor.getValue()).getAlpha()*100));
+        fromColor((ColorRGBA)editor.getValue());
+    }
+
+    protected void fromColor(ColorRGBA col) {
+        Vector4f vCol = new Vector4f(col.r, col.g, col.b, col.a);
+        // normalize so that the max component is 1.0f (because even a grey is white with less intensity)
+        float intensity = Math.max(Math.max(vCol.x, vCol.y), Math.max(vCol.z, vCol.w));
+        
+        if (intensity > 1.0f) {
+            vCol.divideLocal(intensity); // bypass regular normalization
+        } else {
+             // otherwise keep it, to support grey colors.
+             intensity = 1f;
+        }
+        // Unfortunately a grey with intensity 2 will still show like a white though.
+        // (0.5, 0.5, 0.5, 0.5) * 2 = (1.0, 1.0, 1.0, 1.0), no way to tell...
+        
+        jColorChooser1.setColor(new Color(vCol.x, vCol.y, vCol.z, vCol.w));
+        alphaSlider.setValue(Math.round(intensity * 100));
     }
 
     public ColorRGBA setColor() {
-        Color cColor = jColorChooser1.getColor();
-        ColorRGBA color = new ColorRGBA();
+        ColorRGBA oldColor = new ColorRGBA((ColorRGBA) editor.getValue());
+        Color color = jColorChooser1.getColor();
+        ColorRGBA newColor = new ColorRGBA();
+        
         float[] floats = new float[4];
-        cColor.getComponents(floats);
-        color.set(floats[0], floats[1], floats[2], ((float)alphaSlider.getValue())/100.0f);
-        ColorRGBA color2 = new ColorRGBA((ColorRGBA) editor.getValue());
-        editor.setValue(color);
-        editor.notifyListeners(color2, color);
-        return color;
+        color.getComponents(floats);
+        newColor.set(floats[0], floats[1], floats[2], floats[3]);
+        newColor.multLocal((Float)jSpinner1.getValue());
+        
+        editor.setValue(newColor);
+        editor.notifyListeners(oldColor, newColor);
+        return newColor;
     }
 
     /** This method is called from within the constructor to
@@ -84,6 +115,7 @@ public class ColorRGBADialog extends javax.swing.JDialog {
         jToolBar1 = new javax.swing.JToolBar();
         alphaLabel = new javax.swing.JLabel();
         alphaSlider = new javax.swing.JSlider();
+        jSpinner1 = new javax.swing.JSpinner();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -107,31 +139,48 @@ public class ColorRGBADialog extends javax.swing.JDialog {
         alphaLabel.setText(org.openide.util.NbBundle.getMessage(ColorRGBADialog.class, "ColorRGBADialog.alphaLabel.text")); // NOI18N
         jToolBar1.add(alphaLabel);
 
+        alphaSlider.setMaximum(2000);
         alphaSlider.setValue(100);
+        alphaSlider.setPreferredSize(new java.awt.Dimension(150, 16));
+        alphaSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                alphaSliderStateChanged(evt);
+            }
+        });
         jToolBar1.add(alphaSlider);
+
+        jSpinner1.setModel(new javax.swing.SpinnerNumberModel(1.0f, 0.0f, null, 0.25f));
+        jSpinner1.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jSpinner1StateChanged(evt);
+            }
+        });
+        jToolBar1.add(jSpinner1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 554, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1))
-            .addComponent(jColorChooser1, javax.swing.GroupLayout.DEFAULT_SIZE, 496, Short.MAX_VALUE)
+            .addComponent(jColorChooser1, javax.swing.GroupLayout.DEFAULT_SIZE, 701, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jColorChooser1, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
+                .addComponent(jColorChooser1, javax.swing.GroupLayout.DEFAULT_SIZE, 423, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jButton1)
                         .addComponent(jButton2))
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 28, Short.MAX_VALUE)
+                        .addContainerGap())))
         );
 
         pack();
@@ -145,12 +194,32 @@ public class ColorRGBADialog extends javax.swing.JDialog {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         dispose();
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jSpinner1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinner1StateChanged
+        JSpinner source = (JSpinner)evt.getSource();
+        if (!syntheticCall) {
+            syntheticCall = true;
+            alphaSlider.setValue(Math.round((Float)source.getValue() * 100));
+            syntheticCall = false;
+        }
+    }//GEN-LAST:event_jSpinner1StateChanged
+
+    private void alphaSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_alphaSliderStateChanged
+        JSlider source = (JSlider)evt.getSource();
+        if (!syntheticCall && !source.getValueIsAdjusting()) {
+            syntheticCall = true;
+            jSpinner1.setValue(source.getValue() / 100.0f);
+            syntheticCall = false;
+        }
+    }//GEN-LAST:event_alphaSliderStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel alphaLabel;
     private javax.swing.JSlider alphaSlider;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JColorChooser jColorChooser1;
+    private javax.swing.JSpinner jSpinner1;
     private javax.swing.JToolBar jToolBar1;
     // End of variables declaration//GEN-END:variables
 }
