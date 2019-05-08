@@ -2,6 +2,7 @@ package com.jme3.gde.core.sceneexplorer.nodes;
 
 import com.jme3.environment.EnvironmentCamera;
 import com.jme3.environment.LightProbeFactory;
+import com.jme3.environment.util.EnvMapUtils;
 import com.jme3.gde.core.scene.SceneApplication;
 import com.jme3.gde.core.scene.controller.SceneToolController;
 import com.jme3.gde.core.util.ButtonInplaceEditor;
@@ -56,7 +57,13 @@ public class JmeLightProbeButtonProperty extends PropertyEditorSupport implement
                             } else {
                                 envCam.setPosition(new Vector3f(0, 0, 0));
                             }
-                            LightProbeFactory.updateProbe(probe.getLightProbe(), envCam, spatial, new JmeLightProbeProgressHandler());
+                            LightProbeFactory.updateProbe(probe.getLightProbe(),
+                                    envCam, spatial,
+                                    probe.isHQBake() ? 
+                                            EnvMapUtils.GenerationType.HighQuality:
+                                            EnvMapUtils.GenerationType.Fast,
+                                    new JmeLightProbeProgressHandler()
+                            );
                             probe.setModified();
                             return null;
                         }
