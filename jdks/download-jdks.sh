@@ -1,13 +1,20 @@
 #!/bin/bash
 #(c) jmonkeyengine.org
 #Author MeFisto94
+
+# This script is build up like a gradle build script. It contains many functions, each for it's distinctive task and every function is calling it's dependency functions.
+# This means in order for "unpack" to work, it will first launch "download" etc. While each task is self-explanatory, here's the process in short:
+# 1. Download JDK, 2. Unpack JDK (this used to be more work, with SFX Installers from Oracle etc), 3. Compile (this zips the unpacked and processed jdk and
+# creates a SFX Installer again from the zip), 4. Build (Build is the more general code to call compile (which calls unpack which calls download) and links the currently
+# most up to date JDK version into the main directory (because several old jdk versions are stored as well).
+
 set -e # Quit on Error
 
-jdk_version="8u192"
-jdk_build_version="b12"
-jdk_hash=750e1c8617c5452694857ad95c3ee230/
-platforms=( "linux-x64.tar.gz" "linux-i586.tar.gz" "windows-i586.exe" "windows-x64.exe" "macosx-x64.dmg" )
+jdk_version="8u212"
+jdk_build_version="b04"
+platforms=( "x64_linux" "x86-32_windows" "x64_windows" "x64_mac" )
 
+# DEPRECATED (not required anymore)
 function install_xar {
     # This is needed to open Mac OS .pkg files on Linux...
     echo ">> Compiling xar, just for you..."
@@ -20,6 +27,7 @@ function install_xar {
     echo "<< OK!"
 }
 
+# DEPRECATED (not required anymore)
 function install_seven_zip {
     # This is due to not having root privilegs for apt-get
     if [ -x "$(command -v 7z)" ]; then
@@ -59,11 +67,11 @@ function install_seven_zip {
 function download_jdk {
     echo ">>> Downloading the JDK for $1"
 
-    if [ -f downloads/jdk-$1 ];
+    if [ -f downloads/jdk-$1$2 ];
     then
         echo "<<< Already existing, SKIPPING."
     else
-        curl -s -o downloads/jdk-$1 -L -b oraclelicense=accept-securebackup-cookie http://download.oracle.com/otn-pub/java/jdk/$jdk_version-$jdk_build_version/$jdk_hash/jdk-$jdk_version-$1 #--progress-bar
+        curl -s -o downloads/jdk-$1$2 -L https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk$jdk_version-$jdk_build_version/OpenJDK8U-jdk_$1_hotspot_$jdk_version$jdk_build_version$2
         echo "<<< OK!"
     fi
 }
@@ -79,41 +87,17 @@ function unpack_mac_jdk {
         return 0
     fi
 
-    download_jdk macosx-x64.dmg
-	
-    mkdir -p MacOS
-    cd MacOS
-
-    # MacOS
-    if [ "$(uname)" == "Darwin" ]; then
-        hdiutil attach ../downloads/jdk-macosx-x64.dmg
-        xar -xf /Volumes/JDK*/JDK*.pkg
-        hdiutil detach /Volumes/JDK*
-    else # Linux
-        7z x ../downloads/jdk-macosx-x64.dmg > /dev/null
-        # The following seems dependent of the 7zip version. Travis on Version 9.20 extracts all partitions, where as at least version 16.02 is automatically extracting 4.hfs
-        if [ -f 4.hfs ]; then
-            7z x 4.hfs > /dev/null
-        fi
-        #install_xar
-        #./xar-1.5.2/src/xar -xf JDK*/JDK*.pkg
-        7z x JDK*/JDK*.pkg  > /dev/null
-        cd jdk1*.pkg
-    fi
-
-    #cd JDK*
-
-    cat Payload | gunzip -dc | cpio -i
-    #mkdir -p Contents/jdk/
-    cd Contents/
+    download_jdk x64_mac .tar.gz
+    tar xf downloads/jdk-x64_mac.tar.gz
+    cd jdk$jdk_version-$jdk_build_version/Contents/
     # FROM HERE: build-osx-zip.sh by normen (with changes)
     mv Home jdk # rename folder
-    zip -9 -r -y -q ../../../compiled/jdk-macosx.zip jdk
-    cd ../../../
-    rm -rf MacOS/
+    zip -9 -r -y -q ../../compiled/jdk-macosx.zip jdk
+    cd ../../
+    rm -rf jdk$jdk_version-$jdk_build_version
 
     if [ "$TRAVIS" == "true" ]; then
-        rm -rf downloads/jdk-macosx-x64.dmg
+        rm -rf downloads/jdk-x64_mac.tar.gz
     fi
     #cd ../../
 
@@ -132,65 +116,72 @@ function build_mac_jdk {
     echo "< OK!"
 }
 
-# PARAMS windows-arch_oracle arch_other
+# PARAMS arch
 function unpack_windows {
-    echo ">> Extracting the JDK for $1"
+    echo ">> Extracting the JDK for windows-$1"
     #cd local/$jdk_version-$jdk_build_version/
 
-    if [ -d $1 ];
+    if [ -d windows-$1 ];
     then
         echo "<< Already existing, SKIPPING."
         # cd ../../
         return 0
     fi
 
-    download_jdk $1.exe
+    download_jdk $1_windows .zip
 
-    mkdir -p $1
-    7z x -o$1 "downloads/jdk-$1.exe" > /dev/null
+    mkdir -p windows-$1
+    unzip -qq downloads/jdk-$1_windows.zip -d windows-$1
+    cd windows-$1/
+    mv jdk$jdk_version-$jdk_build_version/* .
+    rm -r jdk$jdk_version-$jdk_build_version
     
-    cabextract $1/.rsrc/1033/JAVA_CAB*/* -d $1
-    rm $1/src.zip
-    rm $1/jre.exe # This is the JRE installer, however the jre is already in jre/ ?? 
+    # TODO: Why?
+    rm src.zip
     
-    unzip -qq $1/tools.zip -d $1/
-    rm $1/tools.zip
+    # This seems to be replaced by lib/tools.jar in openJDK
+    #unzip -qq tools.zip -d .
+    #rm tools.zip
 
-    find $1 -type f \( -name "*.exe" -o -name "*.dll" \) -exec chmod u+rwx {} \; # Make them executable
+    find . -type f \( -name "*.exe" -o -name "*.dll" \) -exec chmod u+rwx {} \; # Make them executable
 
-    find $1 -type f -name "*.pack" | while read eachFile; do
+    find . -type f -name "*.pack" | while read eachFile; do
         echo ">> Unpacking $eachFile ...";
         unpack200 $eachFile ${eachFile%.pack}.jar;
         rm $eachFile;
     done
+    
+    cd ../
 
     if [ "$TRAVIS" == "true" ]; then
-        rm -rf downloads/jdk-$1.exe
+        rm -rf downloads/jdk-$1_windows.zip
     fi
-    # cd ../../
+    
     echo "<< OK!"
 }
 
 function unpack_linux {
-    echo ">> Extracting the JDK for $1"
+    echo ">> Extracting the JDK for linux-$1"
     #cd local/$jdk_version-$jdk_build_version/
 
-    if [ -d $1 ];
+    if [ -d linux-$1 ];
     then
         echo "<< Already existing, SKIPPING."
         #cd ../../
         return 0
     fi
 
-    download_jdk $1.tar.gz
+    download_jdk $1_linux .tar.gz
 
-    mkdir -p $1
-    cd $1
-    tar -xf "../downloads/jdk-$1.tar.gz"
-    cd jdk1*
-    mv * ../
-    cd ../
-    rm -rf jdk1*
+    mkdir -p linux-$1
+    cd linux-$1
+    tar -xf "../downloads/jdk-$1_linux.tar.gz"
+    mv jdk$jdk_version-$jdk_build_version/* .
+    rm -r jdk$jdk_version-$jdk_build_version
+    
+    # TODO: Why?
+    rm src.zip
+    
     cd ../
 
     if [ "$TRAVIS" == "true" ]; then
@@ -200,14 +191,14 @@ function unpack_linux {
     echo "<< OK!"
 }
 
-# PARAMS: os arch_usual arch_oracle
+# PARAMS: os arch arch_unzipsfx
 function compile_other {
     echo "> Compiling JDK for $1-$2"
 
     if [ $1 == "windows" ]; then
-        name="jdk-$1-$2.exe"
+        name="jdk-$1-$3.exe"
     elif [ $1 == "linux" ]; then
-        name="jdk-$1-$2.bin"
+        name="jdk-$1-$3.bin"
     else
         echo "Unknown Platform $1. ERROR!!!"
         exit 1
@@ -220,26 +211,26 @@ function compile_other {
 
     # Depends on UNPACK and thus DOWNLOAD
     if [ $1 == "windows" ]; then
-        unpack_windows windows-$3 $2
+        unpack_windows $2
     elif [ $1 == "linux" ]; then
-        unpack_linux linux-$3
+        unpack_linux $2
     fi
 
-    unzipsfxname="../../unzipsfx/unzipsfx-$1-$2"
+    unzipsfxname="../../unzipsfx/unzipsfx-$1-$3"
     if [ ! -f "$unzipsfxname" ]; then
-        echo "No unzipsfx for platform $1-$2 found at $unzipsfxname, cannot continue"
+        echo "No unzipsfx for platform $1-$3 found at $unzipsfxname, cannot continue"
         exit 1
     fi
 
     echo "> Creating SFX JDK package $name"
-    if [ -f "$1-$3/jre/lib/rt.jar" ]; then # Already packed?
+    if [ -f "$1-$2/jre/lib/rt.jar" ]; then # Already packed?
         echo "> PACK200 rt.jar"
-        pack200 -J-Xmx1024m $1-$3/jre/lib/rt.jar.pack.gz $1-$3/jre/lib/rt.jar
-        rm -rf $1-$3/jre/lib/rt.jar
+        pack200 -J-Xmx1024m $1-$2/jre/lib/rt.jar.pack.gz $1-$2/jre/lib/rt.jar
+        rm -rf $1-$2/jre/lib/rt.jar
     fi
 
     echo "> Zipping JDK"
-    cd $1-$3 # zip behaves differently between 7zip and Info-Zip, so simply change wd
+    cd $1-$2 # zip behaves differently between 7zip and Info-Zip, so simply change wd
     zip -9 -qry ../jdk_tmp_sfx.zip *
     cd ../
     echo "> Building SFX"
@@ -248,21 +239,21 @@ function compile_other {
     rm -rf jdk_tmp_sfx.zip
 
     if [ "$TRAVIS" == "true" ]; then
-        rm -rf $1-$3
+        rm -rf $1-$2
     fi
 
     echo "< OK!"
 }
 
-# PARAMS: os arch_usual arch_oracle
+# PARAMS: os arch arch_unzipsfx
 function build_other_jdk {
     echo "> Building Package for $1-$2"
     compile_other $1 $2 $3 # Depend on Compile
 
     if [ $1 == "windows" ]; then
-        name="jdk-$1-$2.exe"
+        name="jdk-$1-$3.exe"
     elif [ $1 == "linux" ]; then
-        name="jdk-$1-$2.bin"
+        name="jdk-$1-$3.bin"
     fi
 
     rm -rf ../../$name
@@ -285,8 +276,8 @@ if [ "x$TRAVIS" != "x" ]; then
         rm -rf compiled/jdk-windows-x64.exe compiled/jdk-linux-x64.bin
     fi
     if [ "x$BUILD_X86" != "x" ]; then
-        build_other_jdk windows x86 i586
-        build_other_jdk linux x86 i586
+        build_other_jdk windows x86-32 x86
+        #build_other_jdk linux x86 i586
     else
         rm -rf compiled/jdk-windows-x86.exe compiled/jdk-linux-x86.bin
     fi
@@ -297,9 +288,10 @@ if [ "x$TRAVIS" != "x" ]; then
     fi
 else
     build_mac_jdk
-    build_other_jdk windows x86 i586
+    build_other_jdk linux x64 x64
+    build_other_jdk windows x86-32 x86
     build_other_jdk windows x64 x64
-    build_other_jdk linux x86 i586
+    #Linux 32bit not supported... build_other_jdk linux x86-32
     build_other_jdk linux x64 x64
 fi
 cd ../../
