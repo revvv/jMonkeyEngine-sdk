@@ -46,9 +46,8 @@ import org.openide.nodes.Sheet;
  */
 @org.openide.util.lookup.ServiceProvider(service=SceneExplorerNode.class)
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class JmeLightProbe extends JmeLight {
+public class JmeLightProbe extends JmeLight{
     protected LightProbe lightProbe;
-    protected boolean HQBake;
 
     public JmeLightProbe() {
     }
@@ -58,14 +57,6 @@ public class JmeLightProbe extends JmeLight {
         this.lightProbe = lightProbe;
         lookupContents.add(lightProbe);
         setName("LightProbe");
-    }
-
-    public boolean isHQBake() {
-        return HQBake;
-    }
-
-    public void setHQBake(boolean HQBake) {
-        this.HQBake = HQBake;
     }
 
     @Override
@@ -82,7 +73,6 @@ public class JmeLightProbe extends JmeLight {
 
         set.put(makeProperty(obj, Vector3f.class, "getPosition", "setPosition", "Position"));
         set.put(makeEmbedProperty(obj.getArea(), obj.getArea().getClass(), float.class, "getRadius", "setRadius", "Radius"));
-        set.put(makeEmbedProperty(JmeLightProbe.this, JmeLightProbe.class, boolean.class, "isHQBake","setHQBake", "High Quality Bake?"));
         set.put(createButtonProperty());
         sheet.put(set);
         return sheet;
