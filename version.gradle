@@ -131,12 +131,11 @@ task configureVersionInfo {
         jmeGitHash = head.id
         jmeShortGitHash = head.abbreviatedId
         jmeBranchName = grgit.branch.current.name
-        jmeGitTag = grgit.tag.list().find { it.commit == head }
         
-        if (jmeGitTag != null) {
-            jmeGitTag = jmeGitTag.name
-        } else {
+        if (System.env.TRAVIS_TAG != null) {
             jmeGitTag = System.env.TRAVIS_TAG
+        } else {
+            jmeGitTag = grgit.tag.list().find { it.commit == head }
         }
 
         def releaseInfo = getReleaseInfo(jmeGitTag)
