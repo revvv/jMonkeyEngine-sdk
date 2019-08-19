@@ -22,7 +22,7 @@ repositories {
         url "http://updates.jmonkeyengine.org/maven/"
     }
     maven {
-        url 'http://nifty-gui.sourceforge.net/nifty-maven-repo/'
+        url "http://nifty-gui.sourceforge.net/nifty-maven-repo/"
     }
     maven { url "https://jitpack.io" }
 
@@ -41,13 +41,14 @@ if (System.getenv('TRAVIS') != null) {
         //ext.jmeEngineVersion = "3.3.0-" + System.env.TRAVIS_TAG + "-SNAPSHOT"
     } else {
         if (System.env.TRAVIS_PULL_REQUEST == null || System.env.TRAVIS_PULL_REQUEST == "" || System.env.TRAVIS_PULL_REQUEST == "false") {
-            ext.jmeEngineVersion = "3.3.0-SNAPSHOT" // Use Beta 2 instead of 3.1.0-master-SNAPSHOT
+            ext.jmeEngineVersion = "3.3.0-SNAPSHOT" // Manually update
         } else {
             ext.jmeEngineVersion = "3.3.0-" + System.env.TRAVIS_PULL_REQUEST_BRANCH + "-pr-" + System.env.TRAVIS_PULL_REQUEST + "-SNAPSHOT"
         }
     }
 } else {
-    ext.jmeEngineVersion = "3.3.0-SNAPSHOT" // In case you build of the HEAD of 3.1, you need to change that to 3.1.0-SNAPSHOT again
+    // This is the engine version that will be used per default on every regular commit
+    ext.jmeEngineVersion = "3.3.0-SNAPSHOT"
 }
 
 configurations {
