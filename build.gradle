@@ -597,7 +597,7 @@ task downloadAvian() {
 
         if (!avianFile.exists())
         {
-            new URL('https://bintray.com/mefisto94/jme-sdk-storage/download_file?file_path=avian-openjdk-mac.zip').withInputStream{ i -> avianFile.withOutputStream{ it << i }}
+            new URL("https://bintray.com/mefisto94/jme-sdk-storage/download_file?file_path=avian-openjdk-mac.zip").withInputStream{ i -> avianFile.withOutputStream{ it << i }}
         }
     }
 }
