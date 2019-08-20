@@ -47,8 +47,25 @@ if (System.getenv('TRAVIS') != null) {
         }
     }
 } else {
-    // This is the engine version that will be used per default on every regular commit
-    ext.jmeEngineVersion = "3.3.0-SNAPSHOT"
+	new ByteArrayOutputStream().withStream { os ->
+		def result = exec {
+			executable = 'git'
+			args = ['rev-parse', '--abbrev-ref', 'HEAD'];
+			standardOutput = os
+		}
+		ext.branch = os.toString().trim()
+	}
+	
+	// If the Branch isn't master, specify the branch name.
+	// @TODO: One could use the same technique like the engine (grgit?)
+	if (ext.branch == "master") {
+		ext.branchSpec = ""
+	} else {
+		ext.branchSpec = "-" + ext.branch;
+	}
+	
+	// This is the engine version that will be used per default on every regular commit
+	ext.jmeEngineVersion = "3.3.0" + ext.branchSpec + "-SNAPSHOT"
 }
 
 configurations {
