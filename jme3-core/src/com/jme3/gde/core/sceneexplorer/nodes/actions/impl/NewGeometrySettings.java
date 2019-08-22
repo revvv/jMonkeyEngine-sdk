@@ -48,23 +48,21 @@ import org.openide.util.NbPreferences;
  *
  * @author david.bernard.31
  */
-
-
 public class NewGeometrySettings implements Serializable, PreferenceChangeListener {
+
     public static enum Plan {
         XY, XZ, YZ
     }
-    
+
     private transient final PropertyChangeSupport propertySupport;
     private transient final Preferences pref;
-    
+
     public NewGeometrySettings() {
         propertySupport = new PropertyChangeSupport(this);
         pref = NbPreferences.forModule(NewGeometrySettings.class);
     }
 
     // -- Listeners management
-
     public void open() {
         pref.addPreferenceChangeListener(this);
     }
@@ -73,20 +71,20 @@ public class NewGeometrySettings implements Serializable, PreferenceChangeListen
         pref.removePreferenceChangeListener(this);
     }
 
+    @Override
     public void preferenceChange(PreferenceChangeEvent evt) {
         propertySupport.firePropertyChange(evt.getKey(), null, evt.getNewValue());
     }
-    
+
     public void addPropertyChangeListener(final PropertyChangeListener listener) {
         propertySupport.addPropertyChangeListener(listener);
     }
-    
+
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         propertySupport.removePropertyChangeListener(listener);
     }
 
     //-- Material info
-
     public static final String PROP_MatRandom = "MatRandom";
 
     public boolean getMatRandom() {
@@ -108,11 +106,8 @@ public class NewGeometrySettings implements Serializable, PreferenceChangeListen
     public void setMatColor(ColorRGBA value) {
         pref.putInt(PROP_MatColor, value.asIntRGBA());
     }
-    
-
 
     //-- Box
-
     public static final String PROP_BoxName = "BoxName";
 
     public String getBoxName() {
@@ -164,7 +159,6 @@ public class NewGeometrySettings implements Serializable, PreferenceChangeListen
     }
 
     //-- Sphere
-    
     public static final String PROP_SphereName = "SphereName";
 
     public String getSphereName() {
@@ -194,17 +188,17 @@ public class NewGeometrySettings implements Serializable, PreferenceChangeListen
     public void setSphereZSamples(int value) {
         pref.putInt(PROP_SphereZSamples, value);
     }
-    
-    public static final String PROP_SpherRadialSamples = "SpherRadialSamples";
 
-    public int getSpherRadialSamples() {
-        return pref.getInt(PROP_SpherRadialSamples, 10);
+    public static final String PROP_SphereRadialSamples = "SphereRadialSamples";
+
+    public int getSphereRadialSamples() {
+        return pref.getInt(PROP_SphereRadialSamples, 10);
     }
 
-    public void setSpherRadialSamples(int value) {
-        pref.putInt(PROP_SpherRadialSamples, value);
+    public void setSphereRadialSamples(int value) {
+        pref.putInt(PROP_SphereRadialSamples, value);
     }
-    
+
     public static final String PROP_SphereRadius = "SphereRadius";
 
     public float getSphereRadius() {
@@ -214,7 +208,7 @@ public class NewGeometrySettings implements Serializable, PreferenceChangeListen
     public void setSphereRadius(float value) {
         pref.putFloat(PROP_SphereRadius, value);
     }
-    
+
     public static final String PROP_SphereUseEvenSlices = "SphereUseEvenSlices";
 
     public boolean getSphereUseEvenSlices() {
@@ -224,7 +218,7 @@ public class NewGeometrySettings implements Serializable, PreferenceChangeListen
     public void setSphereUseEvenSlices(boolean value) {
         pref.putBoolean(PROP_SphereUseEvenSlices, value);
     }
-    
+
     public static final String PROP_SphereInterior = "SphereInterior";
 
     public boolean getSphereInterior() {
@@ -245,7 +239,7 @@ public class NewGeometrySettings implements Serializable, PreferenceChangeListen
     public void setLineName(String value) {
         pref.put(PROP_LineName, value);
     }
-        
+
     public static final String PROP_LineMode = "LineMode";
 
     public Mode getLineMode() {
@@ -259,7 +253,7 @@ public class NewGeometrySettings implements Serializable, PreferenceChangeListen
     public static final String PROP_LineStart = "LineStart";
 
     public Vector3f getLineStart() {
-        return getVector3f(PROP_LineStart, new Vector3f(0,0,0));
+        return getVector3f(PROP_LineStart, new Vector3f(0, 0, 0));
     }
 
     public void setLineStart(Vector3f value) {
@@ -269,7 +263,7 @@ public class NewGeometrySettings implements Serializable, PreferenceChangeListen
     public static final String PROP_LineEnd = "LineEnd";
 
     public Vector3f getLineEnd() {
-        return getVector3f(PROP_LineEnd, new Vector3f(2f,0,2f));
+        return getVector3f(PROP_LineEnd, new Vector3f(2f, 0, 2f));
     }
 
     public void setLineEnd(Vector3f value) {
@@ -338,14 +332,13 @@ public class NewGeometrySettings implements Serializable, PreferenceChangeListen
     }
 
     //-- Tools
-        
     protected Vector3f getVector3f(String baseName, Vector3f def) {
         return new Vector3f(
-            pref.getFloat(baseName + "X", def.x)
-            ,pref.getFloat(baseName + "Y", def.y)
-            ,pref.getFloat(baseName + "Z", def.z)
+                pref.getFloat(baseName + "X", def.x),
+                 pref.getFloat(baseName + "Y", def.y),
+                 pref.getFloat(baseName + "Z", def.z)
         );
-        
+
     }
 
     protected void putVector3f(String baseName, Vector3f value) {
@@ -361,13 +354,13 @@ public class NewGeometrySettings implements Serializable, PreferenceChangeListen
     public void putMode(String baseName, Mode value) {
         pref.putInt(baseName, value.ordinal());
     }
-    
+
     public List<Mode> getModes() {
         return Arrays.asList(Mode.values());
     }
-    
+
     public List<Plan> getPlans() {
         return Arrays.asList(Plan.values());
     }
-    
+
 }

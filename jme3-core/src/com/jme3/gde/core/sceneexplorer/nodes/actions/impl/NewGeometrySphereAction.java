@@ -57,7 +57,7 @@ public class NewGeometrySphereAction extends AbstractNewSpatialAction implements
         NewGeometrySettings cfg = new NewGeometrySettings();
         Sphere b = new Sphere(
             cfg.getSphereZSamples()
-            , cfg.getSpherRadialSamples()
+            , cfg.getSphereRadialSamples()
             , cfg.getSphereRadius()
             , cfg.getSphereUseEvenSlices()
             , cfg.getSphereInterior()
