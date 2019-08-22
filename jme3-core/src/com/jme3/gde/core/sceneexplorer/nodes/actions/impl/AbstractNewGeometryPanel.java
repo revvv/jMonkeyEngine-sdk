@@ -35,6 +35,7 @@ import com.jme3.gde.core.assets.ProjectAssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 
 /**
  * This is the base Panel to be used within every "New Geometry/Primitive" dialogue
@@ -136,8 +137,8 @@ public class AbstractNewGeometryPanel extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
 
-    public void handleGeometry(ProjectAssetManager assetManager, Geometry geom) {
-        geom.setName(inGeomName.getText());
+    public Geometry handleGeometry(ProjectAssetManager assetManager, Mesh m) {
+        Geometry geom = new Geometry(inGeomName.getText(), m);
         ColorRGBA col;
         
         if (inRandomColor.isSelected()) {
@@ -159,6 +160,8 @@ public class AbstractNewGeometryPanel extends javax.swing.JPanel {
                 mat.setColor("BaseColor", col);
                 break;
         }
+        
         geom.setMaterial(mat);
+        return geom;
     }
 }
