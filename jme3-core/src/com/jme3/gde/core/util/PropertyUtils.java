@@ -45,7 +45,7 @@ public class PropertyUtils {
 
     public static PropertyDescriptor getPropertyDescriptor(Class c, Field field) {
         try {
-            PropertyDescriptor prop = new PropertyDescriptor(field.getName(), c);
+            PropertyDescriptor prop = new PropertyDescriptor((String)field.getName(), c);
 
             prop.setDisplayName(splitCamelCase(field.getName()));
 
