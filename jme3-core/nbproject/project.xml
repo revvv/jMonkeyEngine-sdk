@@ -149,6 +149,25 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
+                    <code-name-base>org.netbeans.modules.gradle</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <!--<release-version>0</release-version>-->
+                        <!--<specification-version>1.0.2</specification-version>-->
+                        <implementation-version/>
+                    </run-dependency>
+                </dependency>
+                <!-- <dependency>
+                    <code-name-base>org.netbeans.modules.gradle.java</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>-->
+                        <!-- <release-version>1</release-version>-->
+                        <!--<specification-version>1.0.2</specification-version>
+                    </run-dependency>
+                </dependency>-->
+                <dependency>
                     <code-name-base>org.netbeans.modules.java.api.common</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>

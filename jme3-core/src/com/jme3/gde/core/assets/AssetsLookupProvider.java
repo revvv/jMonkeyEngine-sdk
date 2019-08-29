@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectManager;
 import org.netbeans.api.project.ProjectUtils;
+import org.netbeans.modules.gradle.NbGradleProjectImpl;
 import org.netbeans.modules.java.j2seproject.J2SEProject;
 import org.netbeans.modules.java.j2seproject.api.J2SEPropertyEvaluator;
 import org.netbeans.spi.project.LookupProvider;
@@ -92,34 +93,39 @@ public class AssetsLookupProvider implements LookupProvider {
     private String[] extensionDependencies = new String[]{"-do-init", "-init-assets"};
     private ProjectExtensionManager manager = new ProjectExtensionManager(extensionName, extensionVersion, extensionTargets, extensionDependencies);
 
+    @Override
     public Lookup createAdditionalLookup(Lookup lookup) {
         Project prj = lookup.lookup(Project.class);
         project = prj;
-        FileObject assetsProperties = prj.getProjectDirectory().getFileObject("nbproject/project.properties");
-        if (assetsProperties != null && assetsProperties.isValid()) {
-            FileLock lock = null;
-            try {
-                lock = assetsProperties.lock();
-                InputStream in = assetsProperties.getInputStream();
-                Properties properties = new Properties();
-                properties.load(in);
-                in.close();
-                String assetsFolderName = properties.getProperty("assets.folder.name", "assets");
-                if (prj.getProjectDirectory().getFileObject(assetsFolderName) != null) {
-                    logger.log(Level.FINE, "Valid jMP project, extending with ProjectAssetManager");
-                    openedHook = genOpenedHook(project);
-                    return Lookups.fixed(new ProjectAssetManager(prj, assetsFolderName), openedHook);
-                }
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
-            } finally {
-                if (lock != null) {
-                    lock.releaseLock();
+        if (project instanceof NbGradleProjectImpl) {
+            return Lookups.fixed();
+        } else {
+            FileObject assetsProperties = prj.getProjectDirectory().getFileObject("nbproject/project.properties");
+            if (assetsProperties != null && assetsProperties.isValid()) {
+                FileLock lock = null;
+                try {
+                    lock = assetsProperties.lock();
+                    InputStream in = assetsProperties.getInputStream();
+                    Properties properties = new Properties();
+                    properties.load(in);
+                    in.close();
+                    String assetsFolderName = properties.getProperty("assets.folder.name", "assets");
+                    if (prj.getProjectDirectory().getFileObject(assetsFolderName) != null) {
+                        logger.log(Level.FINE, "Valid jMP project, extending with ProjectAssetManager");
+                        openedHook = genOpenedHook(project);
+                        return Lookups.fixed(new ProjectAssetManager(prj, assetsFolderName), openedHook);
+                    }
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                } finally {
+                    if (lock != null) {
+                        lock.releaseLock();
+                    }
                 }
             }
-        }
 
-        return Lookups.fixed();
+            return Lookups.fixed();
+        }
     }
     
     private ProjectOpenedHook genOpenedHook(final Project context) {
