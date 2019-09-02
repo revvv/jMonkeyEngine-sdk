@@ -35,11 +35,8 @@ import com.jme3.bounding.BoundingSphere;
 import com.jme3.bounding.BoundingVolume;
 import com.jme3.gde.core.sceneexplorer.nodes.JmeDirectionalLight;
 import com.jme3.gde.core.sceneexplorer.nodes.gizmo.DirectionalLightGizmoInterface;
-import com.jme3.gde.scenecomposer.SceneComposerToolController;
-import com.jme3.gde.scenecomposer.SceneComposerTopComponent;
 import com.jme3.gde.scenecomposer.gizmo.NodeCallback;
 import com.jme3.light.DirectionalLight;
-import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
