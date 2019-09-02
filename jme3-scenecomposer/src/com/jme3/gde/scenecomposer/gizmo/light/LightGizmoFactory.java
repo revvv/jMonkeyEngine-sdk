@@ -96,7 +96,7 @@ public class LightGizmoFactory {
         mat.setColor("Color", ColorRGBA.White);
         mat.getAdditionalRenderState().setLineWidth(2f);
         
-        Geometry arrow = new Geometry("direction arrow", new Arrow(((DirectionalLight) light).getDirection().mult(5f)));
+        Geometry arrow = new Geometry("direction arrow", new Arrow(new Vector3f(0, 5, 0)));
         arrow.setMaterial(mat);
         arrow.addControl(new LightColorUpdate(light, arrow.getMaterial(), "Color"));
         
