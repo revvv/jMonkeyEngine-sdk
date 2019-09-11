@@ -47,7 +47,8 @@ import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
 /**
- * Top component which displays something.
+ * This is the component containing the whole scene/model<br />
+ * It also contains the top bar.
  */
 @ConvertAsProperties(dtd = "-//com.jme3.gde.core.sceneviewer//SceneViewer//EN",
 autostore = false)
@@ -92,8 +93,10 @@ public final class SceneViewerTopComponent extends TopComponent {
         //the oGLPanel may naver have the focus.
         //  if ("true".equals(NbPreferences.forModule(Installer.class).get("use_lwjgl_canvas", "false"))) {
         addMouseWheelListener(new MouseWheelListener() {
+            @Override
             public void mouseWheelMoved(final MouseWheelEvent e) {
                 SceneApplication.getApplication().enqueue(new Callable<Void>() {
+                    @Override
                     public Void call() throws Exception {
                         String action;
                         if (e.getWheelRotation() < 0) {
@@ -113,11 +116,14 @@ public final class SceneViewerTopComponent extends TopComponent {
             }
         });
         addKeyListener(new KeyListener() {
+            @Override
             public void keyTyped(KeyEvent evt) {
             }
 
+            @Override
             public void keyPressed(final KeyEvent evt) {
                 SceneApplication.getApplication().enqueue(new Callable<Void>() {
+                    @Override
                     public Void call() throws Exception {
                         int code = AwtKeyInput.convertAwtKey(evt.getKeyCode());
                         KeyInputEvent keyEvent = new KeyInputEvent(code, evt.getKeyChar(), true, false);
@@ -130,8 +136,10 @@ public final class SceneViewerTopComponent extends TopComponent {
                 });
             }
 
+            @Override
             public void keyReleased(final KeyEvent evt) {
                 SceneApplication.getApplication().enqueue(new Callable<Void>() {
+                    @Override
                     public Void call() throws Exception {
                         int code = AwtKeyInput.convertAwtKey(evt.getKeyCode());
                         KeyInputEvent keyEvent = new KeyInputEvent(code, evt.getKeyChar(), false, false);
@@ -161,6 +169,8 @@ public final class SceneViewerTopComponent extends TopComponent {
         jToggleButton1 = new javax.swing.JToggleButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
         enableWireframe = new javax.swing.JToggleButton();
+        enablePBREnv = new javax.swing.JToggleButton();
+        enablePBRSky = new javax.swing.JToggleButton();
         jPanel1 = new javax.swing.JPanel();
         enableStats = new javax.swing.JToggleButton();
         oGLPanel = new javax.swing.JPanel();
@@ -211,6 +221,34 @@ public final class SceneViewerTopComponent extends TopComponent {
             }
         });
         jToolBar1.add(enableWireframe);
+
+        enablePBREnv.setIcon(IconList.chimpSmile);
+        org.openide.awt.Mnemonics.setLocalizedText(enablePBREnv, org.openide.util.NbBundle.getMessage(SceneViewerTopComponent.class, "SceneViewerTopComponent.enablePBREnv.text")); // NOI18N
+        enablePBREnv.setToolTipText(org.openide.util.NbBundle.getMessage(SceneViewerTopComponent.class, "SceneViewerTopComponent.enablePBREnv.toolTipText")); // NOI18N
+        enablePBREnv.setFocusable(false);
+        enablePBREnv.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        enablePBREnv.setSelectedIcon(IconList.chimpSmile);
+        enablePBREnv.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        enablePBREnv.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                enablePBREnvActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(enablePBREnv);
+
+        enablePBRSky.setIcon(IconList.chimpMad);
+        org.openide.awt.Mnemonics.setLocalizedText(enablePBRSky, org.openide.util.NbBundle.getMessage(SceneViewerTopComponent.class, "SceneViewerTopComponent.enablePBRSky.text")); // NOI18N
+        enablePBRSky.setToolTipText(org.openide.util.NbBundle.getMessage(SceneViewerTopComponent.class, "SceneViewerTopComponent.enablePBRSky.toolTipText")); // NOI18N
+        enablePBRSky.setFocusable(false);
+        enablePBRSky.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        enablePBRSky.setSelectedIcon(IconList.chimpMad);
+        enablePBRSky.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        enablePBRSky.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                enablePBRSkyActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(enablePBRSky);
         jToolBar1.add(jPanel1);
 
         enableStats.setIcon(IconList.info);
@@ -248,8 +286,19 @@ public final class SceneViewerTopComponent extends TopComponent {
     private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
         FilterExplorerTopComponent.findInstance().setFilterEnabled(jToggleButton1.isSelected());
     }//GEN-LAST:event_jToggleButton1ActionPerformed
+
+    private void enablePBREnvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enablePBREnvActionPerformed
+        app.enablePBRProbe(enablePBREnv.isSelected());
+    }//GEN-LAST:event_enablePBREnvActionPerformed
+
+    private void enablePBRSkyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enablePBRSkyActionPerformed
+        app.enablePBRSkybox(enablePBRSky.isSelected());
+    }//GEN-LAST:event_enablePBRSkyActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton enableCamLight;
+    private javax.swing.JToggleButton enablePBREnv;
+    private javax.swing.JToggleButton enablePBRSky;
     private javax.swing.JToggleButton enableStats;
     private javax.swing.JToggleButton enableWireframe;
     private javax.swing.JPanel jPanel1;
@@ -264,6 +313,7 @@ public final class SceneViewerTopComponent extends TopComponent {
      * only, i.e. deserialization routines; otherwise you could get a
      * non-deserialized instance. To obtain the singleton instance, use
      * {@link #findInstance}.
+     * @return 
      */
     public static synchronized SceneViewerTopComponent getDefault() {
         if (instance == null) {
@@ -275,6 +325,7 @@ public final class SceneViewerTopComponent extends TopComponent {
     /**
      * Obtain the SceneViewerTopComponent instance. Never call
      * {@link #getDefault} directly!
+     * @return 
      */
     public static synchronized SceneViewerTopComponent findInstance() {
         TopComponent win = WindowManager.getDefault().findTopComponent(PREFERRED_ID);
