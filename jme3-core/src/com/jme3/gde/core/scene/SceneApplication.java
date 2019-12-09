@@ -46,12 +46,14 @@ import com.jme3.input.FlyByCamera;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.light.LightProbe;
 import com.jme3.light.PointLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
@@ -60,6 +62,7 @@ import com.jme3.system.JmeCanvasContext;
 import com.jme3.system.awt.AwtPanel;
 import com.jme3.system.awt.AwtPanelsContext;
 import com.jme3.system.awt.PaintMode;
+import com.jme3.util.SkyFactory;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -134,6 +137,8 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
     private Thread thread;
     private NodeSyncAppState nodeSync;
     private FakeApplication fakeApp;
+    private LightProbe pbrLightProbe;
+    private Spatial pbrSky;
 
     public SceneApplication() {
         Logger.getLogger("com.jme3").addHandler(logHandler);
@@ -183,6 +188,7 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
 
     private void attachPanel() {
         enqueue(new Callable() {
+            @Override
             public Object call() throws Exception {
                 panel.attachTo(true, viewPort, overlayView, guiViewPort);
                 return null;
@@ -334,6 +340,7 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
     }
 
     //TODO: Lookup for Application
+    @Override
     public Lookup createAdditionalLookup(Lookup baseContext) {
         return Lookups.fixed(getApplication());
     }
@@ -348,24 +355,22 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
     }
 
     private void notifyOpen(final SceneRequest opened) {
-        for (Iterator<SceneListener> it = listeners.iterator(); it.hasNext();) {
-            SceneListener sceneViewerListener = it.next();
+        for (SceneListener sceneViewerListener : listeners) {
             sceneViewerListener.sceneOpened(opened);
         }
     }
 
     private void notifyClose(final SceneRequest closed) {
-        for (Iterator<SceneListener> it = listeners.iterator(); it.hasNext();) {
-            SceneListener sceneViewerListener = it.next();
+        for (SceneListener sceneViewerListener : listeners) {
             sceneViewerListener.sceneClosed(closed);
         }
     }
 
     public void notifyPreview(final PreviewRequest request) {
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
-                for (Iterator<SceneListener> it = listeners.iterator(); it.hasNext();) {
-                    SceneListener sceneViewerListener = it.next();
+                for (SceneListener sceneViewerListener : listeners) {
                     sceneViewerListener.previewCreated(request);
                 }
             }
@@ -388,6 +393,7 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
         }
         closeScene(currentSceneRequest, request);
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if (request == null) {
                     return;
@@ -418,6 +424,7 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
                 request.setFakeApp(fakeApp);
                 fakeApp.newAssetManager(manager);
                 enqueue(new Callable() {
+                    @Override
                     public Object call() throws Exception {
                         if (manager != null) {
                             assetManager = manager;
@@ -450,6 +457,7 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
 
     private void closeScene(final SceneRequest oldRequest, final SceneRequest newRequest) {
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if (oldRequest == null) {
                     return;
@@ -474,6 +482,7 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
                 //TODO: state list is not thread safe..
                 fakeApp.removeCurrentStates();
                 enqueue(new Callable() {
+                    @Override
                     public Object call() throws Exception {
                         if (physicsState != null) {
                             physicsState.getPhysicsSpace().removeAll(rootNode);
@@ -548,6 +557,7 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
 
     public void enableCamLight(final boolean enabled) {
         enqueue(new Callable() {
+            @Override
             public Object call() throws Exception {
                 if (enabled) {
                     rootNode.removeLight(camLight);
@@ -562,6 +572,7 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
 
     public void enableStats(final boolean enabled) {
         enqueue(new Callable() {
+            @Override
             public Object call() throws Exception {
                 if (enabled) {
                     guiNode.attachChild(statsGuiNode);
@@ -575,6 +586,7 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
 
     public void enableWireFrame(final boolean selected) {
         enqueue(new Callable() {
+            @Override
             public Object call() throws Exception {
                 if (selected) {
                     viewPort.addProcessor(wireProcessor);
@@ -585,9 +597,76 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
             }
         });
     }
+    
+    public void enablePBRProbe(final boolean selected) {
+        if (pbrLightProbe == null) {
+            new Thread() {
+                @Override
+                public void run() {
+                    Spatial s = assetManager.loadModel("com/jme3/gde/core/sceneviewer/pbrenv.j3o");
+                    pbrLightProbe = (LightProbe)s.getLocalLightList().get(0);
+                    s.getLocalLightList().clear();
+                    
+                    enqueue(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            rootNode.addLight(pbrLightProbe);
+                            return null;
+                        }
+                    });
+                }
+                
+            }.start();
+        } else {
+            enqueue(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    if (selected) {
+                        rootNode.addLight(pbrLightProbe);
+                    } else {
+                        rootNode.removeLight(pbrLightProbe);
+                    }
+                    return null;
+                }
+            });
+        }
+    }
+    
+    public void enablePBRSkybox(final boolean selected) {
+        if (pbrSky == null) {
+            new Thread() {
+                @Override
+                public void run() {
+                    pbrSky = SkyFactory.createSky(assetManager, "Textures/Sky/Path.hdr", SkyFactory.EnvMapType.EquirectMap);
+                    
+                    enqueue(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            rootNode.attachChild(pbrSky);
+                            return null;
+                        }
+                    });
+                }
+                
+            }.start();
+        } else {
+            enqueue(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    if (selected) {
+                        rootNode.attachChild(pbrSky);
+                    } else {
+                        pbrSky.removeFromParent();
+                    }
+                    return null;
+                }
+            });
+        }
+    }
 
     public void setPhysicsEnabled(final boolean enabled) {
         enqueue(new Callable() {
+            @Override
             public Object call() throws Exception {
                 if (enabled) {
                     if (physicsState == null) {
@@ -636,7 +715,9 @@ public class SceneApplication extends LegacyApplication implements LookupProvide
         NotifyUtil.show("Error starting OpenGL context!", "Click here to go to troubleshooting web page.", MessageType.EXCEPTION, lst, 0);
         logger.log(Level.INFO, exception.getMessage(), exception);
     }
+    
     private static final ActionListener lst = new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 HtmlBrowser.URLDisplayer.getDefault().showURL(new URL("http://jmonkeyengine.org/wiki/doku.php/sdk:troubleshooting"));

@@ -7,7 +7,7 @@ for d in *; do
   if [ -d "$d" ]; then
     pushd $d > /dev/null
     mv jme3-jbullet-$d.pom jbullet.pom
-    patch < $sdk/patches/jbullet_dependencies_version_missing.diff
+    patch < "$sdk/patches/jbullet_dependencies_version_missing.diff"
     mv jbullet.pom jme3-jbullet-$d.pom
     popd > /dev/null
   fi

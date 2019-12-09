@@ -1,12 +1,30 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2009-2019 jMonkeyEngine All rights reserved. <p/>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * <p>Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer. <p/> <p>Redistributions
+ * in binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other
+ * materials provided with the distribution. <p/> <p>Neither the name of
+ * 'jMonkeyEngine' nor the names of its contributors may be used to endorse or
+ * promote products derived from this software without specific prior written
+ * permission. <p/> <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT
+ * NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
  */
 package com.jme3.gde.core.scene.controller;
 
-import com.jme3.app.Application;
-import com.jme3.app.state.AppState;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.AbstractAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.bounding.BoundingVolume;
@@ -22,7 +40,6 @@ import com.jme3.gde.core.scene.SceneApplication;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
@@ -33,11 +50,12 @@ import com.jme3.scene.debug.WireBox;
 import java.util.concurrent.Callable;
 
 /**
- * This class can be used or extended by other plugins to display
- * standard tools in the tools scene e.g. a cursor etc.
+ * This class can be used or extended by other plugins to display standard tools
+ * in the tools scene e.g. a cursor etc.
+ *
  * @author normenhansen
  */
-public class SceneToolController implements AppState {
+public class SceneToolController extends AbstractAppState {
 
     protected Node toolsNode;
     protected boolean showSelection = false;
@@ -53,7 +71,7 @@ public class SceneToolController implements AppState {
     @SuppressWarnings("LeakingThisInConstructor")
     public SceneToolController(AssetManager manager) {
         this.toolsNode = new Node("ToolsNode");
-        initTools();        
+        initTools();
         SceneApplication.getApplication().getStateManager().attach(this);
     }
 
@@ -104,9 +122,9 @@ public class SceneToolController implements AppState {
         //grid
         grid = new Geometry("grid", new Grid(20, 20, 1.0f));
         grid.setMaterial(grayMat);
-        grid.setLocalTranslation(-10, 0, -10);        
+        grid.setLocalTranslation(-10, 0, -10);
         SceneApplication.getApplication().enqueue(new Callable<Object>() {
-
+            @Override
             public Object call() throws Exception {
                 toolsNode.attachChild(cursor);
                 return null;
@@ -116,7 +134,7 @@ public class SceneToolController implements AppState {
 
     public void updateSelection(final Spatial spat) {
         SceneApplication.getApplication().enqueue(new Callable<Object>() {
-
+            @Override
             public Object call() throws Exception {
                 doUpdateSelection(spat);
                 return null;
@@ -147,7 +165,7 @@ public class SceneToolController implements AppState {
     public void rebuildSelectionBox() {
         if (SceneApplication.getApplication().isAwt()) {
             SceneApplication.getApplication().enqueue(new Callable<Object>() {
-
+                @Override
                 public Object call() throws Exception {
                     doUpdateSelection(selected);
                     return null;
@@ -162,7 +180,7 @@ public class SceneToolController implements AppState {
 
     public void setCursorLocation(final Vector3f location) {
         SceneApplication.getApplication().enqueue(new Callable<Object>() {
-
+            @Override
             public Object call() throws Exception {
                 doSetCursorLocation(location);
                 return null;
@@ -172,13 +190,14 @@ public class SceneToolController implements AppState {
 
     public void doSetCursorLocation(Vector3f location) {
         cursor.setLocalTranslation(location);
-        if (camController != null)
+        if (camController != null) {
             camController.doSetCamFocus(location);
+        }
     }
 
     public void snapCursorToSelection() {
         SceneApplication.getApplication().enqueue(new Callable<Object>() {
-
+            @Override
             public Object call() throws Exception {
                 doSnapCursorToSelection();
                 return null;
@@ -234,7 +253,7 @@ public class SceneToolController implements AppState {
         selectionGeometry.setLocalTransform(geom.getWorldTransform());
         selectionShape = selectionGeometry;
         SceneApplication.getApplication().enqueue(new Callable<Object>() {
-
+            @Override
             public Object call() throws Exception {
                 toolsNode.attachChild(selectionGeometry);
                 return null;
@@ -263,7 +282,7 @@ public class SceneToolController implements AppState {
             //selectionGeometry.setLocalScale(scale);
 
             SceneApplication.getApplication().enqueue(new Callable<Object>() {
-
+                @Override
                 public Object call() throws Exception {
                     toolsNode.attachChild(selectionShape);
                     return null;
@@ -300,7 +319,7 @@ public class SceneToolController implements AppState {
             selectionGeometry.setLocalTransform(geom.getWorldTransform());
             selectionShape = selectionGeometry;
             SceneApplication.getApplication().enqueue(new Callable<Object>() {
-
+                @Override
                 public Object call() throws Exception {
                     toolsNode.attachChild(selectionGeometry);
                     return null;
@@ -314,7 +333,7 @@ public class SceneToolController implements AppState {
             final Spatial shape = selectionShape;
             selectionShape = null;
             SceneApplication.getApplication().enqueue(new Callable<Void>() {
-
+                @Override
                 public Void call() throws Exception {
                     shape.removeFromParent();
                     return null;
@@ -323,12 +342,14 @@ public class SceneToolController implements AppState {
         }
     }
 
+    @Override
     public void cleanup() {
+        super.cleanup();
         detachSelectionShape();
         final Spatial cursor = this.cursor;
         final Spatial grid = this.grid;
         SceneApplication.getApplication().enqueue(new Callable<Void>() {
-
+            @Override
             public Void call() throws Exception {
                 cursor.removeFromParent();
                 grid.removeFromParent();
@@ -345,7 +366,7 @@ public class SceneToolController implements AppState {
 
     public void setShowSelection(final boolean showSelection) {
         SceneApplication.getApplication().enqueue(new Callable<Object>() {
-
+            @Override
             public Object call() throws Exception {
                 doSetShowSelection(showSelection);
                 return null;
@@ -364,7 +385,7 @@ public class SceneToolController implements AppState {
 
     public void setShowGrid(final boolean showGrid) {
         SceneApplication.getApplication().enqueue(new Callable<Object>() {
-
+            @Override
             public Object call() throws Exception {
                 doSetShowGrid(showGrid);
                 return null;
@@ -388,33 +409,8 @@ public class SceneToolController implements AppState {
         return toolsNode;
     }
 
-    public void initialize(AppStateManager asm, Application aplctn) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean isInitialized() {
-        return true;
-//        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setEnabled(boolean bln) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean isEnabled() {
-        return true;
-//        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void stateAttached(AppStateManager asm) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void stateDetached(AppStateManager asm) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void update(float f) {     
+    @Override
+    public void update(float f) {
         if (selected == null || selectionShape == null) {
             return;
         }
@@ -422,14 +418,7 @@ public class SceneToolController implements AppState {
         selectionShape.setLocalTranslation(selected.getWorldTranslation());
         selectionShape.setLocalRotation(selected.getWorldRotation());
         selectionShape.setLocalScale(selected.getWorldScale());
-        
-    }
-    public void render(RenderManager rm) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-    }
 
-    public void postRender() {
-//        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public Spatial getSelectedSpatial() {
