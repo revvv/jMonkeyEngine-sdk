@@ -10,8 +10,9 @@
 
 set -e # Quit on Error
 
-jdk_version="8u212"
-jdk_build_version="b04"
+jdk_major_version="11"
+jdk_version="0.5"
+jdk_build_version="10"
 platforms=( "x64_linux" "x86-32_windows" "x64_windows" "x64_mac" )
 
 # DEPRECATED (not required anymore)
@@ -71,7 +72,12 @@ function download_jdk {
     then
         echo "<<< Already existing, SKIPPING."
     else
-        curl -s -o downloads/jdk-$1$2 -L https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk$jdk_version-$jdk_build_version/OpenJDK8U-jdk_$1_hotspot_$jdk_version$jdk_build_version$2
+        if [ "$jdk_major_version" == "8" ];
+        then
+            curl -s -o downloads/jdk-$1$2 -L https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk$jdk_version-$jdk_build_version/OpenJDK8U-jdk_$1_hotspot_$jdk_version$jdk_build_version$2
+        else
+            curl -s -o downloads/jdk-$1$2 -L https://github.com/AdoptOpenJDK/openjdk$jdk_major_version-binaries/releases/download/jdk-$jdk_major_version.$jdk_version+$jdk_build_version/OpenJDK$jdk_major_version\U-jdk_$1_hotspot_$jdk_major_version.$jdk_version\_$jdk_build_version$2
+        fi
         echo "<<< OK!"
     fi
 }
@@ -89,12 +95,23 @@ function unpack_mac_jdk {
 
     download_jdk x64_mac .tar.gz
     tar xf downloads/jdk-x64_mac.tar.gz
-    cd jdk$jdk_version-$jdk_build_version/Contents/
+    if [ "$jdk_major_version" == "8" ];
+    then
+        cd jdk$jdk_version-$jdk_build_version/Contents/
+    else
+        cd jdk-$jdk_major_version.$jdk_version+$jdk_build_version/Contents/
+    fi
     # FROM HERE: build-osx-zip.sh by normen (with changes)
     mv Home jdk # rename folder
     zip -9 -r -y -q ../../compiled/jdk-macosx.zip jdk
     cd ../../
-    rm -rf jdk$jdk_version-$jdk_build_version
+    
+    if [ "$jdk_major_version" == "8" ];
+    then
+        rm -r jdk$jdk_version-$jdk_build_version
+    else
+        rm -rf jdk-$jdk_major_version.$jdk_version+$jdk_build_version
+    fi
 
     if [ "$TRAVIS" == "true" ]; then
         rm -rf downloads/jdk-x64_mac.tar.gz
@@ -133,12 +150,18 @@ function unpack_windows {
     mkdir -p windows-$1
     unzip -qq downloads/jdk-$1_windows.zip -d windows-$1
     cd windows-$1/
-    mv jdk$jdk_version-$jdk_build_version/* .
-    rm -r jdk$jdk_version-$jdk_build_version
     
-    # TODO: Why?
-    rm src.zip
-    
+    if [ "$jdk_major_version" == "8" ];
+    then
+        mv jdk$jdk_version-$jdk_build_version/* .
+        rm -r jdk$jdk_version-$jdk_build_version
+        # TODO: Why?
+        rm src.zip
+    else
+        mv jdk-$jdk_major_version.$jdk_version+$jdk_build_version/* .
+        rm -rf jdk-$jdk_major_version.$jdk_version+$jdk_build_version
+    fi    
+
     # This seems to be replaced by lib/tools.jar in openJDK
     #unzip -qq tools.zip -d .
     #rm tools.zip
@@ -178,11 +201,16 @@ function unpack_linux {
     mkdir -p linux-$1
     cd linux-$1
     tar -xf "../downloads/jdk-$1_linux.tar.gz"
-    mv jdk$jdk_version-$jdk_build_version/* .
-    rm -r jdk$jdk_version-$jdk_build_version
-    
-    # TODO: Why?
-    rm src.zip
+    if [ "$jdk_major_version" == "8" ];
+    then
+        mv jdk$jdk_version-$jdk_build_version/* .
+        rm -r jdk$jdk_version-$jdk_build_version
+        # TODO: Why?
+        rm src.zip
+    else
+        mv jdk-$jdk_major_version.$jdk_version+$jdk_build_version/* .
+        rm -rf jdk-$jdk_major_version.$jdk_version+$jdk_build_version
+    fi
     
     cd ../
 
@@ -263,10 +291,10 @@ function build_other_jdk {
     echo "< OK!"
 }
 
-mkdir -p local/$jdk_version-$jdk_build_version/downloads
-mkdir -p local/$jdk_version-$jdk_build_version/compiled
+mkdir -p local/$jdk_major_version-$jdk_version-$jdk_build_version/downloads
+mkdir -p local/$jdk_major_version-$jdk_version-$jdk_build_version/compiled
 
-cd local/$jdk_version-$jdk_build_version
+cd local/$jdk_major_version-$jdk_version-$jdk_build_version
 
 if [ "x$TRAVIS" != "x" ]; then
     if [ "x$BUILD_X64" != "x" ]; then
@@ -289,11 +317,24 @@ if [ "x$TRAVIS" != "x" ]; then
         rm -rf compiled/jdk-macosx.zip
     fi
 else
-    build_mac_jdk
-    build_other_jdk linux x64 x64
-    build_other_jdk windows x86-32 x86
-    build_other_jdk windows x64 x64
-    #Linux 32bit not supported... build_other_jdk linux x86-32
-    build_other_jdk linux x64 x64
+    if [ "x$PARALLEL" != "x" ];
+    then
+        build_mac_jdk &
+        build_other_jdk linux x64 x64 &
+        build_other_jdk windows x86-32 x86 &
+        build_other_jdk windows x64 x64 &
+    else
+        build_mac_jdk
+        build_other_jdk linux x64 x64
+        build_other_jdk windows x86-32 x86
+        build_other_jdk windows x64 x64
+        #Linux 32bit not supported... build_other_jdk linux x86-32
+    fi
+    
+fi
+
+if [ "x$PARALLEL" != "x" ];
+then
+    wait
 fi
 cd ../../
