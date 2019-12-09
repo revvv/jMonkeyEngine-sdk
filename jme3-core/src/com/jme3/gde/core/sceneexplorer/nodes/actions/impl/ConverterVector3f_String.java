@@ -32,14 +32,16 @@
 package com.jme3.gde.core.sceneexplorer.nodes.actions.impl;
 
 import com.jme3.math.Vector3f;
-import org.jdesktop.beansbinding.Converter;
 
 /**
- *
+ * Utility Class to Convert a Vector3f from and to Strings.<br>
+ * This is useful for Properties etc.
+ * 
  * @author david.bernard.31
+ * @author MeFisto94
  */
 
-public class ConverterVector3f_String extends Converter<Vector3f, String> {
+public class ConverterVector3f_String {
     
     public static void parseInto(String text, Vector3f res) throws IllegalArgumentException {
         text = text.replace('[', ' ');
@@ -63,13 +65,11 @@ public class ConverterVector3f_String extends Converter<Vector3f, String> {
         throw new IllegalArgumentException("String not correct");
     }
     
-    @Override
-    public String convertForward(Vector3f vector) {
+    public static String Vector3fToString(Vector3f vector) {
         return "[" + vector.x + ", " + vector.y + ", " + vector.z + "]";
     }
 
-    @Override
-    public Vector3f convertReverse(String text) {
+    public static Vector3f StringToVector3f(String text) throws IllegalArgumentException {
         Vector3f vector = new Vector3f();
         parseInto(text, vector);
         return vector;

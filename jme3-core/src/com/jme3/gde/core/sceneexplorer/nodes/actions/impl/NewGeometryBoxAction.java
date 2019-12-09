@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2009-2010 jMonkeyEngine
+ *  Copyright (c) 2009-2019 jMonkeyEngine
  *  All rights reserved.
  * 
  *  Redistribution and use in source and binary forms, with or without
@@ -31,38 +31,48 @@
  */
 package com.jme3.gde.core.sceneexplorer.nodes.actions.impl;
 
-import com.jme3.asset.AssetManager;
 import com.jme3.gde.core.sceneexplorer.nodes.actions.AbstractNewSpatialAction;
 import com.jme3.gde.core.sceneexplorer.nodes.actions.NewGeometryAction;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
+import com.jme3.gde.core.sceneexplorer.nodes.primitives.CreateBoxPanel;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 
 /**
+ * Action to create a new primitive (Box)
  *
+ * @author MeFisto94
  * @author david.bernard.31
  */
 @org.openide.util.lookup.ServiceProvider(service = NewGeometryAction.class)
 public class NewGeometryBoxAction extends AbstractNewSpatialAction implements NewGeometryAction {
 
+    CreateBoxPanel form;
+
     public NewGeometryBoxAction() {
         name = "Box";
+        form = new CreateBoxPanel();
+    }
+
+    @Override
+    protected boolean prepareCreateSpatial() {
+        String msg = "Create new Box";
+        DialogDescriptor dd = new DialogDescriptor(form, msg);
+        Object result = DialogDisplayer.getDefault().notify(dd);
+        return (result == NotifyDescriptor.OK_OPTION);
     }
 
     @Override
     protected Spatial doCreateSpatial(Node parent) {
-        NewGeometrySettings cfg = new NewGeometrySettings();
-        Box b = new Box(cfg.getBoxX(), cfg.getBoxY(), cfg.getBoxZ());
-        b.setMode(cfg.getBoxMode());
-        Geometry geom = new Geometry(cfg.getBoxName(), b);
-        Material mat = new Material(pm, "Common/MatDefs/Misc/Unshaded.j3md");
-        ColorRGBA  c = cfg.getMatRandom() ?ColorRGBA.randomColor() : cfg.getMatColor();
-        mat.setColor("Color", c);
-        geom.setMaterial(mat);
-        parent.attachChild(geom);
+        Vector3f ext = form.getBoxExtents();
+        Box b = new Box(ext.x, ext.y, ext.z);
+        Geometry geom = form.getNewGeomPanel().handleGeometry(pm, b);
+        // parent.attachChild(geom); // was present in previous code, but should neither be necessary nor correct
         return geom;
     }
 }

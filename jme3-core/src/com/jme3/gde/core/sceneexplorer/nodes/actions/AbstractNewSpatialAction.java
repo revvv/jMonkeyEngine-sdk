@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2009-2010 jMonkeyEngine
+ *  Copyright (c) 2009-2019 jMonkeyEngine
  *  All rights reserved.
  * 
  *  Redistribution and use in source and binary forms, with or without
@@ -56,63 +56,76 @@ public abstract class AbstractNewSpatialAction implements NewSpatialAction {
     protected String name = "*";
     protected ProjectAssetManager pm;
 
+    /**
+     * Implement this method to create a spatial which can be added to 
+     * the Scene Graph as Spatial.
+     * @param parent The Parent Node.
+     * @return The newly created spatial
+     */
     protected abstract Spatial doCreateSpatial(Node parent);
+    
+    /**
+     * Implement this method to prepare creating a spatial (things than can be
+     * done outside of the RenderThread like Dialogs, Loading, ...)
+     * @return Whether the call to {@link #doCreateSpatial(com.jme3.scene.Node) } shall be done.
+     */
+    protected abstract boolean prepareCreateSpatial();
 
     protected Action makeAction(final JmeNode rootNode, final DataObject dataObject) {
         pm = rootNode.getLookup().lookup(ProjectAssetManager.class);
         final Node node = rootNode.getLookup().lookup(Node.class);
         return new AbstractAction(name) {
-
+            @Override
             public void actionPerformed(ActionEvent e) {
-                SceneApplication.getApplication().enqueue(new Callable<Void>() {
+                if (prepareCreateSpatial()) {
+                    SceneApplication.getApplication().enqueue(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            final Spatial attachSpatial = doCreateSpatial(node);
+                            if (node != null && attachSpatial != null) {
+                                node.attachChild(attachSpatial);
+                                Lookup.getDefault().lookup(SceneUndoRedoManager.class).addEdit(this, new AbstractUndoableSceneEdit() {
 
-                    public Void call() throws Exception {
-                        final Spatial attachSpatial = doCreateSpatial(node);
-                        if (node != null && attachSpatial != null) {
-                            node.attachChild(attachSpatial);
-                            Lookup.getDefault().lookup(SceneUndoRedoManager.class).addEdit(this, new AbstractUndoableSceneEdit() {
+                                    @Override
+                                    public void sceneUndo() throws CannotUndoException {
+                                        attachSpatial.removeFromParent();
+                                    }
 
-                                @Override
-                                public void sceneUndo() throws CannotUndoException {
-                                    attachSpatial.removeFromParent();
-                                }
+                                    @Override
+                                    public void sceneRedo() throws CannotRedoException {
+                                        node.attachChild(attachSpatial);
+                                    }
 
-                                @Override
-                                public void sceneRedo() throws CannotRedoException {
-                                    node.attachChild(attachSpatial);
-                                }
+                                    @Override
+                                    public void awtRedo() {
+                                        dataObject.setModified(true);
+                                        rootNode.refresh(true);
+                                    }
 
-                                @Override
-                                public void awtRedo() {
-                                    dataObject.setModified(true);
-                                    rootNode.refresh(true);
-                                }
-
-                                @Override
-                                public void awtUndo() {
-                                    dataObject.setModified(true);
-                                    rootNode.refresh(true);
-                                }
-                            });
-                            setModified();
+                                    @Override
+                                    public void awtUndo() {
+                                        dataObject.setModified(true);
+                                        rootNode.refresh(true);
+                                    }
+                                });
+                                setModified();
+                            }
+                            return null;
                         }
-                        return null;
-                    }
-                });
+                    });
+                }
             }
 
             protected void setModified() {
-                java.awt.EventQueue.invokeLater(new Runnable() {
-
-                    public void run() {
-                        dataObject.setModified(true);
-                        rootNode.refresh(true);
-                    }
+                java.awt.EventQueue.invokeLater(() -> {
+                    dataObject.setModified(true);
+                    rootNode.refresh(true);
                 });
             }
         };
     }
 
+    @Override
     public Action getAction(JmeNode rootNode, DataObject dataObject) {
         return makeAction(rootNode, dataObject);
     }

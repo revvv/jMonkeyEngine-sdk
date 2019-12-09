@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2009-2010 jMonkeyEngine
+ *  Copyright (c) 2009-2019 jMonkeyEngine
  *  All rights reserved.
  * 
  *  Redistribution and use in source and binary forms, with or without
@@ -31,44 +31,47 @@
  */
 package com.jme3.gde.core.sceneexplorer.nodes.actions.impl;
 
-import com.jme3.asset.AssetManager;
 import com.jme3.gde.core.sceneexplorer.nodes.actions.AbstractNewSpatialAction;
 import com.jme3.gde.core.sceneexplorer.nodes.actions.NewGeometryAction;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
+import com.jme3.gde.core.sceneexplorer.nodes.primitives.CreateSpherePanel;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Sphere;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 
 /**
+ * Action to create a new primitive (Sphere)
  *
+ * @author MeFisto94
  * @author david.bernard.31
  */
 @org.openide.util.lookup.ServiceProvider(service = NewGeometryAction.class)
 public class NewGeometrySphereAction extends AbstractNewSpatialAction implements NewGeometryAction {
 
+    CreateSpherePanel form;
+
     public NewGeometrySphereAction() {
         name = "Sphere";
+        form = new CreateSpherePanel();
     }
 
     @Override
     protected Spatial doCreateSpatial(Node parent) {
-        NewGeometrySettings cfg = new NewGeometrySettings();
-        Sphere b = new Sphere(
-            cfg.getSphereZSamples()
-            , cfg.getSpherRadialSamples()
-            , cfg.getSphereRadius()
-            , cfg.getSphereUseEvenSlices()
-            , cfg.getSphereInterior()
-        );
-        b.setMode(cfg.getSphereMode());
-        Geometry geom = new Geometry(cfg.getSphereName(), b);
-        Material mat = new Material(pm, "Common/MatDefs/Misc/Unshaded.j3md");
-        ColorRGBA  c = cfg.getMatRandom() ?ColorRGBA.randomColor() : cfg.getMatColor();
-        mat.setColor("Color", c);
-        geom.setMaterial(mat);        
-        parent.attachChild(geom);
+        Sphere s = new Sphere(form.getZSamples(), form.getRadialSamples(),
+                form.getRadius(), form.useEvenSlices(), form.isInterior());
+        Geometry geom = form.getNewGeomPanel().handleGeometry(pm, s);
+        // parent.attachChild(geom); // was present in previous code, but should neither be necessary nor correct
         return geom;
+    }
+
+    @Override
+    protected boolean prepareCreateSpatial() {
+        String msg = "Create new Sphere";
+        DialogDescriptor dd = new DialogDescriptor(form, msg);
+        Object result = DialogDisplayer.getDefault().notify(dd);
+        return (result == NotifyDescriptor.OK_OPTION);
     }
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2009-2010 jMonkeyEngine
+ *  Copyright (c) 2009-2019 jMonkeyEngine
  *  All rights reserved.
  * 
  *  Redistribution and use in source and binary forms, with or without
@@ -31,53 +31,46 @@
  */
 package com.jme3.gde.core.sceneexplorer.nodes.actions.impl;
 
-import com.jme3.asset.AssetManager;
 import com.jme3.gde.core.sceneexplorer.nodes.actions.AbstractNewSpatialAction;
 import com.jme3.gde.core.sceneexplorer.nodes.actions.NewGeometryAction;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Quaternion;
+import com.jme3.gde.core.sceneexplorer.nodes.primitives.CreateQuadPanel;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Quad;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 
 /**
+ * Action to create a new primitive (Quad)
  *
+ * @author MeFisto94
  * @author david.bernard.31
  */
 @org.openide.util.lookup.ServiceProvider(service = NewGeometryAction.class)
 public class NewGeometryQuadAction extends AbstractNewSpatialAction implements NewGeometryAction {
 
+    CreateQuadPanel form;
+
     public NewGeometryQuadAction() {
         name = "Quad";
+        form = new CreateQuadPanel();
     }
 
     @Override
     protected Spatial doCreateSpatial(Node parent) {
-        NewGeometrySettings cfg = new NewGeometrySettings();
-        Quad b = new Quad(cfg.getQuadWidth(), cfg.getQuadHeight(), cfg.getQuadFlipCoords());
-        b.setMode(cfg.getQuadMode());
-        Geometry geom = new Geometry(cfg.getQuadName(), b);
-        switch(cfg.getQuadPlan()) {
-            case XZ: {
-                Quaternion q = new Quaternion();
-                q.fromAngles((float)Math.PI/-2f, 0.0f, 0.0f);
-                geom.setLocalRotation(q);
-                break;
-            }
-            case YZ: {
-                Quaternion q = new Quaternion();
-                q.fromAngles(0.0f, (float)Math.PI/-2f, 0.0f);
-                geom.setLocalRotation(q);
-                break;
-            }
-        }
-        Material mat = new Material(pm, "Common/MatDefs/Misc/Unshaded.j3md");
-        ColorRGBA  c = cfg.getMatRandom() ?ColorRGBA.randomColor() : cfg.getMatColor();
-        mat.setColor("Color", c);
-        geom.setMaterial(mat);    
-        parent.attachChild(geom);
+        Quad q = new Quad(form.getQuadWidth(), form.getQuadHeight(), form.isFlipCoords());
+        Geometry geom = form.getNewGeomPanel().handleGeometry(pm, q);
+        // parent.attachChild(geom); // was present in previous code, but should neither be necessary nor correct
         return geom;
+    }
+
+    @Override
+    protected boolean prepareCreateSpatial() {
+        String msg = "Create new Quad";
+        DialogDescriptor dd = new DialogDescriptor(form, msg);
+        Object result = DialogDisplayer.getDefault().notify(dd);
+        return (result == NotifyDescriptor.OK_OPTION);
     }
 }
