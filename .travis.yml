@@ -1,6 +1,6 @@
 language: java
 sudo: false
-jdk: openjdk10
+jdk: openjdk11
 dist: bionic
 
 before_cache:
