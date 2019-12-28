@@ -41,7 +41,7 @@ public final class CreateProjectWizardIterator implements WizardDescriptor.Insta
     private int index;
     private WizardDescriptor.Panel[] panels;
     private WizardDescriptor wiz;
-    private String name = "Create AssetPack Project";
+    private final String name = "Create AssetPack Project";
 
     public static CreateProjectWizardIterator createIterator() {
         return new CreateProjectWizardIterator();
@@ -68,7 +68,7 @@ public final class CreateProjectWizardIterator implements WizardDescriptor.Insta
                     JComponent jc = (JComponent) c;
                     // Sets step number of a component
                     // TODO if using org.openide.dialogs >= 7.8, can use WizardDescriptor.PROP_*:
-                    jc.putClientProperty("WizardPanel_contentSelectedIndex", new Integer(i));
+                    jc.putClientProperty("WizardPanel_contentSelectedIndex", i);
                     // Sets steps names for a panel
                     jc.putClientProperty("WizardPanel_contentData", steps);
                     // Turn on subtitle creation on each step
@@ -83,19 +83,23 @@ public final class CreateProjectWizardIterator implements WizardDescriptor.Insta
         return panels;
     }
 
+    @Override
     public void addChangeListener(ChangeListener l) {
 //        throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void removeChangeListener(ChangeListener l) {
 //        throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void initialize(WizardDescriptor wizard) {
         wiz = wizard;
         getPanels();
     }
 
+    @Override
     public void uninitialize(WizardDescriptor wizard) {
 //        this.wiz.putProperty("projdir", null);
 //        this.wiz.putProperty("name", null);
@@ -103,8 +107,9 @@ public final class CreateProjectWizardIterator implements WizardDescriptor.Insta
         panels = null;
     }
 
+    @Override
     public Set<FileObject> instantiate() throws IOException {
-        Set<FileObject> mySet = new LinkedHashSet<FileObject>();
+        Set<FileObject> mySet = new LinkedHashSet<>();
         //create folders
         File dirF = FileUtil.normalizeFile(new File((String) wiz.getProperty("folder")));
         dirF.mkdirs();
@@ -125,14 +130,17 @@ public final class CreateProjectWizardIterator implements WizardDescriptor.Insta
         return mySet;
     }
 
+    @Override
     public boolean hasNext() {
         return index < panels.length - 1;
     }
 
+    @Override
     public boolean hasPrevious() {
         return index > 0;
     }
 
+    @Override
     public void nextPanel() {
         if (!hasNext()) {
             throw new NoSuchElementException();
@@ -140,6 +148,7 @@ public final class CreateProjectWizardIterator implements WizardDescriptor.Insta
         index++;
     }
 
+    @Override
     public void previousPanel() {
         if (!hasPrevious()) {
             throw new NoSuchElementException();
@@ -147,16 +156,18 @@ public final class CreateProjectWizardIterator implements WizardDescriptor.Insta
         index--;
     }
 
+    @Override
     public WizardDescriptor.Panel current() {
         return panels[index];
     }
 
+    @Override
     public String name() {
         return name;
     }
 
     private void unZipFile(InputStream source, FileObject projectRoot) throws IOException {
-        try {
+        try (source) {
             ZipInputStream str = new ZipInputStream(source);
             ZipEntry entry;
             while ((entry = str.getNextEntry()) != null) {
@@ -172,17 +183,12 @@ public final class CreateProjectWizardIterator implements WizardDescriptor.Insta
                     }
                 }
             }
-        } finally {
-            source.close();
         }
     }
 
     private void writeFile(ZipInputStream str, FileObject fo) throws IOException {
-        OutputStream out = fo.getOutputStream();
-        try {
+        try (OutputStream out = fo.getOutputStream()) {
             FileUtil.copy(str, out);
-        } finally {
-            out.close();
         }
     }
 
@@ -198,11 +204,8 @@ public final class CreateProjectWizardIterator implements WizardDescriptor.Insta
             doc.getDocumentElement().setAttribute("name", (String) wiz.getProperty("name"));
             XMLUtil.findElement(doc.getDocumentElement(), "description", null).setTextContent((String) wiz.getProperty("description"));
             XMLUtil.findElement(doc.getDocumentElement(), "license", null).setTextContent((String) wiz.getProperty("license"));
-            OutputStream out = fo.getOutputStream();
-            try {
+            try (OutputStream out = fo.getOutputStream()) {
                 XMLUtil.write(doc, out, "UTF-8");
-            } finally {
-                out.close();
             }
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);

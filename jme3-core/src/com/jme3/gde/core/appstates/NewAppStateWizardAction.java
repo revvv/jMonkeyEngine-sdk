@@ -92,11 +92,10 @@ public final class NewAppStateWizardAction implements ActionListener {
         if (configuration == null) {
             return null;
         }
-        WizardDescriptor wizardDescriptor = (WizardDescriptor) configuration;
-        ProjectAssetManager manager = (ProjectAssetManager) wizardDescriptor.getProperty("asset_manager");
+        ProjectAssetManager manager = (ProjectAssetManager) configuration.getProperty("asset_manager");
         List<ClassLoader> loaders = manager.getClassLoaders();
 
-        String className = (String) wizardDescriptor.getProperty("class_name");
+        String className = (String) configuration.getProperty("class_name");
         Class clazz = null;
         try {
             clazz = getClass().getClassLoader().loadClass(className);
@@ -112,17 +111,14 @@ public final class NewAppStateWizardAction implements ActionListener {
         }
         if (clazz != null) {
             try {
-                Object contr = clazz.newInstance();
+                Object contr = clazz.getDeclaredConstructor().newInstance();
                 //TODO: remove sillyness-test
                 if (contr instanceof AppState || contr instanceof AbstractAppState) {
                     return (AppState) contr;
                 } else {
                     DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message("This is no AppState class!"));
                 }
-            } catch (InstantiationException ex) {
-                Exceptions.printStackTrace(ex);
-                DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message("Error instatiating class!"));
-            } catch (IllegalAccessException ex) {
+            } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
                 DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message("Error instatiating class!"));
             }
@@ -152,7 +148,7 @@ public final class NewAppStateWizardAction implements ActionListener {
                     JComponent jc = (JComponent) c;
                     // Sets step number of a component
                     // TODO if using org.openide.dialogs >= 7.8, can use WizardDescriptor.PROP_*:
-                    jc.putClientProperty("WizardPanel_contentSelectedIndex", new Integer(i));
+                    jc.putClientProperty("WizardPanel_contentSelectedIndex", i);
                     // Sets steps names for a panel
                     jc.putClientProperty("WizardPanel_contentData", steps);
                     // Turn on subtitle creation on each step

@@ -52,12 +52,12 @@ public class EditableMaterialFile {
     private static final Logger logger = Logger.getLogger(EditableMaterialFile.class.getName());
     private String name;
     private String matDefName;
-    private FileObject material;
+    private final FileObject material;
     private FileObject matDef;
-    private Map<String, MaterialProperty> materialParameters = new LinkedHashMap<String, MaterialProperty>();
-    private Map<String, MaterialProperty> additionalRenderStates = new HashMap<String, MaterialProperty>();
-    private List<String> matDefEntries = new ArrayList<String>();
-    private ProjectAssetManager manager;
+    private final Map<String, MaterialProperty> materialParameters = new LinkedHashMap<>();
+    private final Map<String, MaterialProperty> additionalRenderStates = new HashMap<>();
+    private final List<String> matDefEntries = new ArrayList<>();
+    private final ProjectAssetManager manager;
     private FileSystem fs;
     public static final String[] variableTypes = new String[]{"Int", "Boolean", "Float", "Vector2", "Vector3", "Vector4", "Color", "Texture2D", "Texture3D", "TextureArray", "TextureBuffer", "TextureCubeMap"};
 
@@ -106,11 +106,11 @@ public class EditableMaterialFile {
                     states = true;
                 }
                 //up a level
-                if (line.indexOf("{") != -1) {
+                if (line.contains("{")) {
                     level++;
                 }
                 //down a level, stop processing parameters/states
-                if (line.indexOf("}") != -1) {
+                if (line.contains("}")) {
                     level--;
                     if (params) {
                         params = false;
@@ -194,17 +194,17 @@ public class EditableMaterialFile {
             try {
                 fs = FileUtil.createMemoryFileSystem();
                 matDef = fs.getRoot().createData(name, "j3md");
-                OutputStream out = matDef.getOutputStream();
-                InputStream in = manager.getResourceAsStream(getMatDefName());
-                if (in != null) {
-                    int input = in.read();
-                    while (input != -1) {
-                        out.write(input);
-                        input = in.read();
+                try (OutputStream out = matDef.getOutputStream()) {
+                    InputStream in = manager.getResourceAsStream(getMatDefName());
+                    if (in != null) {
+                        int input = in.read();
+                        while (input != -1) {
+                            out.write(input);
+                            input = in.read();
+                        }
+                        in.close();
                     }
-                    in.close();
                 }
-                out.close();
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -229,10 +229,10 @@ public class EditableMaterialFile {
                     if (defLine.startsWith("MaterialParameters ") || defLine.startsWith("MaterialParameters\t") || defLine.startsWith("MaterialParameters{") && level == 1) {
                         params = true;
                     }
-                    if (defLine.indexOf("{") != -1) {
+                    if (defLine.contains("{")) {
                         level++;
                     }
-                    if (defLine.indexOf("}") != -1) {
+                    if (defLine.contains("}")) {
                         level--;
                         if (params) {
                             params = false;
@@ -285,8 +285,8 @@ public class EditableMaterialFile {
         try {
             List<String> matLines = material.asLines();
             StringWriter out = new StringWriter();
-            List<String> setValues = new LinkedList<String>();
-            List<String> setStates = new LinkedList<String>();
+            List<String> setValues = new LinkedList<>();
+            List<String> setStates = new LinkedList<>();
             //goes through the lines of the material file and replaces the values it finds
             for (String line : matLines) {
                 String newLine = line;
@@ -294,7 +294,7 @@ public class EditableMaterialFile {
                 //write material header
                 if (line.startsWith("Material ") || line.startsWith("Material\t") && level == 0) {
                     String suffix = "";
-                    if (line.indexOf("{") > -1) {
+                    if (line.contains("{")) {
                         suffix = "{";
                     }
                     newLine = "Material " + getName() + " : " + matDefName + " " + suffix;
@@ -309,16 +309,15 @@ public class EditableMaterialFile {
                     addedstates = true;
                 }
                 //up a level
-                if (line.indexOf("{") != -1) {
+                if (line.contains("{")) {
                     level++;
                 }
                 //down a level, stop processing states and check if all parameters and states have been written
-                if (line.indexOf("}") != -1) {
+                if (line.contains("}")) {
                     level--;
                     //find and write parameters we did not replace yet at end of parameters section
                     if (params) {
-                        for (Iterator<Map.Entry<String, MaterialProperty>> it = materialParameters.entrySet().iterator(); it.hasNext();) {
-                            Map.Entry<String, MaterialProperty> entry = it.next();
+                        for (Map.Entry<String, MaterialProperty> entry : materialParameters.entrySet()) {
                             if (!setValues.contains(entry.getKey()) && matDefEntries.contains(entry.getKey())) {
                                 MaterialProperty prop = entry.getValue();
                                 if (prop.getValue() != null && prop.getValue().length() > 0) {
@@ -331,8 +330,7 @@ public class EditableMaterialFile {
                     }
                     //find and write states we did not replace yet at end of states section
                     if (states) {
-                        for (Iterator<Map.Entry<String, MaterialProperty>> it = additionalRenderStates.entrySet().iterator(); it.hasNext();) {
-                            Map.Entry<String, MaterialProperty> entry = it.next();
+                        for (Map.Entry<String, MaterialProperty> entry : additionalRenderStates.entrySet()) {
                             if (!setStates.contains(entry.getKey())) {
                                 MaterialProperty prop = entry.getValue();
                                 if (prop.getValue() != null && prop.getValue().length() > 0) {
@@ -348,8 +346,7 @@ public class EditableMaterialFile {
                         if (!addedstates) {
                             String myLine = "    AdditionalRenderState {\n";
                             out.write(myLine, 0, myLine.length());
-                            for (Iterator<Map.Entry<String, MaterialProperty>> it = additionalRenderStates.entrySet().iterator(); it.hasNext();) {
-                                Map.Entry<String, MaterialProperty> entry = it.next();
+                            for (Map.Entry<String, MaterialProperty> entry : additionalRenderStates.entrySet()) {
                                 if (!setStates.contains(entry.getKey())) {
                                     MaterialProperty prop = entry.getValue();
                                     if (prop.getValue() != null && prop.getValue().length() > 0) {
@@ -420,12 +417,12 @@ public class EditableMaterialFile {
     }
 
     private void createBaseMaterialFile() throws IOException {
-        OutputStreamWriter out = new OutputStreamWriter(material.getOutputStream());
-        out.write("Material MyMaterial : " + matDefName + " {\n");
-        out.write("    MaterialParameters {\n");
-        out.write("    }\n");
-        out.write("}\n");
-        out.close();
+        try (OutputStreamWriter out = new OutputStreamWriter(material.getOutputStream())) {
+            out.write("Material MyMaterial : " + matDefName + " {\n");
+            out.write("    MaterialParameters {\n");
+            out.write("    }\n");
+            out.write("}\n");
+        }
     }
 
  
@@ -453,15 +450,16 @@ public class EditableMaterialFile {
     }
 
     public void setAsText(String text) throws IOException {
-        OutputStreamWriter out = new OutputStreamWriter(material.getOutputStream());
-        out.write(text, 0, text.length());
-        out.close();
+        try (OutputStreamWriter out = new OutputStreamWriter(material.getOutputStream())) {
+            out.write(text, 0, text.length());
+        }
     }
 
     /**
      * Creates the data from a material
      *
      * @param mat
+     * @throws java.io.IOException
      */
     public void setAsMaterial(Material mat) throws IOException {
         assert (mat.getMaterialDef().getAssetName() != null);
@@ -491,8 +489,7 @@ public class EditableMaterialFile {
      */
     private void checkPackedTextureProps(Material mat) {
         Collection<MatParam> params = mat.getParams();
-        for (Iterator<MatParam> it = new ArrayList<MatParam>(params).iterator(); it.hasNext();) {
-            MatParam param = it.next();
+        for (MatParam param : new ArrayList<>(params)) {
             MaterialProperty prop = new MaterialProperty(param);
             if (prop.getValue() == null) {
                 switch (param.getVarType()) {

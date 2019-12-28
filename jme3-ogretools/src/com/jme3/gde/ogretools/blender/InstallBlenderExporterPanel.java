@@ -17,7 +17,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import org.openide.filesystems.FileChooserBuilder;
 import org.openide.util.Exceptions;
-import org.openide.util.Utilities;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.prefs.Preferences;
@@ -35,12 +34,15 @@ import org.openide.NotifyDescriptor.Confirmation;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class InstallBlenderExporterPanel extends javax.swing.JDialog {
 
-    /** Creates new form InstallBlenderExporterPanel */
+    /** Creates new form InstallBlenderExporterPanel
+     * @param parent
+     * @param modal */
     public InstallBlenderExporterPanel(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         java.awt.EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 jTextField1.setText(findBlenderFolder());
             }
@@ -210,7 +212,7 @@ public class InstallBlenderExporterPanel extends javax.swing.JDialog {
             // Should be: HKEY_CURRENT_USER\Volatile Environment, key NWUSERNAME
             final String subKey = "Volatile Environment";
 
-            Object[] objects1 = {toByteArray(subKey), new Integer(KEY_READ), new Integer(KEY_READ)};
+            Object[] objects1 = {toByteArray(subKey), KEY_READ, KEY_READ};
             Integer hSettings = (Integer) mOpenKey.invoke(userRoot,
                     objects1);
 

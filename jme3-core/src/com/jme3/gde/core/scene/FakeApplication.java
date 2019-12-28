@@ -60,8 +60,6 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -358,7 +356,7 @@ public class FakeApplication extends SimpleApplication {
     public static class FakeAppStateManager extends AppStateManager {
 
         private AppStateManagerNode node;
-        ArrayList<AppState> states = new ArrayList<AppState>();
+        List<AppState> states = new ArrayList<>();
 
         public FakeAppStateManager(Application app) {
             super(app);
@@ -403,8 +401,7 @@ public class FakeApplication extends SimpleApplication {
     private ScheduledThreadPoolExecutor fakeAppThread = new ScheduledThreadPoolExecutor(1);
 
     public void removeCurrentStates() {
-        for (Iterator<AppState> it = new ArrayList<AppState>(appStateManager.getAddedStates()).iterator(); it.hasNext();) {
-            AppState appState = it.next();
+        for (AppState appState : new ArrayList<AppState>(appStateManager.getAddedStates())) {
             try {
                 appStateManager.detach(appState);
             } catch (Exception e) {
@@ -469,10 +466,13 @@ public class FakeApplication extends SimpleApplication {
 
     public boolean runQueuedFake() {
         Future<Void> fut = fakeAppThread.submit(new Callable<Void>() {
+            
+            @Override
             public Void call() throws Exception {
                 runQueuedTasks();
                 return null;
             }
+            
         });
         try {
             fut.get(1, TimeUnit.MINUTES);
@@ -491,11 +491,14 @@ public class FakeApplication extends SimpleApplication {
 
     public boolean updateFake(final float tpf) {
         Future<Void> fut = fakeAppThread.submit(new Callable<Void>() {
+            
+            @Override
             public Void call() throws Exception {
                 AudioContext.setAudioRenderer(audioRenderer);
                 appStateManager.update(tpf);
                 return null;
             }
+            
         });
         try {
             fut.get(1, TimeUnit.MINUTES);
@@ -516,10 +519,13 @@ public class FakeApplication extends SimpleApplication {
 
     public boolean renderFake() {
         Future<Void> fut = fakeAppThread.submit(new Callable<Void>() {
+            
+            @Override
             public Void call() throws Exception {
                 appStateManager.render(renderManager);
                 return null;
             }
+            
         });
         try {
             fut.get(1, TimeUnit.MINUTES);
@@ -540,10 +546,13 @@ public class FakeApplication extends SimpleApplication {
 
     public boolean updateExternalLogicalState(final Node externalNode, final float tpf) {
         Future<Void> fut = fakeAppThread.submit(new Callable<Void>() {
+            
+            @Override
             public Void call() throws Exception {               
                 externalNode.updateLogicalState(tpf);
                 return null;
             }
+            
         });
         try {
             fut.get(1, TimeUnit.MINUTES);
@@ -564,10 +573,13 @@ public class FakeApplication extends SimpleApplication {
 
     public boolean updateExternalGeometricState(final Node externalNode) {
         Future<Void> fut = fakeAppThread.submit(new Callable<Void>() {
+            
+            @Override
             public Void call() throws Exception {
                 externalNode.updateGeometricState();
                 return null;
             }
+            
         });
         try {
             fut.get(1, TimeUnit.MINUTES);
@@ -606,8 +618,7 @@ public class FakeApplication extends SimpleApplication {
     private void removeAllStates() {
         try {
             try {
-                for (Iterator<AppState> it = new ArrayList<AppState>(appStateManager.getAddedStates()).iterator(); it.hasNext();) {
-                    AppState appState = it.next();
+                for (AppState appState : new ArrayList<>(appStateManager.getAddedStates())) {
                     appStateManager.detach(appState);
                 }
             } catch (Exception e) {
@@ -631,9 +642,7 @@ public class FakeApplication extends SimpleApplication {
         while (!externalNode.getChildren().isEmpty()) {
             try {
                 externalNode.detachAllChildren();
-            } catch (Exception e) {
-                Exceptions.printStackTrace(e);
-            } catch (Error e) {
+            } catch (Exception | Error e) {
                 Exceptions.printStackTrace(e);
             }
         }
@@ -641,36 +650,28 @@ public class FakeApplication extends SimpleApplication {
         while (control != null) {
             try {
                 externalNode.removeControl(control);
-            } catch (Exception e) {
-                Exceptions.printStackTrace(e);
-            } catch (Error e) {
+            } catch (Exception | Error e) {
                 Exceptions.printStackTrace(e);
             }
             control = externalNode.getControl(Control.class);
         }
         Collection<String> keys = externalNode.getUserDataKeys();
         if (keys != null) {
-            for (Iterator<String> it = keys.iterator(); it.hasNext();) {
-                String string = it.next();
+            for (String string : keys) {
                 externalNode.setUserData(string, null);
             }
         }
         LightList llist = null;
         try {
             llist = externalNode.getLocalLightList();
-            for (Iterator<Light> it = llist.iterator(); it.hasNext();) {
-                Light light = it.next();
+            for (Light light : llist) {
                 try {
                     externalNode.removeLight(light);
-                } catch (Exception e) {
-                    Exceptions.printStackTrace(e);
-                } catch (Error e) {
+                } catch (Exception | Error e) {
                     Exceptions.printStackTrace(e);
                 }
             }
-        } catch (Exception e) {
-            Exceptions.printStackTrace(e);
-        } catch (Error e) {
+        } catch (Exception | Error e) {
             Exceptions.printStackTrace(e);
         }
     }

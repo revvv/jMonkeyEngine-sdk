@@ -114,8 +114,7 @@ public class NiftyGuiDataObject extends MultiDataObject {
                             return;
                         }
                     }
-                } catch (IOException ex) {
-                } catch (IllegalArgumentException ex) {
+                } catch (IOException | IllegalArgumentException ex) {
                 }
             }
             file = file.getParent();

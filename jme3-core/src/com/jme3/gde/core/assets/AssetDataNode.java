@@ -70,7 +70,7 @@ public class AssetDataNode extends DataNode {
             return sheet;
         }
         
-        Sheet.Set set = sheet.createPropertiesSet();
+        Sheet.Set set = Sheet.createPropertiesSet();
         set.setName("AssetKey");
         set.setDisplayName("Conversion Settings");
         for (Field field : key.getClass().getDeclaredFields()) {

@@ -22,16 +22,15 @@ import com.jme3.shader.VarType;
 import com.jme3.texture.Texture;
 import java.awt.Component;
 import java.awt.Dialog;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JComponent;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.project.Project;
@@ -73,6 +72,7 @@ public final class ImportModel implements ActionListener {
         this.context = context;
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev) {
         Project context = OpenProjects.getDefault().getMainProject();
         if (context == null) {
@@ -95,6 +95,8 @@ public final class ImportModel implements ActionListener {
         boolean cancelled = wiz.getValue() != WizardDescriptor.FINISH_OPTION;
         if (!cancelled) {
             new Thread(new Runnable() {
+                
+                @Override
                 public void run() {
                     ProgressHandle handle = ProgressHandle.createHandle("Importing Model..");
                     handle.start();
@@ -105,7 +107,7 @@ public final class ImportModel implements ActionListener {
                     }
                     handle.finish();
                 }
-            }).start();
+            }, "ModelImporter").start();
         }
     }
 
@@ -123,11 +125,10 @@ public final class ImportModel implements ActionListener {
             throw new IllegalStateException("Cannot find project AssetManager!");
         }
 
-        List<FileObject> deleteList = new LinkedList<FileObject>();
+        List<FileObject> deleteList = new LinkedList<>();
         int idx = 0;
         //go through list and copy assets to project
-        for (Iterator<FileObject> it = assetList.iterator(); it.hasNext();) {
-            FileObject source = it.next();
+        for (FileObject source : assetList) {
             AssetKey key = assetKeys.get(idx);
             UberAssetInfo info = UberAssetLocator.getInfo(key);
             if (info != null) {
@@ -228,8 +229,7 @@ public final class ImportModel implements ActionListener {
         }
         //delete files if not keeping original
         if (!keepFiles) {
-            for (Iterator<FileObject> it = deleteList.iterator(); it.hasNext();) {
-                FileObject fileObject = it.next();
+            for (FileObject fileObject : deleteList) {
                 try {
                     fileObject.delete();
                 } catch (IOException ex) {
@@ -250,8 +250,7 @@ public final class ImportModel implements ActionListener {
                 Material mat = geom.getMaterial();
                 if (mat != null) {
                     Collection<MatParam> params = mat.getParams();
-                    for (Iterator<MatParam> it = params.iterator(); it.hasNext();) {
-                        MatParam matParam = it.next();
+                    for (MatParam matParam : params) {
                         VarType paramType = matParam.getVarType();
                         String paramName = matParam.getName();
                         switch (paramType) {
@@ -316,7 +315,7 @@ public final class ImportModel implements ActionListener {
                     JComponent jc = (JComponent) c;
                     // Sets step number of a component
                     // TODO if using org.openide.dialogs >= 7.8, can use WizardDescriptor.PROP_*:
-                    jc.putClientProperty("WizardPanel_contentSelectedIndex", new Integer(i));
+                    jc.putClientProperty("WizardPanel_contentSelectedIndex", i);
                     // Sets steps names for a panel
                     jc.putClientProperty("WizardPanel_contentData", steps);
                     // Turn on subtitle creation on each step

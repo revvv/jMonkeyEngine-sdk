@@ -185,15 +185,15 @@ public class SkyboxWizardPanel2 implements WizardDescriptor.ValidatingPanel<Wiza
             settings.putProperty("textureWest", (Texture)comp.getEditorWest().getValue());
             settings.putProperty("textureTop", (Texture)comp.getEditorTop().getValue());
             settings.putProperty("textureBottom", (Texture)comp.getEditorBottom().getValue());
-            float x = new Float(comp.getNormal1X().getText());
-            float y = new Float(comp.getNormal1Y().getText());
-            float z = new Float(comp.getNormal1Z().getText());
+            float x = Float.parseFloat(comp.getNormal1X().getText());
+            float y = Float.parseFloat(comp.getNormal1Y().getText());
+            float z = Float.parseFloat(comp.getNormal1Z().getText());
             settings.putProperty("normalScale", new Vector3f(x,y,z) );
         } else {
             settings.putProperty("textureSingle", (Texture)comp.getEditorSingle().getValue());
-            float x = new Float(comp.getNormal2X().getText());
-            float y = new Float(comp.getNormal2Y().getText());
-            float z = new Float(comp.getNormal2Z().getText());
+            float x = Float.parseFloat(comp.getNormal2X().getText());
+            float y = Float.parseFloat(comp.getNormal2Y().getText());
+            float z = Float.parseFloat(comp.getNormal2Z().getText());
             settings.putProperty("normalScale", new Vector3f(x,y,z) );
             settings.putProperty("envMapType", comp.getEnvMapType());         
             settings.putProperty("flipY", comp.getFlipYCheckBox().isSelected());

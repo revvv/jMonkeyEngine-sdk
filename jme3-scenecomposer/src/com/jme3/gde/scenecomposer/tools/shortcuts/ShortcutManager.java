@@ -5,12 +5,10 @@
  */
 package com.jme3.gde.scenecomposer.tools.shortcuts;
 
-import com.jme3.gde.scenecomposer.SceneEditTool;
 import com.jme3.input.KeyInput;
 import com.jme3.input.event.KeyInputEvent;
 import com.jme3.math.Vector3f;
 import java.util.ArrayList;
-import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -21,7 +19,7 @@ import org.openide.util.lookup.ServiceProvider;
 public class ShortcutManager {
 
     private ShortcutTool currentShortcut;
-    private ArrayList<ShortcutTool> shortcutList;
+    private final ArrayList<ShortcutTool> shortcutList;
     private boolean ctrlDown = false;
     private boolean shiftDown = false;
     private boolean altDown = false;
@@ -321,7 +319,7 @@ public class ShortcutManager {
         if (numberBuilder.length() == 0) {
             return 0;
         } else {
-            return new Float(numberBuilder.toString());
+            return Float.parseFloat(numberBuilder.toString());
         }
     }
 

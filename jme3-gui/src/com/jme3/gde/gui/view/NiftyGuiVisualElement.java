@@ -78,10 +78,10 @@ import org.xml.sax.SAXException;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class NiftyGuiVisualElement extends JPanel implements MultiViewElement , ExplorerManager.Provider,Observer, PropertyChangeListener {
     private static final Logger logger = Logger.getLogger(NiftyGuiVisualElement.class.getName());
-    private NiftyGuiDataObject obj;
-    private JToolBar toolbar = new JToolBar();
+    private final NiftyGuiDataObject obj;
+    private final JToolBar toolbar = new JToolBar();
     private transient MultiViewElementCallback callback;
-    private GUIEditor editor;
+    private final GUIEditor editor;
     private final Nifty nifty;
     private final J2DNiftyView view;
     private final JComboBox layers = new JComboBox();
@@ -89,13 +89,14 @@ public final class NiftyGuiVisualElement extends JPanel implements MultiViewElem
     private final UndoRedo.Manager undoSupport;
     private int guiID;
      private final InstanceContent content = new InstanceContent();
-     private Lookup lookup;
-     private AssetManager assetManager;
+     private final Lookup lookup;
+     private final AssetManager assetManager;
 
     protected class ResourceLocationJmp implements ResourceLocation {
 
+        @Override
         public InputStream getResourceAsStream(String path) {
-            AssetKey<Object> key = new AssetKey<Object>(path);
+            AssetKey<Object> key = new AssetKey<>(path);
             AssetInfo info = assetManager.locateAsset(key);
             if (info != null){
                 return info.openStream();
@@ -104,12 +105,13 @@ public final class NiftyGuiVisualElement extends JPanel implements MultiViewElem
             }
         }
 
+        @Override
         public URL getResource(String path) {
             throw new UnsupportedOperationException();
         }
     }
     
-    private ResourceLocation resourceLocation = new ResourceLocationJmp();
+    private final ResourceLocation resourceLocation = new ResourceLocationJmp();
     
         
     public NiftyGuiVisualElement(Lookup lkp) {
@@ -151,6 +153,7 @@ public final class NiftyGuiVisualElement extends JPanel implements MultiViewElem
         JComboBox comboBox = new JComboBox(new String[]{"640x480", "480x800", "800x480", "800x600", "1024x768", "1280x720"});
         comboBox.addItemListener(new ItemListener() {
 
+            @Override
             public void itemStateChanged(ItemEvent e) {
                 String string = (String) e.getItem();
                 if ("640x480".equals(string)) {
@@ -175,6 +178,7 @@ public final class NiftyGuiVisualElement extends JPanel implements MultiViewElem
         toolbar.add(new JLabel("Current Layer"));
         layers.addItemListener(new ItemListener() {
 
+            @Override
             public void itemStateChanged(ItemEvent e) {
                 GLayer item = (GLayer) e.getItem();
                 editor.selectElement(item);
@@ -254,12 +258,8 @@ public final class NiftyGuiVisualElement extends JPanel implements MultiViewElem
         String path = this.obj.getPrimaryFile().getPath();
         try {
             this.editor.saveGui(path);
-        } catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException | JAXBException | NullPointerException ex) {
             Exceptions.printStackTrace(ex);
-        } catch (JAXBException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (NullPointerException ex){
-             Exceptions.printStackTrace(ex);
         }
     }
 
@@ -349,22 +349,14 @@ public final class NiftyGuiVisualElement extends JPanel implements MultiViewElem
             Collection<GLayer> layers1 = this.editor.getGui().getLayers();
             guiID = this.editor.getGui().getGUIid();
             this.editor.getGui().addObserver(this);
-            DefaultComboBoxModel<GLayer> model = new DefaultComboBoxModel<GLayer>(layers1.toArray(new GLayer[0]));
+            DefaultComboBoxModel<GLayer> model = new DefaultComboBoxModel<>(layers1.toArray(new GLayer[0]));
             layers.setModel(model);
             layers.setSelectedItem(this.editor.getCurrentLayer());
             
             handle.finish();
         } catch (ParserConfigurationException ex) {
             Exceptions.printStackTrace(ex);
-        } catch (JAXBException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (ClassNotFoundException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (NoProductException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (SAXException ex) {
+        } catch (JAXBException | ClassNotFoundException | IOException | NoProductException | SAXException ex) {
             Exceptions.printStackTrace(ex);
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
@@ -402,11 +394,7 @@ public final class NiftyGuiVisualElement extends JPanel implements MultiViewElem
             NiftyGuiVisualElement.this.content.remove(this);
           
             
-        } catch (FileNotFoundException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (JAXBException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (ClassNotFoundException ex) {
+        } catch (FileNotFoundException | JAXBException | ClassNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         }
     }

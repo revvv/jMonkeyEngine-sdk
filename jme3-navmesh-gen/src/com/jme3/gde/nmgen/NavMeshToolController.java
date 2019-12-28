@@ -22,7 +22,7 @@ public class NavMeshToolController extends SceneToolController {
     
     private NavMeshController editorController;
     private NavMeshCameraController cameraController;
-    private JmeSpatial jmeRootNode;
+    private final JmeSpatial jmeRootNode;
     private Geometry navGeom;
     private Material navMaterial;
     

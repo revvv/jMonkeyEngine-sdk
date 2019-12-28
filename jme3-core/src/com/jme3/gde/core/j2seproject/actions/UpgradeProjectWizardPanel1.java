@@ -17,7 +17,7 @@ public class UpgradeProjectWizardPanel1 implements WizardDescriptor.ValidatingPa
     /**
      * The reference to the project we work on.
      */
-    private Project context;
+    private final Project context;
     
     /**
      * The visual component that displays this panel. If you need to access the
@@ -70,8 +70,7 @@ public class UpgradeProjectWizardPanel1 implements WizardDescriptor.ValidatingPa
 
     @Override
     public void storeSettings(WizardDescriptor wiz) {
-        UpgradeProjectVisualPanel1 pnl = (UpgradeProjectVisualPanel1)component;
-        wiz.putProperty("flatUpgrade", pnl.flatUpgrade());
+        wiz.putProperty("flatUpgrade", component.flatUpgrade());
     }
 
     @Override

@@ -35,9 +35,10 @@ public class SceneNavigatorPanel extends JPanel implements NavigatorPanel, Looku
     private Lookup.Result<SceneApplication> applicationResult;
     private final Result<AbstractSceneExplorerNode> nodeSelectionResult;
     //ExplorerNode selection listener, does nothing
-    private LookupListener listener = new LookupListener() {
+    private final LookupListener listener = new LookupListener() {
         private Node selectedNode;
 
+        @Override
         public void resultChanged(LookupEvent ev) {
             Collection collection = nodeSelectionResult.allInstances();
             for (Iterator it = collection.iterator(); it.hasNext();) {
@@ -75,22 +76,27 @@ public class SceneNavigatorPanel extends JPanel implements NavigatorPanel, Looku
         nodeSelectionResult = Utilities.actionsGlobalContext().lookupResult(AbstractSceneExplorerNode.class);
     }
 
+    @Override
     public Lookup getLookup() {
         return lookup;
     }
 
+    @Override
     public String getDisplayName() {
         return "SceneExplorer";
     }
 
+    @Override
     public String getDisplayHint() {
         return "Hint";
     }
 
+    @Override
     public JComponent getComponent() {
         return this;
     }
 
+    @Override
     public void panelActivated(Lookup lkp) {
         ExplorerUtils.activateActions(explorerManager, true);
         applicationResult = lkp.lookupResult(SceneApplication.class);
@@ -98,6 +104,7 @@ public class SceneNavigatorPanel extends JPanel implements NavigatorPanel, Looku
         nodeSelectionResult.addLookupListener(listener);
     }
 
+    @Override
     public void panelDeactivated() {
         ExplorerUtils.activateActions(explorerManager, false);
         applicationResult.removeLookupListener(this);
@@ -108,6 +115,7 @@ public class SceneNavigatorPanel extends JPanel implements NavigatorPanel, Looku
     /**
      * result listener for application start
      */
+    @Override
     public void resultChanged(LookupEvent ev) {
 //        System.out.println("Select Thread: " + Thread.currentThread().getName());
         Collection collection = applicationResult.allInstances();
@@ -116,7 +124,7 @@ public class SceneNavigatorPanel extends JPanel implements NavigatorPanel, Looku
             if (obj instanceof SceneApplication) {
                 SceneApplication app = (SceneApplication) obj;
                 if (app != null) {
-                    Node node = NodeUtility.createNode(((SceneApplication) app).getRootNode());
+                    Node node = NodeUtility.createNode(app.getRootNode());
                     explorerManager.setRootContext(node);
                     explorerManager.getRootContext().setDisplayName(node.getName());
                     return;
@@ -126,6 +134,7 @@ public class SceneNavigatorPanel extends JPanel implements NavigatorPanel, Looku
         explorerManager.setRootContext(Node.EMPTY);
     }
 
+    @Override
     public ExplorerManager getExplorerManager() {
         return explorerManager;
     }

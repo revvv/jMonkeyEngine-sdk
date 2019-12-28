@@ -572,7 +572,7 @@ public class ConnectionStraight extends JPanel implements ComponentListener,
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        mapping = (Object) evt.getSource();
+        mapping = evt.getSource();
         key = "error";
         //key = MaterialUtils.makeKey(mapping, getDiagram().getCurrentTechniqueName());
     }

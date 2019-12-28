@@ -19,7 +19,6 @@ import com.jme3.terrain.Terrain;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.text.MessageFormat;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JComponent;
@@ -79,7 +78,7 @@ public final class NewNavMeshWizardAction extends AbstractNewSpatialWizardAction
 
             Mesh mesh = new Mesh();
 
-            GeometryBatchFactory.mergeGeometries(findGeometries(rootNode, new LinkedList<Geometry>(), generator, rootNode), mesh);
+            GeometryBatchFactory.mergeGeometries(findGeometries(rootNode, new LinkedList<>(), generator, rootNode), mesh);
             Mesh optiMesh = generator.optimize(mesh);
             if(optiMesh == null) return null;
 
@@ -111,8 +110,7 @@ public final class NewNavMeshWizardAction extends AbstractNewSpatialWizardAction
             return geoms;
         }
         
-        for (Iterator<Spatial> it = node.getChildren().iterator(); it.hasNext();) {
-            Spatial spatial = it.next();
+        for (Spatial spatial : node.getChildren()) {
             if (spatial instanceof Geometry) {
                 geoms.add((Geometry) spatial);
             } else if (spatial instanceof Node) {
@@ -142,7 +140,7 @@ public final class NewNavMeshWizardAction extends AbstractNewSpatialWizardAction
                     JComponent jc = (JComponent) c;
                     // Sets step number of a component
                     // TODO if using org.openide.dialogs >= 7.8, can use WizardDescriptor.PROP_*:
-                    jc.putClientProperty("WizardPanel_contentSelectedIndex", new Integer(i));
+                    jc.putClientProperty("WizardPanel_contentSelectedIndex", i);
                     // Sets steps names for a panel
                     jc.putClientProperty("WizardPanel_contentData", steps);
                     // Turn on subtitle creation on each step

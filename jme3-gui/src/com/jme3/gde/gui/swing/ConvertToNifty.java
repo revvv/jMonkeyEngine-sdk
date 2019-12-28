@@ -2,25 +2,22 @@ package com.jme3.gde.gui.swing;
 
 import com.jme3.gde.core.assets.ProjectAssetManager;
 import com.jme3.gde.core.util.ProjectSelection;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.project.JavaProjectConstants;
 import org.netbeans.api.project.Project;
-
 import org.netbeans.api.project.SourceGroup;
-
 import org.netbeans.api.project.Sources;
-import org.openide.awt.ActionRegistration;
+import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
-import org.openide.awt.ActionID;
+import org.openide.awt.ActionRegistration;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
@@ -42,6 +39,7 @@ public final class ConvertToNifty implements ActionListener {
         this.context = context;
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev) {
         ProjectAssetManager pm = context.getLookup().lookup(ProjectAssetManager.class);
         if (pm == null) {
@@ -60,13 +58,12 @@ public final class ConvertToNifty implements ActionListener {
 
         Sources sources = context.getLookup().lookup(Sources.class);
         if (sources != null) {
-            List<URL> urls = new LinkedList<URL>();
+            List<URL> urls = new ArrayList<>();
             SourceGroup[] groups = sources.getSourceGroups(JavaProjectConstants.SOURCES_TYPE_JAVA);
             for (SourceGroup sourceGroup : groups) {
                 try {
                     ClassPath path = ClassPath.getClassPath(sourceGroup.getRootFolder(), ClassPath.COMPILE);
-                    for (Iterator<ClassPath.Entry> it = path.entries().iterator(); it.hasNext();) {
-                        ClassPath.Entry entry = it.next();
+                    for (ClassPath.Entry entry : path.entries()) {
                         urls.add(entry.getURL());
                     }
                 } catch (Exception ex) {
@@ -83,7 +80,7 @@ public final class ConvertToNifty implements ActionListener {
                     clazzConfig.getDeclaredMethod("setOutputDir", clazzString).invoke(null, folder.getPath());
                     Object string = clazzString.getDeclaredConstructor(clazzString).newInstance(sourceGroup.getRootFolder().getPath());//context.getProjectDirectory().getFileObject("build/classes").getPath());
                     Object file = clazzFile.getDeclaredConstructor(clazzString).newInstance(string);
-                    Object factory = clazzFactory.newInstance();
+                    Object factory = clazzFactory.getDeclaredConstructor().newInstance();
                     clazzFactory.getMethod("loadComponents", clazzFile).invoke(factory, file);
                 } catch (Exception ex) {
                     Exceptions.printStackTrace(ex);

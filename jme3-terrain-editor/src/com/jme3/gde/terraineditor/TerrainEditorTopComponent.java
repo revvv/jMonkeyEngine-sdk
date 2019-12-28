@@ -88,8 +88,8 @@ import org.openide.nodes.NodeEvent;
 import org.openide.nodes.NodeListener;
 import org.openide.nodes.NodeMemberEvent;
 import org.openide.nodes.NodeReorderEvent;
-import org.openide.util.Lookup.Result;
 import org.openide.util.*;
+import org.openide.util.Lookup.Result;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -119,7 +119,7 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
     private boolean availableNormalTextures;
     private HelpCtx ctx = new HelpCtx("sdk.terrain_editor");
     private TexturePreview texPreview;
-    private Map<String, JButton> buttons = new HashMap<String, JButton>();
+    private Map<String, JButton> buttons = new HashMap<>();
     private JPanel insideToolSettings;
     
     //private InstanceContent content;
@@ -792,7 +792,7 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
 
     private void shininessFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_shininessFieldActionPerformed
         try {
-            Float f = new Float(shininessField.getText());
+            Float f = Float.parseFloat(shininessField.getText());
             editorController.setShininess(Math.max(0, f));
         } catch (Exception e) {
             Logger.getLogger(TerrainEditorTopComponent.class.getName()).log(Level.WARNING,
@@ -952,7 +952,7 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
             if (input instanceof javax.swing.JTextField) {
                 String text = ((javax.swing.JTextField)input).getText();
                 try {
-                    Float f = new Float(text);
+                    Float f = Float.parseFloat(text);
                     if (f > 0)
                         return true;
                 } catch (Exception e) {
@@ -977,7 +977,7 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
             LevelExtraToolParams params = new LevelExtraToolParams();
             params.absolute = levelAbsoluteCheckbox.isSelected();
             params.precision = levelPrecisionCheckbox.isSelected();
-            params.height = new Float(levelAbsoluteHeightField.getText());
+            params.height = Float.parseFloat(levelAbsoluteHeightField.getText());
             toolController.setExtraToolParams(params);
         } catch (NumberFormatException e) {}
     }
@@ -987,10 +987,10 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
             RoughExtraToolParams params = new RoughExtraToolParams();
             //params.amplitude = new Float(amplitudeField.getText());
             //params.frequency = new Float(frequencyField.getText());
-            params.lacunarity = new Float(lacunarityField.getText());
-            params.octaves = new Float(octavesField.getText());
+            params.lacunarity = Float.parseFloat(lacunarityField.getText());
+            params.octaves = Float.parseFloat(octavesField.getText());
             //params.roughness = new Float(roughnessField.getText());
-            params.scale = new Float(scaleField.getText());
+            params.scale = Float.parseFloat(scaleField.getText());
             toolController.setExtraToolParams(params);
             
         } catch (NumberFormatException e) {}
@@ -1536,7 +1536,7 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
             super.setValueAt(aValue, row, column);
 
             if (column == 3) {
-                setTextureScale(row, new Float((String) aValue));
+                setTextureScale(row, Float.parseFloat((String) aValue));
             }
         }
 
@@ -1595,6 +1595,7 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
 
             addListSelectionListener(new ListSelectionListener() {
 
+                @Override
                 public void valueChanged(ListSelectionEvent e) {
                     if (toolController != null) {
                         toolController.setSelectedTextureIndex(textureTable.getSelectedRow());
@@ -1617,6 +1618,7 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
 
         }
 
+        @Override
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
             return getButton(value, row, column);
         }
@@ -1652,7 +1654,7 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
                     int index = 0;
                     // this is messy, fix it so we know what values are coming in from where:
                     if (value instanceof String) {
-                        index = new Float((String) value).intValue();
+                        index = (int) Float.parseFloat((String) value);
                     } else if (value instanceof Float) {
                         index = ((Float) value).intValue();
                     } else if (value instanceof Integer) {
@@ -1669,6 +1671,7 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
 
                 lbl.addActionListener(new ActionListener() {
 
+                    @Override
                     public void actionPerformed(ActionEvent e) {
 
                         if (alreadyChoosing) {
@@ -1785,6 +1788,7 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
         Utils utils = new Utils();
         //Accept all directories and all gif, jpg, tiff, or png files.
 
+        @Override
         public boolean accept(File f) {
             if (f.isDirectory()) {
                 return true;
@@ -1809,6 +1813,7 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
         }
 
         //The description of this filter
+        @Override
         public String getDescription() {
             return "Just Images";
         }
@@ -1831,8 +1836,8 @@ public final class TerrainEditorTopComponent extends TopComponent implements Sce
 
         @Override
         public Boolean isTraversable(File f) {
-            if (f.getAbsolutePath().indexOf(rootDirectories[0].getAbsolutePath()) >= 0) {
-                return Boolean.valueOf(f.isDirectory());
+            if (f.getAbsolutePath().contains(rootDirectories[0].getAbsolutePath())) {
+                return f.isDirectory();
             } else {
                 return false;
             }
