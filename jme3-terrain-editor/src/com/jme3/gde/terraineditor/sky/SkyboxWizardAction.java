@@ -45,7 +45,7 @@ import org.openide.util.actions.CallableSystemAction;
 public final class SkyboxWizardAction extends CallableSystemAction {
 
     private WizardDescriptor.Panel[] panels;
-    private TerrainEditorTopComponent topComponent;
+    private final TerrainEditorTopComponent topComponent;
 
     public SkyboxWizardAction(TerrainEditorTopComponent topComponent) {
         this.topComponent = topComponent;
@@ -87,7 +87,7 @@ public final class SkyboxWizardAction extends CallableSystemAction {
                     JComponent jc = (JComponent) c;
                     // Sets step number of a component
                     // TODO if using org.openide.dialogs >= 7.8, can use WizardDescriptor.PROP_*:
-                    jc.putClientProperty("WizardPanel_contentSelectedIndex", new Integer(i));
+                    jc.putClientProperty("WizardPanel_contentSelectedIndex", i);
                     // Sets steps names for a panel
                     jc.putClientProperty("WizardPanel_contentData", steps);
                     // Turn on subtitle creation on each step

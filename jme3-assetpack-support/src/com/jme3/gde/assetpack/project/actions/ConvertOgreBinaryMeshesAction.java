@@ -35,6 +35,7 @@ public final class ConvertOgreBinaryMeshesAction implements Action {
         this.context = context;
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev) {
         final WizardDescriptor wizardDescriptor = new WizardDescriptor(getPanels());
         // {0} will be replaced by WizardDesriptor.Panel.getComponent().getName()
@@ -49,6 +50,7 @@ public final class ConvertOgreBinaryMeshesAction implements Action {
         if (!cancelled) {
             new Thread(new Runnable() {
 
+                @Override
                 public void run() {
                     scanDir(((AssetPackProject) context).getAssetsFolder().getPath(), deleteFiles);
                 }
@@ -62,8 +64,8 @@ public final class ConvertOgreBinaryMeshesAction implements Action {
         try {
             File zipDir = new File(dir2scan);
             String[] dirList = zipDir.list();
-            for (int i = 0; i < dirList.length; i++) {
-                File f = new File(zipDir, dirList[i]);
+            for (String dirList1 : dirList) {
+                File f = new File(zipDir, dirList1);
                 if (f.isDirectory()) {
                     String filePath = f.getPath();
                     scanDir(filePath, delete);
@@ -107,7 +109,7 @@ public final class ConvertOgreBinaryMeshesAction implements Action {
                     JComponent jc = (JComponent) c;
                     // Sets step number of a component
                     // TODO if using org.openide.dialogs >= 7.8, can use WizardDescriptor.PROP_*:
-                    jc.putClientProperty("WizardPanel_contentSelectedIndex", new Integer(i));
+                    jc.putClientProperty("WizardPanel_contentSelectedIndex", i);
                     // Sets steps names for a panel
                     jc.putClientProperty("WizardPanel_contentData", steps);
                     // Turn on subtitle creation on each step
@@ -122,6 +124,7 @@ public final class ConvertOgreBinaryMeshesAction implements Action {
         return panels;
     }
 
+    @Override
     public Object getValue(String key) {
         if (key.equals(NAME)) {
             return "Convert Binary Ogre Meshes..";
@@ -129,19 +132,24 @@ public final class ConvertOgreBinaryMeshesAction implements Action {
         return null;
     }
 
+    @Override
     public void putValue(String key, Object value) {
     }
 
+    @Override
     public void setEnabled(boolean b) {
     }
 
+    @Override
     public boolean isEnabled() {
         return true;
     }
 
+    @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
     }
 
+    @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
     }
 }

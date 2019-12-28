@@ -52,6 +52,7 @@ public final class CreateTerrainWizardAction extends CallableSystemAction {
         this.controller = controller;
     }
 
+    @Override
     public void performAction() {
         WizardDescriptor wizardDescriptor = new WizardDescriptor(getPanels());
         // {0} will be replaced by WizardDesriptor.Panel.getComponent().getName()
@@ -90,7 +91,7 @@ public final class CreateTerrainWizardAction extends CallableSystemAction {
                     JComponent jc = (JComponent) c;
                     // Sets step number of a component
                     // TODO if using org.openide.dialogs >= 7.8, can use WizardDescriptor.PROP_*:
-                    jc.putClientProperty("WizardPanel_contentSelectedIndex", new Integer(i));
+                    jc.putClientProperty("WizardPanel_contentSelectedIndex", i);
                     // Sets steps names for a panel
                     jc.putClientProperty("WizardPanel_contentData", steps);
                     // Turn on subtitle creation on each step
@@ -105,6 +106,7 @@ public final class CreateTerrainWizardAction extends CallableSystemAction {
         return panels;
     }
 
+    @Override
     public String getName() {
         return "Terrain Wizard";
     }
@@ -114,6 +116,7 @@ public final class CreateTerrainWizardAction extends CallableSystemAction {
         return null;
     }
 
+    @Override
     public HelpCtx getHelpCtx() {
         return HelpCtx.DEFAULT_HELP;
     }

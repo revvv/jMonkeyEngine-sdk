@@ -69,6 +69,7 @@ public final class CodelessProjectWizardAction extends CallableSystemAction {
     private static final Logger logger = Logger.getLogger(CodelessProjectWizardAction.class.getName());
     private WizardDescriptor.Panel[] panels;
 
+    @Override
     public void performAction() {
         WizardDescriptor wizardDescriptor = new WizardDescriptor(getPanels());
         // {0} will be replaced by WizardDesriptor.Panel.getComponent().getName()
@@ -91,13 +92,13 @@ public final class CodelessProjectWizardAction extends CallableSystemAction {
             FileObject properties = project.createData(CodelessProjectFactory.CONFIG_NAME);
             Properties propertiesObj = new Properties();
             FileLock lock = properties.lock();
-            InputStream in = properties.getInputStream();
-            propertiesObj.load(in);
-            in.close();
+            try (InputStream in = properties.getInputStream()) {
+                propertiesObj.load(in);
+            }
             propertiesObj.setProperty("assets.folder.name", assetsFolder);
-            OutputStream out = properties.getOutputStream(lock);
-            propertiesObj.store(out, "assets properties");
-            out.close();
+            try (OutputStream out = properties.getOutputStream(lock)) {
+                propertiesObj.store(out, "assets properties");
+            }
             lock.releaseLock();
 
             Project theProject = ProjectManager.getDefault().findProject(project);
@@ -134,7 +135,7 @@ public final class CodelessProjectWizardAction extends CallableSystemAction {
                     JComponent jc = (JComponent) c;
                     // Sets step number of a component
                     // TODO if using org.openide.dialogs >= 7.8, can use WizardDescriptor.PROP_*:
-                    jc.putClientProperty("WizardPanel_contentSelectedIndex", new Integer(i));
+                    jc.putClientProperty("WizardPanel_contentSelectedIndex", i);
                     // Sets steps names for a panel
                     jc.putClientProperty("WizardPanel_contentData", steps);
                     // Turn on subtitle creation on each step
@@ -149,6 +150,7 @@ public final class CodelessProjectWizardAction extends CallableSystemAction {
         return panels;
     }
 
+    @Override
     public String getName() {
         return "External Project Assets..";
     }
@@ -158,6 +160,7 @@ public final class CodelessProjectWizardAction extends CallableSystemAction {
         return null;
     }
 
+    @Override
     public HelpCtx getHelpCtx() {
         return HelpCtx.DEFAULT_HELP;
     }

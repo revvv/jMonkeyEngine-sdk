@@ -8,7 +8,6 @@ import com.jme3.export.Savable;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Mesh;
-import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.mesh.IndexBuffer;
 import com.jme3.terrain.Terrain;
@@ -468,6 +467,7 @@ public class NavMeshGenerator implements Savable {
         this.timeout = timeout;
     }
     
+    @Override
     public void write(JmeExporter ex) throws IOException {
         OutputCapsule oc = ex.getCapsule(this);
         oc.write(cellSize, "cellSize", 1f);
@@ -488,6 +488,7 @@ public class NavMeshGenerator implements Savable {
         oc.write(contourMaxDeviation, "contourMaxDeviation", 25);
     }
 
+    @Override
     public void read(JmeImporter im) throws IOException {
         InputCapsule ic = im.getCapsule(this);
         cellSize = ic.readFloat("cellSize", 1f);
@@ -510,9 +511,9 @@ public class NavMeshGenerator implements Savable {
 
     private class MeshBuildRunnable implements Runnable {
 
-        private float[] positions;
-        private int[] indices;
-        private IntermediateData intermediateData;
+        private final float[] positions;
+        private final int[] indices;
+        private final IntermediateData intermediateData;
         private TriangleMesh triMesh;
 
         public MeshBuildRunnable(float[] positions, int[] indices, IntermediateData intermediateData) {

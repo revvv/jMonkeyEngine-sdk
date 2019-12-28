@@ -61,6 +61,7 @@ public class CreateTerrainWizardPanel2 implements WizardDescriptor.Panel {
     // is kept separate. This can be more efficient: if the wizard is created
     // but never displayed, or not all panels are displayed, it is better to
     // create only those which really need to be visible.
+    @Override
     public Component getComponent() {
         if (component == null) {
             component = new CreateTerrainVisualPanel2();
@@ -69,6 +70,7 @@ public class CreateTerrainWizardPanel2 implements WizardDescriptor.Panel {
         return component;
     }
 
+    @Override
     public HelpCtx getHelp() {
         // Show no Help button for this panel:
         return HelpCtx.DEFAULT_HELP;
@@ -77,6 +79,7 @@ public class CreateTerrainWizardPanel2 implements WizardDescriptor.Panel {
     }
 
     // If it is always OK to press Next or Finish, then:
+    @Override
     public boolean isValid() {
         CreateTerrainVisualPanel2 comp = (CreateTerrainVisualPanel2) getComponent();
 
@@ -98,13 +101,15 @@ public class CreateTerrainWizardPanel2 implements WizardDescriptor.Panel {
     public final void removeChangeListener(ChangeListener l) {
     }*/
     
-    private final Set<ChangeListener> listeners = new HashSet<ChangeListener>(1); // or can use ChangeSupport in NB 6.0
+    private final Set<ChangeListener> listeners = new HashSet<>(1); // or can use ChangeSupport in NB 6.0
+    @Override
     public final void addChangeListener(ChangeListener l) {
     synchronized (listeners) {
     listeners.add(l);
     }
     System.out.println("############ Wizard panel listener added: "+l.toString());
     }
+    @Override
     public final void removeChangeListener(ChangeListener l) {
     synchronized (listeners) {
     listeners.remove(l);
@@ -113,7 +118,7 @@ public class CreateTerrainWizardPanel2 implements WizardDescriptor.Panel {
     protected final void fireChangeEvent() {
     Iterator<ChangeListener> it;
     synchronized (listeners) {
-    it = new HashSet<ChangeListener>(listeners).iterator();
+    it = new HashSet<>(listeners).iterator();
     }
     ChangeEvent ev = new ChangeEvent(this);
     while (it.hasNext()) {
@@ -126,11 +131,13 @@ public class CreateTerrainWizardPanel2 implements WizardDescriptor.Panel {
     // settings object will be the WizardDescriptor, so you can use
     // WizardDescriptor.getProperty & putProperty to store information entered
     // by the user.
+    @Override
     public void readSettings(Object settings) {
         WizardDescriptor wiz = (WizardDescriptor) settings;
         terrainTotalSize = (Integer)wiz.getProperty("totalSize");
     }
 
+    @Override
     public void storeSettings(Object settings) {
 
         CreateTerrainVisualPanel2 comp = (CreateTerrainVisualPanel2) getComponent();
@@ -152,10 +159,10 @@ public class CreateTerrainWizardPanel2 implements WizardDescriptor.Panel {
             }
         }
         else if ("Hill".equals(comp.getHeightmapTypeComboBox().getSelectedItem()) ) {
-            int iterations = new Integer(comp.getHillIterationsTextField().getText());
-            byte flattening = new Byte(comp.getHillFlatteningTextField().getText());
-            float min = new Float(comp.getHillMinRadiusTextField().getText());
-            float max = new Float(comp.getHillMaxRadiusTextField().getText());
+            int iterations = Integer.parseInt(comp.getHillIterationsTextField().getText());
+            byte flattening = Byte.parseByte(comp.getHillFlatteningTextField().getText());
+            float min = Float.parseFloat(comp.getHillMinRadiusTextField().getText());
+            float max = Float.parseFloat(comp.getHillMaxRadiusTextField().getText());
             try {
                 heightmap = new HillHeightMap(terrainTotalSize, iterations, min, max, flattening);
             } catch (Exception ex) {

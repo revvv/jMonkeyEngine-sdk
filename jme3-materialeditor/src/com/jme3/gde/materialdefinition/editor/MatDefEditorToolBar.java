@@ -51,7 +51,7 @@ import javax.swing.ListCellRenderer;
 public class MatDefEditorToolBar extends JPanel {
 
     private MatDefEditorlElement parent;
-    private final DefaultComboBoxModel<TechniqueBlock> comboModel = new DefaultComboBoxModel<TechniqueBlock>();
+    private final DefaultComboBoxModel<TechniqueBlock> comboModel = new DefaultComboBoxModel<>();
     private final static Logger logger = Logger.getLogger(MatDefEditorToolBar.class.getName());
     
     /**

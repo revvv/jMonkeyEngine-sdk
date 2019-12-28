@@ -42,6 +42,7 @@ public final class PublishAssetPackAction implements Action {
         this.context = context;
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev) {
         final WizardDescriptor wizardDescriptor = new WizardDescriptor(getPanels());
         // {0} will be replaced by WizardDesriptor.Panel.getComponent().getName()
@@ -57,6 +58,7 @@ public final class PublishAssetPackAction implements Action {
         if (!cancelled) {
             new Thread(new Runnable() {
 
+                @Override
                 public void run() {
                     ProgressHandle handle = ProgressHandle.createHandle("Publishing AssetPack..");
                     handle.start();
@@ -67,7 +69,7 @@ public final class PublishAssetPackAction implements Action {
                     cleanup(wizardDescriptor);
                     handle.finish();
                 }
-            }).start();
+            }, "AssetPackPublisher").start();
         }
     }
 
@@ -87,23 +89,22 @@ public final class PublishAssetPackAction implements Action {
         try {
             FileObject[] dirList = dir2zip.getChildren();
             byte[] readBuffer = new byte[2156];
-            int bytesIn = 0;
-            for (int i = 0; i < dirList.length; i++) {
-                FileObject f = dirList[i];
+            int bytesIn;
+            for (FileObject f : dirList) {
                 if (f.isFolder()) {
                     zipDir(f, zos, fileName);
                     //loop again
                     continue;
                 }
-                InputStream fis = f.getInputStream();
                 if (!f.getNameExt().equals(fileName) && !f.getNameExt().startsWith(".")) {
-                    String filePathName = f.getPath().replaceAll(context.getProjectDirectory().getPath(), "");
-                    ZipEntry anEntry = new ZipEntry(filePathName);
-                    zos.putNextEntry(anEntry);
-                    while ((bytesIn = fis.read(readBuffer)) != -1) {
-                        zos.write(readBuffer, 0, bytesIn);
+                    try(InputStream fis = f.getInputStream()) {
+                        String filePathName = f.getPath().replaceAll(context.getProjectDirectory().getPath(), "");
+                        ZipEntry anEntry = new ZipEntry(filePathName);
+                        zos.putNextEntry(anEntry);
+                        while ((bytesIn = fis.read(readBuffer)) != -1) {
+                            zos.write(readBuffer, 0, bytesIn);
+                        }
                     }
-                    fis.close();
                 }
             }
         } catch (Exception e) {
@@ -162,7 +163,7 @@ public final class PublishAssetPackAction implements Action {
                     JComponent jc = (JComponent) c;
                     // Sets step number of a component
                     // TODO if using org.openide.dialogs >= 7.8, can use WizardDescriptor.PROP_*:
-                    jc.putClientProperty("WizardPanel_contentSelectedIndex", new Integer(i));
+                    jc.putClientProperty("WizardPanel_contentSelectedIndex", i);
                     // Sets steps names for a panel
                     jc.putClientProperty("WizardPanel_contentData", steps);
                     // Turn on subtitle creation on each step
@@ -177,6 +178,7 @@ public final class PublishAssetPackAction implements Action {
         return panels;
     }
 
+    @Override
     public Object getValue(String key) {
         if (key.equals(NAME)) {
             return "Publish AssetPack..";
@@ -184,19 +186,24 @@ public final class PublishAssetPackAction implements Action {
         return null;
     }
 
+    @Override
     public void putValue(String key, Object value) {
     }
 
+    @Override
     public void setEnabled(boolean b) {
     }
 
+    @Override
     public boolean isEnabled() {
         return true;
     }
 
+    @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
     }
 
+    @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
     }
 }

@@ -34,9 +34,7 @@ package com.jme3.gde.core.appstates;
 import com.jme3.app.state.AppState;
 import com.jme3.gde.core.assets.ProjectAssetManager;
 import com.jme3.gde.core.scene.FakeApplication;
-import com.jme3.gde.core.scene.PreviewRequest;
 import com.jme3.gde.core.scene.SceneApplication;
-import com.jme3.gde.core.scene.SceneListener;
 import com.jme3.gde.core.scene.SceneRequest;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
@@ -44,6 +42,7 @@ import com.sun.source.tree.Tree;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.lang.model.element.TypeElement;
@@ -233,8 +232,10 @@ public class RunAppStateAction implements ContextAwareAction {
                     }
                 }
 
+                @Override
                 public void cancel() {
                 }
+                
             };
             src.runUserActionTask(task, true);
             return ret;
@@ -247,13 +248,10 @@ public class RunAppStateAction implements ContextAwareAction {
     private void attachState(FakeApplication app) {
         try {
             assert (config.className != null);
-            AppState state = (AppState) app.getClassByName(config.className).newInstance();
+            AppState state = (AppState) app.getClassByName(config.className).getDeclaredConstructor().newInstance();
             app.getStateManager().attach(state);
             AppStateExplorerTopComponent.openExplorer();
-        } catch (InstantiationException ex) {
-            DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message("Error creating AppState, is the project compiled?\nAlso make sure it has an empty constructor!\n" + ex.getMessage()));
-            Exceptions.printStackTrace(ex);
-        } catch (IllegalAccessException ex) {
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
             DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message("Error creating AppState, is the project compiled?\nAlso make sure it has an empty constructor!\n" + ex.getMessage()));
             Exceptions.printStackTrace(ex);
         } catch (Exception ex) {

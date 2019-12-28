@@ -50,7 +50,7 @@ import org.openide.util.HelpCtx;
  */
 public class IosCustomizerPanel extends javax.swing.JPanel implements ActionListener {
 
-    private ProjectExtensionProperties properties;
+    private final ProjectExtensionProperties properties;
 
     /**
      * Creates new form LwjglAppletCustomizerPanel
@@ -94,6 +94,7 @@ public class IosCustomizerPanel extends javax.swing.JPanel implements ActionList
         }
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         saveProperties();
     }

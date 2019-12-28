@@ -26,6 +26,7 @@ public class NavMeshAction implements ActionListener {
         this.context = context;
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev) {
         final ProjectAssetManager manager = context.getLookup().lookup(ProjectAssetManager.class);
         if (manager == null) {
@@ -33,6 +34,7 @@ public class NavMeshAction implements ActionListener {
         }
         Runnable call = new Runnable() {
 
+            @Override
             public void run() {
                 ProgressHandle progressHandle = ProgressHandle.createHandle("Opening in Nav Mesh Editor");
                 progressHandle.start();
@@ -43,8 +45,9 @@ public class NavMeshAction implements ActionListener {
                 if(asset!=null){
                     java.awt.EventQueue.invokeLater(new Runnable() {
 
+                        @Override
                         public void run() {
-                            manager.getManager().clearCache();
+                            manager.clearCache();
                             NavMeshTopComponent composer = NavMeshTopComponent.findInstance();
                             composer.openScene(asset, context, manager);
                         }
@@ -59,7 +62,7 @@ public class NavMeshAction implements ActionListener {
                 progressHandle.finish();
             }
         };
-        new Thread(call).start();
+        new Thread(call, "NavMeshLoader").start();
     }
     
 }

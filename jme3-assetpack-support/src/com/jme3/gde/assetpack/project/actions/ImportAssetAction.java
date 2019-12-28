@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -34,6 +33,7 @@ public final class ImportAssetAction implements Action {
         this.context = context;
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev) {
         WizardDescriptor wizardDescriptor = new WizardDescriptor(getPanels());
         // {0} will be replaced by WizardDesriptor.Panel.getComponent().getName()
@@ -65,8 +65,7 @@ public final class ImportAssetAction implements Action {
         asset.appendChild(license);
 
         List<FileDescription> files = (List<FileDescription>) desc.getProperty("filelist");
-        for (Iterator<FileDescription> it = files.iterator(); it.hasNext();) {
-            FileDescription fileObject = it.next();
+        for (FileDescription fileObject : files) {
             Element file = context.getConfiguration().createElement("file");
             asset.appendChild(file);
             file.setAttribute("path", fileObject.getPath() + fileObject.getFile().getNameExt());
@@ -117,7 +116,7 @@ public final class ImportAssetAction implements Action {
                     JComponent jc = (JComponent) c;
                     // Sets step number of a component
                     // TODO if using org.openide.dialogs >= 7.8, can use WizardDescriptor.PROP_*:
-                    jc.putClientProperty("WizardPanel_contentSelectedIndex", new Integer(i));
+                    jc.putClientProperty("WizardPanel_contentSelectedIndex", i);
                     // Sets steps names for a panel
                     jc.putClientProperty("WizardPanel_contentData", steps);
                     // Turn on subtitle creation on each step
@@ -132,6 +131,7 @@ public final class ImportAssetAction implements Action {
         return panels;
     }
 
+    @Override
     public Object getValue(String key) {
         if (key.equals(NAME)) {
             return "Add Asset..";
@@ -139,19 +139,24 @@ public final class ImportAssetAction implements Action {
         return null;
     }
 
+    @Override
     public void putValue(String key, Object value) {
     }
 
+    @Override
     public void setEnabled(boolean b) {
     }
 
+    @Override
     public boolean isEnabled() {
         return true;
     }
 
+    @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
     }
 
+    @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
     }
 }

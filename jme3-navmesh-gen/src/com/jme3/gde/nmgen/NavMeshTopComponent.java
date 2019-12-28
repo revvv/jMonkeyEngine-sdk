@@ -20,15 +20,16 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import java.util.Collection;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openide.util.LookupEvent;
-import org.openide.util.NbBundle;
-import org.openide.windows.TopComponent;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup.Result;
+import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
+import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
+import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
 
@@ -46,6 +47,7 @@ import org.openide.windows.WindowManager;
 public final class NavMeshTopComponent extends TopComponent implements SceneListener, LookupListener {
     
     private static NavMeshTopComponent instance;
+    private static final Logger LOGGER = Logger.getLogger(NavMeshTopComponent.class.getName());
     static final String ICON_PATH = "com/sploreg/tritium/editor/navmesh/logo.png";
     private static final String PREFERRED_ID = "NavMeshTopComponent";
     private SceneRequest currentRequest;
@@ -437,14 +439,14 @@ private void traversableAreaBorderSizeFieldActionPerformed(java.awt.event.Action
     public static synchronized NavMeshTopComponent findInstance() {
         TopComponent win = WindowManager.getDefault().findTopComponent(PREFERRED_ID);
         if (win == null) {
-            Logger.getLogger(NavMeshTopComponent.class.getName()).warning(
+            LOGGER.warning(
                     "Cannot find " + PREFERRED_ID + " component. It will not be located properly in the window system.");
             return getDefault();
         }
         if (win instanceof NavMeshTopComponent) {
             return (NavMeshTopComponent) win;
         }
-        Logger.getLogger(NavMeshTopComponent.class.getName()).warning(
+        LOGGER.warning(
                 "There seem to be multiple components with the '" + PREFERRED_ID
                 + "' ID. That is a potential source of errors and unexpected behavior.");
         return getDefault();
@@ -469,7 +471,7 @@ private void traversableAreaBorderSizeFieldActionPerformed(java.awt.event.Action
 
         addSaveNode(jmeNode);
 
-        Logger.getLogger(NavMeshTopComponent.class.getName()).finer("NavMesh openScene " + file.getName());
+        LOGGER.log(Level.FINER, "NavMesh openScene {0}", file.getName());
 
         if (editorController != null) {
             editorController.cleanup();
@@ -489,7 +491,7 @@ private void traversableAreaBorderSizeFieldActionPerformed(java.awt.event.Action
     /*@Override
     public void sceneRequested(SceneRequest request) {
         if (request.equals(currentRequest)) {
-            Logger.getLogger(NavMeshTopComponent.class.getName()).finer("Terrain sceneRequested " + request.getWindowTitle());
+            LOGGER.finer("Terrain sceneRequested " + request.getWindowTitle());
 
             setSceneInfo(currentRequest.getJmeNode(), true);
             
@@ -546,6 +548,7 @@ private void traversableAreaBorderSizeFieldActionPerformed(java.awt.event.Action
         final NavMeshTopComponent inst = this;
         java.awt.EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 if (jmeNode != null) {
                 } else {
@@ -641,7 +644,7 @@ private void traversableAreaBorderSizeFieldActionPerformed(java.awt.event.Action
     @Override
     public void sceneOpened(SceneRequest request) {
         if (request.equals(currentRequest)) {
-            Logger.getLogger(NavMeshTopComponent.class.getName()).finer("Terrain sceneRequested " + request.getWindowTitle());
+            LOGGER.log(Level.FINER, "Terrain sceneRequested {0}", request.getWindowTitle());
 
             setSceneInfo(currentRequest.getJmeNode(), true);
             
@@ -655,7 +658,7 @@ private void traversableAreaBorderSizeFieldActionPerformed(java.awt.event.Action
             //for (int i=0; i<textureTable.getModel().getRowCount(); i++)
             //    ((TextureTableModel)textureTable.getModel()).removeRow(i);
 
-            toolController = new NavMeshToolController(currentRequest.getToolNode(), currentRequest.getManager().getManager(), request.getJmeNode());
+            toolController = new NavMeshToolController(currentRequest.getToolNode(), currentRequest.getManager(), request.getJmeNode());
             
             cameraController = new NavMeshCameraController(SceneApplication.getApplication().getCamera());
             cameraController.setMaster(this);

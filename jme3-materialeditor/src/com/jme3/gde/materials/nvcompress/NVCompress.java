@@ -365,7 +365,7 @@ public class NVCompress extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private String[] computeCompressParameters(){
-        List<String> params = new ArrayList<String>();
+        List<String> params = new ArrayList<>();
 
         if (!chkCuda.isSelected())
             params.add("-nocuda");
@@ -453,16 +453,17 @@ public class NVCompress extends javax.swing.JFrame {
         if (manager == null)
             manager = JmeSystem.newAssetManager();
 
-        manager.registerLocator(input.getParent().toString(),
+        manager.registerLocator(input.getParent(),
                                 FileLocator.class);
 
         String format = (String) cmbCompressType.getSelectedItem();
         if (format.equals("PNG-RGBE")){
             HDRLoader loader = new HDRLoader(true);
             try{
-                FileInputStream in = new FileInputStream(input);
-                Image image = loader.load(in, false);
-                in.close();
+                Image image;
+                try (FileInputStream in = new FileInputStream(input)) {
+                    image = loader.load(in, false);
+                }
 
                 BufferedImage rgbeImage = ImageToAwt.convert(image, false, true, 0);
                 if (output == null){
@@ -500,22 +501,22 @@ public class NVCompress extends javax.swing.JFrame {
             ProcessBuilder builder = new ProcessBuilder(args);
             updateWork(statusStr, 0);
             p = builder.start();
-            BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String ln;
-            while ((ln = r.readLine()) != null){
-                if (Thread.interrupted())
-                    throw new InterruptedException();
-                
-                if (ln.endsWith("%")){
-                    // show status in bar
-                    int percent = Integer.parseInt(ln.substring(0, ln.length()-1));
-                    updateWork(statusStr, percent);
-                }else if (ln.startsWith("time taken")){
-                    ln = ln.substring(12, ln.length()-7).trim();
-                    System.out.println("Time Taken: "+ln+" seconds");
+            try (BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                String ln;
+                while ((ln = r.readLine()) != null){
+                    if (Thread.interrupted())
+                        throw new InterruptedException();
+                    
+                    if (ln.endsWith("%")){
+                        // show status in bar
+                        int percent = Integer.parseInt(ln.substring(0, ln.length()-1));
+                        updateWork(statusStr, percent);
+                    }else if (ln.startsWith("time taken")){
+                        ln = ln.substring(12, ln.length()-7).trim();
+                        System.out.println("Time Taken: "+ln+" seconds");
+                    }
                 }
             }
-            r.close();
             int error = p.waitFor();
             if (error != 0){
                 System.out.println("Error Code: " + error);
@@ -586,7 +587,7 @@ public class NVCompress extends javax.swing.JFrame {
         final Object[] fileList = compileFileList();
         if (fileList != null && fileList.length > 0){
             startWork();
-            workThread = new Thread(){
+            workThread = new Thread("NVCompressor"){
                 @Override
                 public void run(){
                     for (Object val : fileList){
@@ -618,7 +619,7 @@ public class NVCompress extends javax.swing.JFrame {
         final Object[] fileList = compileFileList();
         if (fileList != null && fileList.length > 0){
             startWork();
-            workThread = new Thread(){
+            workThread = new Thread("J3Compressor"){
                 @Override
                 public void run(){
                     for (Object val : fileList){
@@ -650,7 +651,7 @@ public class NVCompress extends javax.swing.JFrame {
         final Object[] fileList = compileFileList();
         if (fileList != null && fileList.length > 0){
             startWork();
-            workThread = new Thread(){
+            workThread = new Thread("NVDecompressor"){
                 @Override
                 public void run(){
                     for (Object val : fileList){
@@ -866,9 +867,12 @@ public class NVCompress extends javax.swing.JFrame {
         }
 
         java.awt.EventQueue.invokeLater(new Runnable() {
+            
+            @Override
             public void run() {
                 new NVCompress().setVisible(true);
             }
+            
         });
     }
 

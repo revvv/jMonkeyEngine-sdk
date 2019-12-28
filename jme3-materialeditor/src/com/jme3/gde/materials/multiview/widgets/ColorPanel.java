@@ -308,6 +308,7 @@ private void aLabelFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_a
     protected void readProperty() {
         java.awt.EventQueue.invokeLater(new Runnable() {
             
+            @Override
             public void run() {
                 jLabel1.setText(property.getName());
                 jLabel1.setToolTipText(property.getName());                
