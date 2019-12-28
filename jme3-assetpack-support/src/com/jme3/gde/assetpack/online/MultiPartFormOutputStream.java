@@ -6,9 +6,6 @@ package com.jme3.gde.assetpack.online;
 
 import java.io.*;
 import java.net.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.netbeans.api.progress.ProgressHandle;
 
 /**
  * <code>MultiPartFormOutputStream</code> is used to write
@@ -70,7 +67,7 @@ public class MultiPartFormOutputStream {
      */
     public void writeField(String name, boolean value)
             throws java.io.IOException {
-        writeField(name, new Boolean(value).toString());
+        writeField(name, Boolean.toString(value));
     }
 
     /**
