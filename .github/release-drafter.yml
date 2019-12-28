@@ -1,0 +1,11 @@
+name-template: Upcoming Changes
+categories:
+  - title: 🚀 Features
+    label: enhancement
+  - title: 🐛 Bug Fixes
+    label: bug
+tag-template: - $TITLE @$AUTHOR (#$NUMBER)
+template: |
+  ## Upcoming Changes
+
+  $CHANGES
