@@ -356,7 +356,7 @@ public class FakeApplication extends SimpleApplication {
     public static class FakeAppStateManager extends AppStateManager {
 
         private AppStateManagerNode node;
-        ArrayList<AppState> states = new ArrayList<>();
+        List<AppState> states = new ArrayList<>();
 
         public FakeAppStateManager(Application app) {
             super(app);
