@@ -45,7 +45,7 @@ import org.netbeans.modules.csl.spi.LanguageRegistration;
 public class GlslLanguage extends DefaultLanguageConfig {
 
     @Override
-    public Language getLexerLanguage() {
+    public Language<GlslTokenID> getLexerLanguage() {
         return new GlslLanguageHierarchy().language();
     }
 

@@ -35,11 +35,6 @@ import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
 import javax.swing.border.TitledBorder;
 import org.netbeans.api.progress.ProgressHandle;
-import org.openide.util.Exceptions;
-import org.openide.util.NbBundle;
-import org.openide.windows.TopComponent;
-import org.openide.windows.WindowManager;
-import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
@@ -49,12 +44,17 @@ import org.openide.awt.Toolbar;
 import org.openide.awt.ToolbarPool;
 import org.openide.awt.UndoRedo;
 import org.openide.filesystems.FileObject;
+import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
+import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.Lookup.Result;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
+import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
+import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 /**
  * TODO: some threading stuff
@@ -112,7 +112,7 @@ public final class SceneComposerTopComponent extends TopComponent implements Sce
         jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         jToolBar1 = new javax.swing.JToolBar();
-        transformationTypeComboBox = new javax.swing.JComboBox();
+        transformationTypeComboBox = new javax.swing.JComboBox<>();
         jSeparator9 = new javax.swing.JToolBar.Separator();
         selectButton = new javax.swing.JToggleButton();
         moveButton = new javax.swing.JToggleButton();
@@ -231,12 +231,9 @@ public final class SceneComposerTopComponent extends TopComponent implements Sce
                     .addComponent(jLabel10))
                 .addGap(34, 34, 34)
                 .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(sceneInfoPanelLayout.createSequentialGroup()
-                        .addComponent(jLabel12)
-                        .addGap(105, 105, 105))
-                    .addGroup(sceneInfoPanelLayout.createSequentialGroup()
-                        .addComponent(jLabel11)
-                        .addContainerGap(105, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addComponent(jLabel12)
+                    .addComponent(jLabel11))
+                .addContainerGap())
         );
         sceneInfoPanelLayout.setVerticalGroup(
             sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -244,13 +241,10 @@ public final class SceneComposerTopComponent extends TopComponent implements Sce
                 .addComponent(sceneInfoLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sceneInfoLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(5, 5, 5)
                 .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(sceneInfoPanelLayout.createSequentialGroup()
-                        .addGap(4, 4, 4)
-                        .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel7)))
+                    .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7)
                     .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(sceneInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -274,7 +268,7 @@ public final class SceneComposerTopComponent extends TopComponent implements Sce
         jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
 
-        transformationTypeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Local", "Global", "Camera" }));
+        transformationTypeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Local", "Global", "Camera" }));
         transformationTypeComboBox.setToolTipText(org.openide.util.NbBundle.getMessage(SceneComposerTopComponent.class, "SceneComposerTopComponent.transformationTypeComboBox.toolTipText")); // NOI18N
         transformationTypeComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -724,6 +718,7 @@ public final class SceneComposerTopComponent extends TopComponent implements Sce
 private void emitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emitButtonActionPerformed
     SceneApplication.getApplication().enqueue(new Callable<Object>() {
 
+        @Override
         public Object call() throws Exception {
             emit(editorController.getSelectedSpat());
             return null;
@@ -767,7 +762,7 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
 }//GEN-LAST:event_jToggleSelectGeomActionPerformed
 
     private void transformationTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transformationTypeComboBoxActionPerformed
-        toolController.setTransformationType((String) transformationTypeComboBox.getSelectedItem());
+        toolController.setTransformationType(transformationTypeComboBox.getItemAt(transformationTypeComboBox.getSelectedIndex()));
     }//GEN-LAST:event_transformationTypeComboBoxActionPerformed
 
     private void jSlider1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSlider1StateChanged
@@ -880,7 +875,7 @@ private void jToggleSelectGeomActionPerformed(java.awt.event.ActionEvent evt) {/
     private javax.swing.JToggleButton showGridToggleButton;
     private javax.swing.JToggleButton showSelectionToggleButton;
     private javax.swing.ButtonGroup spatialModButtonGroup;
-    private javax.swing.JComboBox transformationTypeComboBox;
+    private javax.swing.JComboBox<String> transformationTypeComboBox;
     // End of variables declaration//GEN-END:variables
 
     private void emit(Spatial root) {

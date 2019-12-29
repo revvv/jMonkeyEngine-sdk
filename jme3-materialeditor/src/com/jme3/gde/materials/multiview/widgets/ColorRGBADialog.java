@@ -60,7 +60,7 @@ public class ColorRGBADialog extends javax.swing.JDialog {
         float[] floats = new float[4];
         jColorChooser1.getColor().getComponents(floats);
         color = new Color(floats[0], floats[1], floats[2], ((float) alphaSlider.getValue()) / 100.0f);
-        String str = new String(floats[0] + " " + floats[1] + " " + floats[2] + " " + ((float) alphaSlider.getValue()) / 100.0f);
+        String str = floats[0] + " " + floats[1] + " " + floats[2] + " " + ((float) alphaSlider.getValue()) / 100.0f;
         strColor = str;
     }
 
@@ -169,7 +169,7 @@ public class ColorRGBADialog extends javax.swing.JDialog {
             this.color = color;
             jColorChooser1.setColor(color);
 
-            alphaSlider.setValue((int) ((float) (color.getAlpha() / 255f) * 100));
+            alphaSlider.setValue((int) ((color.getAlpha() / 255f) * 100));
         }
 
     }

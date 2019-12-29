@@ -92,7 +92,7 @@ public class NVCompress extends javax.swing.JFrame {
         lblCompressType = new javax.swing.JLabel();
         chkCuda = new javax.swing.JCheckBox();
         sclFileList = new javax.swing.JScrollPane();
-        lstFileList = new javax.swing.JList();
+        lstFileList = new javax.swing.JList<>();
         btnAddFiles = new javax.swing.JButton();
         btnRemoveFiles = new javax.swing.JButton();
         pnlExportOpt = new javax.swing.JPanel();
@@ -356,7 +356,7 @@ public class NVCompress extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(barProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
-                    .addComponent(btnRemoveFiles, javax.swing.GroupLayout.PREFERRED_SIZE, 24, Short.MAX_VALUE)
+                    .addComponent(btnRemoveFiles, javax.swing.GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE)
                     .addComponent(btnAddFiles, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -574,13 +574,13 @@ public class NVCompress extends javax.swing.JFrame {
     }
 
     private Object[] compileFileList(){
-        Object[] values = lstFileList.getSelectedValues();
-        if (values == null || values.length == 0){
+        List<File> values = lstFileList.getSelectedValuesList();
+        if (values == null || values.isEmpty()){
             // no specific files selected, add all of them
-            DefaultListModel listModel = (DefaultListModel) lstFileList.getModel();
-            values = listModel.toArray();
+            DefaultListModel<File> listModel = (DefaultListModel) lstFileList.getModel();
+            return listModel.toArray();
         }
-        return values;
+        return values.toArray();
     }
 
     private void runNVCompressAll(final File exportDir){
@@ -749,9 +749,9 @@ public class NVCompress extends javax.swing.JFrame {
     }//GEN-LAST:event_btnAddFilesActionPerformed
 
     private void btnRemoveFilesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveFilesActionPerformed
-        Object[] selected = lstFileList.getSelectedValues();
-        DefaultListModel listModel = (DefaultListModel) lstFileList.getModel();
-        for (Object val : selected){
+        List<File> selected = lstFileList.getSelectedValuesList();
+        DefaultListModel<File> listModel = (DefaultListModel) lstFileList.getModel();
+        for (File val : selected){
             listModel.removeElement(val);
         }
     }//GEN-LAST:event_btnRemoveFilesActionPerformed
@@ -895,7 +895,7 @@ public class NVCompress extends javax.swing.JFrame {
     private javax.swing.JLabel lblCompressType;
     private javax.swing.JLabel lblMapType;
     private javax.swing.JLabel lblTargetDir;
-    private javax.swing.JList lstFileList;
+    private javax.swing.JList<File> lstFileList;
     private javax.swing.JMenuItem menuAbout;
     private javax.swing.JMenu menuFile;
     private javax.swing.JMenu menuHelp;
