@@ -79,14 +79,14 @@ public class IosCustomizerPanel extends javax.swing.JPanel implements ActionList
     private void saveProperties() {
         //TODO: check properties
         properties.setProperty("ios.enabled", "" + jCheckBox1.isSelected());
-        String version = (String) jComboBox1.getSelectedItem();
+        String version = jComboBox1.getItemAt(jComboBox1.getSelectedIndex());
         properties.setProperty("ios.version", version);
         properties.setProperty("delete.folder", "" + jCheckBox2.isSelected());
     }
 
     private void setSelected(String name) {
         for (int i = 0; i < jComboBox1.getItemCount(); i++) {
-            String target = (String) jComboBox1.getItemAt(i);
+            String target = jComboBox1.getItemAt(i);
             if (target.equals(name)) {
                 jComboBox1.setSelectedIndex(i);
                 return;
@@ -109,7 +109,7 @@ public class IosCustomizerPanel extends javax.swing.JPanel implements ActionList
     private void initComponents() {
 
         jCheckBox1 = new javax.swing.JCheckBox();
-        jComboBox1 = new javax.swing.JComboBox();
+        jComboBox1 = new javax.swing.JComboBox<>();
         jLabel1 = new javax.swing.JLabel();
         jCheckBox2 = new javax.swing.JCheckBox();
         jTextField1 = new javax.swing.JTextField();
@@ -119,7 +119,7 @@ public class IosCustomizerPanel extends javax.swing.JPanel implements ActionList
 
         jCheckBox1.setText(org.openide.util.NbBundle.getMessage(IosCustomizerPanel.class, "IosCustomizerPanel.jCheckBox1.text")); // NOI18N
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         jLabel1.setText(org.openide.util.NbBundle.getMessage(IosCustomizerPanel.class, "IosCustomizerPanel.jLabel1.text")); // NOI18N
 
@@ -184,7 +184,7 @@ public class IosCustomizerPanel extends javax.swing.JPanel implements ActionList
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox2;
-    private javax.swing.JComboBox jComboBox1;
+    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;

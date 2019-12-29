@@ -18,7 +18,7 @@ import org.openide.filesystems.FileUtil;
 public class JME3TestsAndroidPanelVisual extends JPanel implements DocumentListener {
 
     public static final String PROP_PROJECT_NAME = "projectName";
-    private JME3TestsAndroidWizardPanel panel;
+    private final JME3TestsAndroidWizardPanel panel;
 
     public JME3TestsAndroidPanelVisual(JME3TestsAndroidWizardPanel panel) {
         initComponents();
@@ -110,7 +110,7 @@ public class JME3TestsAndroidPanelVisual extends JPanel implements DocumentListe
         String command = evt.getActionCommand();
         if ("BROWSE".equals(command)) {
             JFileChooser chooser = new JFileChooser();
-            FileUtil.preventFileChooserSymlinkTraversal(chooser, null);
+            chooser.setCurrentDirectory(null);
             chooser.setDialogTitle("Select Project Location");
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             String path = this.projectLocationTextField.getText();
@@ -218,6 +218,7 @@ public class JME3TestsAndroidPanelVisual extends JPanel implements DocumentListe
     }
 
     // Implementation of DocumentListener --------------------------------------
+    @Override
     public void changedUpdate(DocumentEvent e) {
         updateTexts(e);
         if (this.projectNameTextField.getDocument() == e.getDocument()) {
@@ -225,6 +226,7 @@ public class JME3TestsAndroidPanelVisual extends JPanel implements DocumentListe
         }
     }
 
+    @Override
     public void insertUpdate(DocumentEvent e) {
         updateTexts(e);
         if (this.projectNameTextField.getDocument() == e.getDocument()) {
@@ -232,6 +234,7 @@ public class JME3TestsAndroidPanelVisual extends JPanel implements DocumentListe
         }
     }
 
+    @Override
     public void removeUpdate(DocumentEvent e) {
         updateTexts(e);
         if (this.projectNameTextField.getDocument() == e.getDocument()) {

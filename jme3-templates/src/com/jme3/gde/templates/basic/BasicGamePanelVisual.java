@@ -18,7 +18,7 @@ import org.openide.filesystems.FileUtil;
 public class BasicGamePanelVisual extends JPanel implements DocumentListener {
 
     public static final String PROP_PROJECT_NAME = "projectName";
-    private BasicGameWizardPanel panel;
+    private final BasicGameWizardPanel panel;
 
     public BasicGamePanelVisual(BasicGameWizardPanel panel) {
         initComponents();
@@ -110,7 +110,7 @@ public class BasicGamePanelVisual extends JPanel implements DocumentListener {
         String command = evt.getActionCommand();
         if ("BROWSE".equals(command)) {
             JFileChooser chooser = new JFileChooser();
-            FileUtil.preventFileChooserSymlinkTraversal(chooser, null);
+            chooser.setCurrentDirectory(null);
             chooser.setDialogTitle("Select Project Location");
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             String path = this.projectLocationTextField.getText();
@@ -218,6 +218,7 @@ public class BasicGamePanelVisual extends JPanel implements DocumentListener {
     }
 
     // Implementation of DocumentListener --------------------------------------
+    @Override
     public void changedUpdate(DocumentEvent e) {
         updateTexts(e);
         if (this.projectNameTextField.getDocument() == e.getDocument()) {
@@ -225,6 +226,7 @@ public class BasicGamePanelVisual extends JPanel implements DocumentListener {
         }
     }
 
+    @Override
     public void insertUpdate(DocumentEvent e) {
         updateTexts(e);
         if (this.projectNameTextField.getDocument() == e.getDocument()) {
@@ -232,6 +234,7 @@ public class BasicGamePanelVisual extends JPanel implements DocumentListener {
         }
     }
 
+    @Override
     public void removeUpdate(DocumentEvent e) {
         updateTexts(e);
         if (this.projectNameTextField.getDocument() == e.getDocument()) {

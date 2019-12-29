@@ -62,12 +62,14 @@ public class MatDefEditorToolBar extends JPanel {
         techniqueComboBox.setModel(comboModel);
         final DefaultListCellRenderer renderer = new DefaultListCellRenderer();
         techniqueComboBox.setRenderer(new ListCellRenderer<TechniqueBlock>() {
+            
             @Override
-            public Component getListCellRendererComponent(JList list, TechniqueBlock value, int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<? extends TechniqueBlock> list, TechniqueBlock value, int index, boolean isSelected, boolean cellHasFocus) {
                 JLabel c = (JLabel) renderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 c.setText(value.getName());
                 return c;
             }
+            
         });
 
     }
@@ -95,7 +97,7 @@ public class MatDefEditorToolBar extends JPanel {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        techniqueComboBox = new javax.swing.JComboBox();
+        techniqueComboBox = new javax.swing.JComboBox<>();
         jButton1 = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         jButton2 = new javax.swing.JButton();
@@ -105,7 +107,6 @@ public class MatDefEditorToolBar extends JPanel {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(MatDefEditorToolBar.class, "MatDefEditorToolBar.jLabel1.text")); // NOI18N
 
-        techniqueComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         techniqueComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 techniqueComboBoxActionPerformed(evt);
@@ -196,6 +197,6 @@ public class MatDefEditorToolBar extends JPanel {
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JComboBox techniqueComboBox;
+    private javax.swing.JComboBox<TechniqueBlock> techniqueComboBox;
     // End of variables declaration//GEN-END:variables
 }
