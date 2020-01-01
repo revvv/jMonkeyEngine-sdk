@@ -10,7 +10,7 @@ cache:
    - $HOME/.gradle/caches/
    - $HOME/.gradle/wrapper/
    - netbeans
-   - jdks/local/8u152-b16/compiled
+   - jdks/local/*/compiled
 
 addons:
   ssh_known_hosts: updates.jmonkeyengine.org
@@ -42,8 +42,9 @@ install:
   - ./build_engine.sh
   # Now we have to patch the engine
   - ./fix_engine.sh
+  # Can't do that currently was we now use engine/ as subproject...
   # Remove Engine Source and built class files since travis is low on disk space
-  - rm -rf engine/
+  # - rm -rf engine/
   - ./gradlew buildSdk
   #- '[ -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && ant -Dstorepass="$NBM_SIGN_PASS" hudson-nightly | awk "{printf(\".\"); fflush(stdout)}" || :'
   #- '[ -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && scp -rp -i nbproject/private/www-updater.key build/updates/* www-updater@updates.jmonkeyengine.org:/var/www/updates/nightly/3.1/plugins || :'
