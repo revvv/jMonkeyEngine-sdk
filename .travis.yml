@@ -9,7 +9,6 @@ cache:
   directories:
    - $HOME/.gradle/caches/
    - $HOME/.gradle/wrapper/
-   - netbeans
    - jdks/local/*/compiled
 
 addons:
