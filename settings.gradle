@@ -1,0 +1,2 @@
+rootProject.name = 'sdk'
+includeBuild './engine'
