@@ -1,198 +1,179 @@
 package com.jme3.gde.codecheck.hints;
 
+import com.sun.source.tree.BlockTree;
+import com.sun.source.tree.ExpressionStatementTree;
+import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
-import com.sun.source.tree.Tree.Kind;
 import com.sun.source.util.SourcePositions;
 import com.sun.source.util.TreePath;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import javax.lang.model.element.Element;
-import javax.swing.text.Document;
-import javax.swing.text.JTextComponent;
-import org.netbeans.api.editor.EditorRegistry;
 import org.netbeans.api.java.source.CompilationInfo;
-import org.netbeans.modules.java.hints.spi.AbstractHint;
-import org.netbeans.spi.editor.hints.ChangeInfo;
-import org.netbeans.spi.editor.hints.EnhancedFix;
+import org.netbeans.api.java.source.TreeMaker;
+import org.netbeans.api.java.source.WorkingCopy;
 import org.netbeans.spi.editor.hints.ErrorDescription;
-import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.Fix;
-import org.openide.awt.StatusDisplayer;
+import org.netbeans.spi.editor.hints.Severity;
+import org.netbeans.spi.java.hints.ErrorDescriptionFactory;
+import org.netbeans.spi.java.hints.Hint;
+import org.netbeans.spi.java.hints.HintContext;
+import org.netbeans.spi.java.hints.JavaFix;
+import org.netbeans.spi.java.hints.TriggerTreeKind;
 import org.openide.util.NbBundle;
 
-public class TempVarsHint extends AbstractHint {
+@Hint(id = "#TempVarsHint.id", displayName = "#TempVarsHint.display-name",
+        description = "#TempVarsHint.description", severity = Severity.WARNING,
+        category = "general")
+@NbBundle.Messages({
+    "TempVarsHint.display-name=TempVars might not be released",
+    "TempVarsHint.id=TempVars release check",
+    "TempVarsHint.description=Checks for calls TempVars.get() and search for correspondinng release() call",
+    "TempVarsHint.fix-text=Add a release() call at the end of the method",})
+public class TempVarsHint {
 
-    //This hint does not enable the IDE to fix the problem:
-    private static final List<Fix> NO_FIXES = Collections.<Fix>emptyList();
-    //This hint applies to method invocations:
-    private static final Set<Tree.Kind> TREE_KINDS =
-            EnumSet.<Tree.Kind>of(Tree.Kind.METHOD);
-    private List<varsPosition> vars = new ArrayList<varsPosition>();
+    @TriggerTreeKind(Tree.Kind.METHOD)
+    public static List<ErrorDescription> hint(HintContext ctx) {
+        MethodTree mt = (MethodTree) ctx.getPath().getLeaf();
+        CompilationInfo info = ctx.getInfo();
 
-    public TempVarsHint() {
-        super(true, true, AbstractHint.HintSeverity.WARNING);
-    }
-
-    //Specify the kind of code that the hint applies to, in this case,
-    //the hint applies to method invocations:
-    @Override
-    public Set<Kind> getTreeKinds() {
-        return TREE_KINDS;
-    }
-
-    @Override
-    public List<ErrorDescription> run(CompilationInfo info, TreePath treePath) {
-
-        MethodTree mt = (MethodTree) treePath.getLeaf();
-        vars.clear();
-        if (mt.getBody() != null) {
-            for (StatementTree t : mt.getBody().getStatements()) {
-
-
-                if (t.getKind().equals(Tree.Kind.VARIABLE)) {
-                    Element el = info.getTrees().getElement(info.getTrees().getPath(info.getCompilationUnit(), t));
-                    String name = t.toString();
-
-                    //This is where it all happens: if the method invocation is 'showMessageDialog',
-                    //then the hint infrastructure kicks into action:
-                    if (name.indexOf("TempVars.get()") >= 0) {
-
-                        SourcePositions sp = info.getTrees().getSourcePositions();
-                        int start = (int) sp.getStartPosition(info.getCompilationUnit(), t);
-                        int end = (int) sp.getEndPosition(info.getCompilationUnit(), t);
-                        vars.add(new varsPosition(el.getSimpleName().toString(), start, end));
-                        // System.err.println("TempVars.get() at " + start + " " + end+" for variable "+el.getSimpleName().toString());
-                    }
-
-                }
-                if (t.getKind().equals(Tree.Kind.EXPRESSION_STATEMENT) && !vars.isEmpty()) {
-                    Element el = info.getTrees().getElement(treePath);
-                    String name = t.toString();
-
-
-                    if (name.indexOf(".release()") >= 0) {
-
-                        for (Iterator<varsPosition> it = vars.iterator(); it.hasNext();) {
-                            varsPosition curVar = it.next();
-                            //This is where it all happens: if the method invocation is 'showMessageDialog',
-                            //then the hint infrastructure kicks into action:
-                            if (name.indexOf(curVar.varName + ".release()") >= 0) {
-                                //prepare selection for removing                       
-                                it.remove();
-
-//                            SourcePositions sp = info.getTrees().getSourcePositions();
-//                            int start = (int) sp.getStartPosition(info.getCompilationUnit(), t);
-//                            int end = (int) sp.getEndPosition(info.getCompilationUnit(), t);
-//                            System.err.println(curVar.varName + ".release() at " + start + " " + end);
-
-                            }
-                        }
-                    }
-
-                }
-
-
-            }
-        }
+        // Get the list of unreleased temp variables inside the method body
+        Collection<VarsPosition> vars = getUnreleasedTempVars(mt, info);
         if (!vars.isEmpty()) {
-            List<ErrorDescription> list = new ArrayList<ErrorDescription>();
+            List<ErrorDescription> list = new ArrayList<>(vars.size());
 
-            JTextComponent editor = EditorRegistry.lastFocusedComponent();
-            Document doc = editor.getDocument();
-            List<Fix> fixes = new ArrayList<Fix>();
-            SourcePositions sp = info.getTrees().getSourcePositions();
-            int methodEnd = (int) (sp.getEndPosition(info.getCompilationUnit(), mt) - 1);
-
-            for (varsPosition curVar : vars) {
-                String bodyText = "    "+curVar.varName + ".release();\n    ";
-                fixes.clear();
-                fixes.add(new MessagesFix(doc, methodEnd, bodyText));
-
-                list.add(ErrorDescriptionFactory.createErrorDescription(
-                        getSeverity().toEditorSeverity(),
-                        getDisplayName(),
-                        fixes,
-                        info.getFileObject(),
-                        curVar.start, curVar.end));
+            for (VarsPosition curVar : vars) {
+                Fix fix = new TempVarsHint.FixImpl(ctx.getInfo(), ctx.getPath(), curVar).toEditorFix();
+                list.add(ErrorDescriptionFactory.forSpan(
+                        ctx,
+                        curVar.start, curVar.end,
+                        Bundle.TempVarsHint_display_name(),
+                        fix));
             }
+
             return list;
         }
 
         return null;
-
     }
 
-    //This is called if/when the hint processing is cancelled:
-    @Override
-    public void cancel() {
-    }
+    private static List<VarsPosition> getUnreleasedTempVars(MethodTree mt, CompilationInfo info) {
+        if (mt.getBody() != null) {
+            List<VarsPosition> vars = null;
+            for (StatementTree t : mt.getBody().getStatements()) {
 
-    //Message that the user sees in the left sidebar:
-    @Override
-    public String getDisplayName() {
-        return NbBundle.getMessage(TempVarsHint.class, "TempVarsHint.display-name");
-    }
+                if (t.getKind().equals(Tree.Kind.VARIABLE)) {
+                    Element el = info.getTrees().getElement(info.getTrees().getPath(info.getCompilationUnit(), t));
+                    String realTypeName = el.asType().toString();
 
-    //Name of the hint in the Options window:
-    @Override
-    public String getId() {
-        return NbBundle.getMessage(TempVarsHint.class, "TempVarsHint.id");
-    }
+                    // Check that the variable type is TempVars
+                    if ("com.jme3.util.TempVars".equals(realTypeName)) {
 
-    //Description of the hint in the Options window:
-    @Override
-    public String getDescription() {
-        return NbBundle.getMessage(TempVarsHint.class, "TempVarsHint.description");
-    }
+                        SourcePositions sp = info.getTrees().getSourcePositions();
+                        int start = (int) sp.getStartPosition(info.getCompilationUnit(), t);
+                        int end = (int) sp.getEndPosition(info.getCompilationUnit(), t);
+                        String variableName = el.getSimpleName().toString();
+                        if (vars == null) {
+                            vars = new ArrayList<>();
+                        }
+                        vars.add(new VarsPosition(variableName, start, end));
+                        // System.err.println("TempVars.get() at " + start + " " + end+" for variable "+el.getSimpleName().toString());
+                    }
 
-    class MessagesFix implements EnhancedFix {
+                }
+                if (vars != null && !vars.isEmpty() && t.getKind().equals(Tree.Kind.EXPRESSION_STATEMENT)) {
+                    ExpressionStatementTree expressionStatementTree = (ExpressionStatementTree) t;
+                    if (expressionStatementTree.getExpression().getKind().equals(Tree.Kind.METHOD_INVOCATION)) {
+                        MethodInvocationTree methodInvocationTree = (MethodInvocationTree) expressionStatementTree.getExpression();
 
-        Document doc = null;
-        int start = 0;
-        String bodyText = null;
+                        // See that the method is called on a member
+                        if (methodInvocationTree.getMethodSelect().getKind().equals(Tree.Kind.MEMBER_SELECT)) {
+                            MemberSelectTree memberSelectTree = (MemberSelectTree) methodInvocationTree.getMethodSelect();
+                            Element el = info.getTrees().getElement(info.getTrees().getPath(info.getCompilationUnit(), methodInvocationTree));
 
-        public MessagesFix(Document doc, int start, String bodyText) {
-            this.doc = doc;
-            this.start = start;
-            this.bodyText = bodyText;
+                            // Check that the method being called is "release"
+                            if ("release".equals(el.getSimpleName().toString())) {
+                                String variableName = memberSelectTree.getExpression().toString();
+                                for (Iterator<VarsPosition> it = vars.iterator(); it.hasNext();) {
+                                    VarsPosition curVar = it.next();
+                                    if (variableName.equals(curVar.varName)) {
+                                        //prepare selection for removing
+                                        it.remove();
+
+                                        //SourcePositions sp = info.getTrees().getSourcePositions();
+                                        //int start = (int) sp.getStartPosition(info.getCompilationUnit(), t);
+                                        //int end = (int) sp.getEndPosition(info.getCompilationUnit(), t);
+                                        //System.err.println(curVar.varName + ".release() at " + start + " " + end);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return (vars == null ? Collections.emptyList() : vars);
         }
 
-        @Override
-        public CharSequence getSortText() {
-            return "charsequence";
-        }
-
-        @Override
-        public String getText() {
-            return NbBundle.getMessage(TempVarsHint.class, "TempVarsHint.fix-text");
-        }
-
-        @Override
-        public ChangeInfo implement() throws Exception {
-            //Adding the release call
-            doc.insertString(start, bodyText, null);            
-            //Display message to user in status bar:
-            StatusDisplayer.getDefault().setStatusText("Added: " + bodyText);
-            return null;
-        }
+        return Collections.emptyList();
     }
 
-    class varsPosition {
+    private static final class VarsPosition {
 
-        String varName;
-        int start;
-        int end;
+        final String varName;
+        final int start;
+        final int end;
 
-        public varsPosition(String varName, int start, int end) {
+        public VarsPosition(String varName, int start, int end) {
             this.varName = varName;
             this.end = end;
             this.start = start;
+        }
+
+        @Override
+        public String toString() {
+            return varName;
+        }
+
+    }
+
+    private static final class FixImpl extends JavaFix {
+
+        private final VarsPosition variable;
+
+        public FixImpl(CompilationInfo info, TreePath tp, VarsPosition variable) {
+            super(info, tp);
+            this.variable = variable;
+        }
+
+        @Override
+        protected String getText() {
+            return Bundle.TempVarsHint_fix_text();
+        }
+
+        @Override
+        protected void performRewrite(JavaFix.TransformationContext tc) throws Exception {
+            WorkingCopy wc = tc.getWorkingCopy();
+            TreePath tp = tc.getPath();
+            final BlockTree oldBody = ((MethodTree) tp.getLeaf()).getBody();
+            if (oldBody == null) {
+                return;
+            }
+            TreeMaker make = wc.getTreeMaker();
+            List<? extends StatementTree> statements = oldBody.getStatements();
+            List<StatementTree> newStatements = new ArrayList<>(statements.size() + 1);
+            newStatements.addAll(statements);
+            newStatements.add(make.ExpressionStatement(make.MethodInvocation(Collections.emptyList(), make.MemberSelect(make.Identifier(variable.varName), "release"), Collections.emptyList())));
+
+            BlockTree newBlockTree = wc.getTreeMaker().Block(newStatements, oldBody.isStatic());
+            wc.rewrite(oldBody, newBlockTree);
         }
     }
 }
