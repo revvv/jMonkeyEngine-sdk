@@ -568,7 +568,7 @@ ant.properties['plugins.version'] = jmeVersion
 ant.properties['app.version']= jmePomVersion
 ant.properties['nbm.revision']= jmeNbmRevision
 
-task overrideHarness(dependsOn: checkPlatformConfig) {
+task overrideHarness(dependsOn: ['checkPlatformConfig', 'updateNetbeans']) {
     doLast {
         def props = new Properties()
         props.load(new FileInputStream("$rootDir/harness-override/override.properties"))
@@ -611,6 +611,15 @@ task overrideHarness(dependsOn: checkPlatformConfig) {
 }
 overrideHarness.outputs.files([ 'netbeans/harness/launchers/app.exe', 'netbeans/harness/launchers/app64.exe', 'netbeans/harness/launchers/pre7_app.exe'])
 overrideHarness.inputs.files([ 'netbeans/harness/launchers/app.exe', 'netbeans/harness/launchers/app64.exe', 'netbeans/harness/launchers/pre7_app.exe', 'harness-override/override.properties'])
+
+task updateNetbeans(type: Exec, dependsOn: checkPlatformConfig) {
+    ignoreExitValue true // We make netbeans fail by specifying "exit" which is no java file to open (this command would open the whole IDE)
+    if (org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem.isWindows()) {
+        commandLine 'netbeans/bin/netbeans.exe', '--update-all', '--modules', '--refresh', '--nosplash', '--nogui', 'exit'
+    } else {
+        commandLine 'netbeans/bin/netbeans', '--update-all', '--modules', '--refresh', '--nosplash', '--nogui', 'exit'
+    }
+}
 
 task downloadAvian() {
     doLast {
