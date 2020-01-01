@@ -4,6 +4,10 @@ It's not really a big process but you should be familiar with the command line a
 We will skip the process of cloning the repo/downloading the zip, as the net is full of examples about this.  
 
 ## Defining the Engine Version  
+Note: The following explanation is somewhat outdate: We cannot download the Engine as Maven Dependency, as that misses critical stuff like jbullet.jar.
+Thus we have the scripts `build_engine.sh` and `fix_engine.sh`, which download and fix the engine install. Currently we use [Gradle Composite Builds](https://docs.gradle.org/current/userguide/composite_builds.html)
+The engine will be downloaded into an `engine` directory, so care about editing this repository, when trying to use a specific engine version.
+
 As the SDK has been split apart from the Engine Core, it simply downloads it as a dependency.  
 This comes in handy when it comes to build time however you're most likely unable to check your own engine changes.  
 

@@ -21,7 +21,11 @@ fi
 #echo "Patching the Engine...."
 #patch -s -N -p 1 < ../patches/FixHWSkinningSerialization.diff
 
-echo "Building the Engine and installing them to your local maven repo...."
-./gradlew -PbuildJavaDoc=true install # Depends on jarJavadoc, jarSourcecode, assemble, dist etc.
+# Remark: We don't build the engine from here anymore but instead use https://docs.gradle.org/current/userguide/composite_builds.html,
+# that way we don't have to care about versioning and don't spam the user's mavenLocal Repo. Also you only need this script really to
+# download the engine. Nothing a windows user couldn't do by hand.
+
+#echo "Building the Engine and installing them to your local maven repo...."
+# ./gradlew -PbuildJavaDoc=true install # Depends on jarJavadoc, jarSourcecode, assemble, dist etc.
 
 cd ../

@@ -33,7 +33,7 @@ repositories {
     }
 }
 
-if (System.getenv('TRAVIS') != null) {
+/*if (System.getenv('TRAVIS') != null) {
     if (System.env.TRAVIS_TAG != null && System.env.TRAVIS_TAG != "") { // Strangely it has to be both, because it's sometimes set as TRAVIS_TAG="" when we're in travis but no tag is set
         // v3.3.0-stable-sdk1 becomes 3.3.0-stable
         // Intentionally not using lastIndexOf here, we want the second "-".
@@ -69,7 +69,7 @@ if (System.getenv('TRAVIS') != null) {
 	
 	// This is the engine version that will be used per default on every regular commit
 	ext.jmeEngineVersion = "3.3.0" + ext.branchSpec + "-SNAPSHOT"
-}
+}*/
 
 configurations {
     corelibs
@@ -84,31 +84,31 @@ dependencies {
     corelibs dep("com.badlogicgames.gdx:gdx-ai:1.8.1", true, true)
     corelibs dep("javax.help:javahelp:2.0.05", false, false)
 
-    corelibs dep("org.jmonkeyengine:jme3-core:$jmeEngineVersion", true, true)
-    corelibs dep("org.jmonkeyengine:jme3-desktop:$jmeEngineVersion", true, true)
-    corelibs dep("org.jmonkeyengine:jme3-lwjgl:$jmeEngineVersion", true, true)
-    corelibs dep("org.jmonkeyengine:jme3-effects:$jmeEngineVersion", true, true)
-    corelibs dep("org.jmonkeyengine:jme3-blender:$jmeEngineVersion", true, true)
+    corelibs dep("org.jmonkeyengine:jme3-core", false, false)
+    corelibs dep("org.jmonkeyengine:jme3-desktop", false, false)
+    corelibs dep("org.jmonkeyengine:jme3-lwjgl", false, false)
+    corelibs dep("org.jmonkeyengine:jme3-effects", false, false)
+    corelibs dep("org.jmonkeyengine:jme3-blender", false, false)
 
-    corelibs dep("org.jmonkeyengine:jme3-bullet:$jmeEngineVersion", true, true)
-    corelibs dep("org.jmonkeyengine:jme3-bullet-native:$jmeEngineVersion", true, true)
+    corelibs dep("org.jmonkeyengine:jme3-bullet", false, false)
+    corelibs dep("org.jmonkeyengine:jme3-bullet-native", false, false)
     corelibs dep(fileTree("lib"), false, false)
-    corelibs dep("org.jmonkeyengine:jme3-jogg:$jmeEngineVersion", true, true)
+    corelibs dep("org.jmonkeyengine:jme3-jogg", false, false)
 
-    corelibs dep("org.jmonkeyengine:jme3-networking:$jmeEngineVersion", true, true)
-    corelibs dep("org.jmonkeyengine:jme3-niftygui:$jmeEngineVersion", true, true)
-    corelibs dep("org.jmonkeyengine:jme3-plugins:$jmeEngineVersion", true, true)
-    corelibs dep("org.jmonkeyengine:jme3-terrain:$jmeEngineVersion", true, true)
+    corelibs dep("org.jmonkeyengine:jme3-networking", false, false)
+    corelibs dep("org.jmonkeyengine:jme3-niftygui", false, false)
+    corelibs dep("org.jmonkeyengine:jme3-plugins", false, false)
+    corelibs dep("org.jmonkeyengine:jme3-terrain", false, false)
 
-    optlibs dep("org.jmonkeyengine:jme3-jbullet:$jmeEngineVersion", true, true)
-    optlibs dep("org.jmonkeyengine:jme3-jogl:$jmeEngineVersion", true, true)
-    optlibs dep("org.jmonkeyengine:jme3-android:$jmeEngineVersion", true, true)
-    optlibs dep("org.jmonkeyengine:jme3-ios:$jmeEngineVersion", true, true)
-    optlibs dep("org.jmonkeyengine:jme3-android-native:$jmeEngineVersion", true, true)
-    optlibs dep("org.jmonkeyengine:jme3-bullet-native-android:$jmeEngineVersion", true, true)
-    testdatalibs dep("org.jmonkeyengine:jme3-testdata:$jmeEngineVersion", false, false)
+    optlibs dep("org.jmonkeyengine:jme3-jbullet", false, false)
+    optlibs dep("org.jmonkeyengine:jme3-jogl", false, false)
+    optlibs dep("org.jmonkeyengine:jme3-android", false, false)
+    optlibs dep("org.jmonkeyengine:jme3-ios", false, false)
+    optlibs dep("org.jmonkeyengine:jme3-android-native", false, false)
+    optlibs dep("org.jmonkeyengine:jme3-bullet-native-android", false, false)
+    testdatalibs dep("org.jmonkeyengine:jme3-testdata", false, false)
 
-    examplelibs dep("org.jmonkeyengine:jme3-examples:$jmeEngineVersion", false, true)
+    examplelibs dep("org.jmonkeyengine:jme3-examples", false, false)
 
 }
 
