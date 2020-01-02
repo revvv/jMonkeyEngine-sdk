@@ -238,7 +238,7 @@
                 <if>
                     <equals arg1="${env.BUILD_X86}" arg2="true"/>
                     <then>
-                        <property name="temp.platform2" value="windows-x86 linux-x86 " />
+                        <property name="temp.platform2" value="windows-x86" />
                         <echo message="Building for the X86 architecture "/>
                     </then>
                     <else>
