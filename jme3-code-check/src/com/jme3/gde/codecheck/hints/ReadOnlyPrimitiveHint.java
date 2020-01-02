@@ -39,8 +39,8 @@ public class ReadOnlyPrimitiveHint {
             Tree t = treePath.getLeaf();
             Element el = info.getTrees().getElement(info.getTrees().getPath(info.getCompilationUnit(), t));
 
-            //TODO: add more checks
-            if ("set".equals(el.getSimpleName().toString())) {
+            // TODO: add more checks
+            if (el.getSimpleName().toString().startsWith("set")) {
                 Fix fix = new ReadOnlyPrimitiveHint.FixImpl(ctx.getInfo(), ctx.getPath()).toEditorFix();
                 return ErrorDescriptionFactory.forName(
                         ctx,
