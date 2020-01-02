@@ -1,18 +1,18 @@
 #!/bin/bash
 sdk=`pwd`
 
-echo "Patching the jme3-jbullet POM file"
-pushd ~/.m2/repository/org/jmonkeyengine/jme3-jbullet/ > /dev/null
-for d in *; do
-  if [ -d "$d" ]; then
-    pushd $d > /dev/null
-    mv jme3-jbullet-$d.pom jbullet.pom
-    patch < "$sdk/patches/jbullet_dependencies_version_missing.diff"
-    mv jbullet.pom jme3-jbullet-$d.pom
-    popd > /dev/null
-  fi
-done
-popd > /dev/null
+#echo "Patching the jme3-jbullet POM file"
+#pushd ~/.m2/repository/org/jmonkeyengine/jme3-jbullet/ > /dev/null
+#for d in *; do
+#  if [ -d "$d" ]; then
+#    pushd $d > /dev/null
+#    mv jme3-jbullet-$d.pom jbullet.pom
+#    patch < "$sdk/patches/jbullet_dependencies_version_missing.diff"
+#    mv jbullet.pom jme3-jbullet-$d.pom
+#    popd > /dev/null
+#  fi
+#done
+#popd > /dev/null
 
 echo "Installing our local jbullet.jar and stack-alloc.jar into the maven local repository"
 pushd lib > /dev/null
