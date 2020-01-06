@@ -103,6 +103,7 @@ function unpack_mac_jdk {
     fi
     # FROM HERE: build-osx-zip.sh by normen (with changes)
     mv Home jdk # rename folder
+    rm -rf jdk/man jdk/legal # ANT got stuck at the symlinks (https://bz.apache.org/bugzilla/show_bug.cgi?id=64053)
     zip -9 -r -y -q ../../compiled/jdk-macosx.zip jdk
     cd ../../
     
