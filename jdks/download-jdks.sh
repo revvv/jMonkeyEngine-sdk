@@ -77,6 +77,7 @@ function download_jdk {
             curl -s -o downloads/jdk-$1$2 -L https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk$jdk_version-$jdk_build_version/OpenJDK8U-jdk_$1_hotspot_$jdk_version$jdk_build_version$2
         else
             curl -s -o downloads/jdk-$1$2 -L https://github.com/AdoptOpenJDK/openjdk$jdk_major_version-binaries/releases/download/jdk-$jdk_major_version.$jdk_version+$jdk_build_version/OpenJDK$jdk_major_version\U-jdk_$1_hotspot_$jdk_major_version.$jdk_version\_$jdk_build_version$2
+            curl -s -o downloads/jre-$1$2 -L https://github.com/AdoptOpenJDK/openjdk$jdk_major_version-binaries/releases/download/jdk-$jdk_major_version.$jdk_version+$jdk_build_version/OpenJDK$jdk_major_version\U-jre_$1_hotspot_$jdk_major_version.$jdk_version\_$jdk_build_version$2
         fi
         echo "<<< OK!"
     fi
@@ -150,8 +151,15 @@ function unpack_windows {
 
     mkdir -p windows-$1
     unzip -qq downloads/jdk-$1_windows.zip -d windows-$1
-    cd windows-$1/
     
+    if [ "$jdk_major_version" == "11" ];
+    then # temporary until https://issues.apache.org/jira/browse/NETBEANS-3660 is fixed
+        mkdir -p windows-$1/jre 
+        unzip -qq downloads/jre-$1_windows.zip -d windows-$1
+    fi
+    
+    cd windows-$1/
+
     if [ "$jdk_major_version" == "8" ];
     then
         mv jdk$jdk_version-$jdk_build_version/* .
@@ -160,8 +168,10 @@ function unpack_windows {
         rm src.zip
     else
         mv jdk-$jdk_major_version.$jdk_version+$jdk_build_version/* .
+        mv jdk-$jdk_major_version.$jdk_version+$jdk_build_version-jre/* jre/
         rm -rf jdk-$jdk_major_version.$jdk_version+$jdk_build_version
-    fi    
+        rm -rf jre-$jdk_major_version.$jdk_version+$jdk_build_version
+    fi
 
     # This seems to be replaced by lib/tools.jar in openJDK
     #unzip -qq tools.zip -d .
