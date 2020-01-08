@@ -69,3 +69,15 @@ When you then build the nbms, you have to specify the SecurePassword like so: `a
 To not show the key to the public, you can specify the StorePass as an Environment Variable inside of your CI Build System (Hudson, Travis, ...)  
 
 When all of this is completed, you just have to upload the nbms to the right server, we do that using the SCP Protocol which you can also see for uploading the maven artifacts.  
+
+### Upgrading the internal Netbeans Installer Bundles
+Whenever something unpredictable goes wrong with the installers, this is something you can try.
+For Instance: At the time of writing, we've been upgrading for Java 8 to Java 11 and Netbeans 8 to Netbeans 11.
+Now unfortunately Oracle/The OpenJDK Devs changed the versioning scheme from "1.8.3-b04" to "11.0.5+10", so the installer failed at detecting the Java Version in place.
+One __can__ specify a minimum version, it just doesn't make sense, since we're shipping with a JDK anyway.
+Now here's the catch: Even though we did Upgrade to Netbeans 11, our installer was still the one of commit b8bc4aca4c575ec092363a72cc98d04a91cd95a0.
+
+
+How to Upgrade the internal Netbeans Installer Natives? Just copy the files from `netbeans/harness/modules/ext` to `nbi/antlib`, where we fetch our nbi dependency from.
+Do note that we don't need the `nbi-engine` folder, which seems to contain the same files, just not jar'ed.
+Also note that it might be a good idea to upgrade `nbi/antlib/version`, so we know which version is used.
