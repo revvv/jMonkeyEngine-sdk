@@ -188,7 +188,7 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
         }
         //normen - JDK install - uses package on OSX
         if (!SystemUtils.isMacOS()) {
-            File javaHome = new File(System.getProperty("java.home")).getParentFile();
+            File javaHome = new File(System.getProperty("java.home"));
             File target = new File(installLocation, "jdk");
             try {
                 FileUtils.copyFile(javaHome, target, true); //FileUtils is one of the NBI core classes, already imported in ConfigurationLogic.java
@@ -199,7 +199,6 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
             // ADDED BY KIRILL: force correct permissions for JDK files
             LogManager.log("Setting JDK files as executable");
             setExecutableContents(target, "bin");
-            setExecutableContents(target, "jre/bin");
             setExecutableFile(target, "lib/jexec");
             setExecutableFile(target, "lib/amd64/libjawt.so");
             setExecutableFile(target, "lib/amd64/jli/libjli.so");
