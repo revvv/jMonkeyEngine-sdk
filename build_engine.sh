@@ -25,6 +25,10 @@ fi
 # that way we don't have to care about versioning and don't spam the user's mavenLocal Repo. Also you only need this script really to
 # download the engine. Nothing a windows user couldn't do by hand.
 
+# Until https://github.com/jMonkeyEngine/jmonkeyengine/issues/1260 is solved, prebuild the engine manually
+echo "Prebuilding the engine to ensure native libraries are unzipped"
+./gradlew -PbuildJavaDoc=true assemble
+
 #echo "Building the Engine and installing them to your local maven repo...."
 # ./gradlew -PbuildJavaDoc=true install # Depends on jarJavadoc, jarSourcecode, assemble, dist etc.
 
