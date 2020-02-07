@@ -27,7 +27,7 @@ fi
 
 # Until https://github.com/jMonkeyEngine/jmonkeyengine/issues/1260 is solved, prebuild the engine manually
 echo "Prebuilding the engine to ensure native libraries are unzipped"
-./gradlew -PbuildJavaDoc=true assemble
+./gradlew -PbuildJavaDoc=true build assemble
 
 #echo "Building the Engine and installing them to your local maven repo...."
 # ./gradlew -PbuildJavaDoc=true install # Depends on jarJavadoc, jarSourcecode, assemble, dist etc.
