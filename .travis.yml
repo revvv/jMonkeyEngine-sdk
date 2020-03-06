@@ -1,5 +1,4 @@
 language: java
-sudo: false
 jdk: openjdk11
 dist: bionic
 
@@ -12,7 +11,7 @@ cache:
    - jdks/local/*/compiled
 
 addons:
-  ssh_known_hosts: updates.jmonkeyengine.org
+  #ssh_known_hosts: updates.jmonkeyengine.org
   apt:
     packages:
     - p7zip-full
