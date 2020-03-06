@@ -635,7 +635,7 @@ task downloadAvian() {
     }
 }
 
-task buildSdk(dependsOn: [copyBaseLibs, copyProjectLibs, createProjectXml, createBaseXml, copyTestSources, overrideHarness, downloadAvian]) {
+task buildSdk(dependsOn: [copyBaseLibs, copyProjectLibs, createProjectXml, createBaseXml, copyTestSources, downloadAvian]) {
     doLast {
         ant.propertyfile(file: "nbproject/project.properties") {
             entry( key: "plugins.version", value: "${jmeVersion}")

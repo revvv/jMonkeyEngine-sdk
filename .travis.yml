@@ -66,6 +66,7 @@ before_deploy:
   
   # Force Freeing Space.
   - rm -rf build/
+  - ./gradlew overrideHarness # This will patch the launcher exes to have our custom icon
   - set -o pipefail # Allow failing in ant to be up-propagated
   - ant -Dstorepass="$NBM_SIGN_PASS" -Dpack200.enabled=true set-spec-version build-installers unset-spec-version | awk '{printf("."); fflush(stdout)}'
   
