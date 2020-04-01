@@ -278,7 +278,6 @@ getEnv(JavaVM* vm)
         while (touch = [enumerator nextObject]) {
             CGPoint position = [touch locationInView: nil];
             float scale = _glview.contentScaleFactor;
-            //NSLog(@"multipleTouchEnabled=%d", _window.rootViewController.view.multipleTouchEnabled); // true
             // NOTE: cast to jlong is required, otherwise JmeAppHarness receives non-sense values
             (*e)->CallVoidMethod(e, self.harness, self.injectTouchBegin, (jint) touch.hash, (jlong) touch.timestamp, position.x * scale, position.y * scale);
             if ((*e)->ExceptionCheck(e)) {
@@ -299,6 +298,7 @@ getEnv(JavaVM* vm)
         while (touch = [enumerator nextObject]) {
             CGPoint position = [touch locationInView: nil];
             float scale = _glview.contentScaleFactor;
+            // NOTE: cast to jlong is required, otherwise JmeAppHarness receives non-sense values
             (*e)->CallVoidMethod(e, self.harness, self.injectTouchMove, (jint) touch.hash, (jlong) touch.timestamp, position.x * scale, position.y * scale);
             if ((*e)->ExceptionCheck(e)) {
                 NSLog(@"Could not invoke iOS Harness injectTouchMove");
@@ -318,6 +318,7 @@ getEnv(JavaVM* vm)
         while (touch = [enumerator nextObject]) {
             CGPoint position = [touch locationInView: nil];
             float scale = _glview.contentScaleFactor;
+            // NOTE: cast to jlong is required, otherwise JmeAppHarness receives non-sense values
             (*e)->CallVoidMethod(e, self.harness, self.injectTouchEnd, (jint) touch.hash, (jlong) touch.timestamp, position.x * scale, position.y * scale);
             if ((*e)->ExceptionCheck(e)) {
                 NSLog(@"Could not invoke iOS Harness injectTouchEnd");
