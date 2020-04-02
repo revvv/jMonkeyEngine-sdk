@@ -1,5 +1,4 @@
 language: java
-sudo: false
 jdk: openjdk11
 dist: bionic
 
@@ -12,7 +11,7 @@ cache:
    - jdks/local/*/compiled
 
 addons:
-  ssh_known_hosts: updates.jmonkeyengine.org
+  #ssh_known_hosts: updates.jmonkeyengine.org
   apt:
     packages:
     - p7zip-full
@@ -66,6 +65,7 @@ before_deploy:
   
   # Force Freeing Space.
   - rm -rf build/
+  - ./gradlew overrideHarness # This will patch the launcher exes to have our custom icon
   - set -o pipefail # Allow failing in ant to be up-propagated
   - ant -Dstorepass="$NBM_SIGN_PASS" -Dpack200.enabled=true set-spec-version build-installers unset-spec-version | awk '{printf("."); fflush(stdout)}'
   
