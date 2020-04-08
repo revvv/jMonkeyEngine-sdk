@@ -31,7 +31,10 @@
  */
 package com.jme3.gde.blender;
 
+import com.jme3.asset.ModelKey;
 import com.jme3.gde.core.assets.SpatialAssetDataObject;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.plugins.gltf.GltfModelKey;
 import java.io.IOException;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -93,4 +96,12 @@ public class GLTFDataObject extends SpatialAssetDataObject {
     public GLTFDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException, IOException {
         super(pf, loader);
     }
+
+    @Override
+    public synchronized ModelKey getAssetKey() {
+        GltfModelKey gltf = new GltfModelKey(super.getAssetKey().getName());
+        gltf.setExtrasLoader(GltfExtrasLoader.INSTANCE);
+        return gltf;
+    }
+    
 }
