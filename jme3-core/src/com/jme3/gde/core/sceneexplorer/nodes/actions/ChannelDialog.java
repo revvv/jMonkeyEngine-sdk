@@ -32,7 +32,7 @@
 package com.jme3.gde.core.sceneexplorer.nodes.actions;
 
 import com.jme3.animation.LoopMode;
-import com.jme3.gde.core.sceneexplorer.nodes.JmeAnimation;
+import com.jme3.gde.core.sceneexplorer.nodes.animation.JmeAnimation;
 
 /**
  *

@@ -29,11 +29,12 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.core.sceneexplorer.nodes;
+package com.jme3.gde.core.sceneexplorer.nodes.animation;
 
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.Animation;
 import com.jme3.gde.core.scene.SceneApplication;
+import com.jme3.gde.core.sceneexplorer.nodes.JmeTrackChildren;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;

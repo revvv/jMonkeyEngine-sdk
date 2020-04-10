@@ -114,7 +114,7 @@ public abstract class JmeControl extends AbstractSceneExplorerNode {
     
     /* Controls have a parental node containing them */
     @Override
-    protected void fireSave(boolean modified) {
+    public void fireSave(boolean modified) {
         super.fireSave(true);
         Node parent = getParentNode();
         if (parent instanceof AbstractSceneExplorerNode) {

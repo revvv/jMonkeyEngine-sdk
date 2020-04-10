@@ -29,7 +29,7 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.core.sceneexplorer.nodes;
+package com.jme3.gde.core.sceneexplorer.nodes.animation;
 
 import com.jme3.animation.Bone;
 import com.jme3.gde.core.scene.SceneApplication;

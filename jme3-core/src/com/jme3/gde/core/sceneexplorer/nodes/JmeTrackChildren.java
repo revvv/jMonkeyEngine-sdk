@@ -31,6 +31,8 @@
  */
 package com.jme3.gde.core.sceneexplorer.nodes;
 
+import com.jme3.gde.core.sceneexplorer.nodes.animation.JmeAnimation;
+import com.jme3.gde.core.sceneexplorer.nodes.animation.JmeAnimControl;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.Animation;
 import com.jme3.animation.AudioTrack;

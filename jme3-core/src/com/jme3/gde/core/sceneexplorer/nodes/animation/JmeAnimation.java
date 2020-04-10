@@ -29,7 +29,7 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.core.sceneexplorer.nodes;
+package com.jme3.gde.core.sceneexplorer.nodes.animation;
 
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
@@ -39,6 +39,9 @@ import com.jme3.animation.LoopMode;
 import com.jme3.gde.core.icons.IconList;
 import com.jme3.gde.core.properties.AnimationProperty;
 import com.jme3.gde.core.scene.SceneApplication;
+import com.jme3.gde.core.sceneexplorer.nodes.AbstractSceneExplorerNode;
+import com.jme3.gde.core.sceneexplorer.nodes.JmeTrackChildren;
+import com.jme3.gde.core.sceneexplorer.nodes.SceneExplorerNode;
 import com.jme3.gde.core.sceneexplorer.nodes.actions.ChannelDialog;
 import com.jme3.gde.core.sceneexplorer.nodes.actions.ExtractSubAnimationDialog;
 import com.jme3.gde.core.sceneexplorer.nodes.actions.impl.tracks.AudioTrackWizardAction;
@@ -177,7 +180,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
 
     @Override
     public boolean canDestroy() {
-         return !jmeControl.readOnly;        
+         return !jmeControl.isReadOnly();
     }
 
     public void stop() {
@@ -193,6 +196,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
             lookupContents.remove(JmeAnimation.this.animation);
             lookupContents.remove(this);
             SceneApplication.getApplication().enqueue(new Callable<Void>() {
+                @Override
                 public Void call() throws Exception {
                     control.removeAnim(JmeAnimation.this.animation);                    
                     return null;
@@ -200,9 +204,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
             }).get();            
             jmeControl.refreshChildren();
             setChanged();
-        } catch (InterruptedException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (ExecutionException ex) {
+        } catch (InterruptedException | ExecutionException ex) {
             Exceptions.printStackTrace(ex);
         }
         
@@ -214,6 +216,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
         ((JmeTrackChildren) getChildren()).refreshChildren(false);
     }
 
+    @Override
     public Class getExplorerObjectClass() {
         return Animation.class;
     }
@@ -232,6 +235,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
 
     class PlayAction implements ActionListener {
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             final AnimControl control = jmeControl.getLookup().lookup(AnimControl.class);
             if (control == null) {
@@ -240,6 +244,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
 
             try {
                 SceneApplication.getApplication().enqueue(new Callable<Void>() {
+                    @Override
                     public Void call() throws Exception {
                         if (playing) {
                             control.clearChannels();
@@ -253,6 +258,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
                         innerSetLoopMode();
                         channel.setSpeed(animSpeed);
                         java.awt.EventQueue.invokeLater(new Runnable() {
+                            @Override
                             public void run() {
                                 play();
                             }
@@ -261,12 +267,8 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
 
                     }
                 }).get();
-            } catch (InterruptedException ex) {
+            } catch (InterruptedException | ExecutionException ex) {
                 Exceptions.printStackTrace(ex);
-                return;
-            } catch (ExecutionException ex) {
-                Exceptions.printStackTrace(ex);
-                return;
             }
 
         }
@@ -286,6 +288,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
                             channel = null;
                             jmeControl.setAnim(null);
                             java.awt.EventQueue.invokeLater(new Runnable() {
+                                @Override
                                 public void run() {
                                     stop();
                                 }
@@ -296,6 +299,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
                     }
                 }
 
+                @Override
                 public void onAnimChange(AnimControl ac, AnimChannel ac1, String animName) {
 //                    if (animation.getName().equals(ac1.getAnimationName())) {
 //                         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -314,6 +318,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
 
         ChannelDialog dialog = new ChannelDialog(null, false, JmeAnimation.this);
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             dialog.setLocationRelativeTo(null);
             dialog.setVisible(true);
@@ -330,6 +335,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
 
         try {
             SceneApplication.getApplication().enqueue(new Callable<Void>() {
+                @Override
                 public Void call() throws Exception {
                     if (channel != null) {
                         innerSetLoopMode();
@@ -338,13 +344,9 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
                     return null;
                 }
             }).get();
-        } catch (InterruptedException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (ExecutionException ex) {
+        } catch (InterruptedException | ExecutionException ex) {
             Exceptions.printStackTrace(ex);
         }
-
-
     }
 
     public float getAnimSpeed() {
@@ -355,6 +357,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
         this.animSpeed = speed;
         try {
             SceneApplication.getApplication().enqueue(new Callable<Void>() {
+                @Override
                 public Void call() throws Exception {
                     if (channel != null) {
                         channel.setSpeed(animSpeed);
@@ -362,9 +365,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
                     return null;
                 }
             }).get();
-        } catch (InterruptedException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (ExecutionException ex) {
+        } catch (InterruptedException | ExecutionException ex) {
             Exceptions.printStackTrace(ex);
         }
 
@@ -374,6 +375,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
 
         ExtractSubAnimationDialog dialog = new ExtractSubAnimationDialog();
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 dialog.setAnimControl(JmeAnimation.this.jmeControl);
@@ -431,7 +433,7 @@ public class JmeAnimation extends AbstractSceneExplorerNode {
 
     @Override
     public boolean canRename() {
-        return !jmeControl.readOnly;        
+        return !jmeControl.isReadOnly();        
     }
     
     /**
