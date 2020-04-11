@@ -31,7 +31,7 @@
  */
 package com.jme3.gde.core.sceneexplorer.nodes.animation;
 
-import com.jme3.anim.Armature;
+import com.jme3.anim.SkinningControl;
 import com.jme3.gde.core.icons.IconList;
 import com.jme3.gde.core.sceneexplorer.nodes.AbstractSceneExplorerNode;
 import com.jme3.gde.core.sceneexplorer.nodes.SceneExplorerNode;
@@ -46,20 +46,20 @@ import org.openide.nodes.Sheet;
  */
 @org.openide.util.lookup.ServiceProvider(service = SceneExplorerNode.class)
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class JmeArmature extends AbstractSceneExplorerNode {
-    private Armature armature;
+public class JmeSkinningControl extends AbstractSceneExplorerNode {
+    private SkinningControl skinningControl;
     private static Image smallImage = IconList.skeletonControl.getImage();
 
-    public JmeArmature() {
+    public JmeSkinningControl() {
     }
 
-    public JmeArmature(Armature armature, JmeBoneChildren children) {
+    public JmeSkinningControl(SkinningControl skinningControl, JmeJointChildren children) {
         super(children);
-        this.armature = armature;
+        this.skinningControl = skinningControl;
         lookupContents.add(this);
-        lookupContents.add(armature);
+        lookupContents.add(skinningControl);
         setName("Armature");
-        //children.setSkeltonControl(this);
+        children.setSkinningControl(this);
     }
 
     @Override
@@ -76,34 +76,32 @@ public class JmeArmature extends AbstractSceneExplorerNode {
     protected Sheet createSheet() {
         Sheet sheet = Sheet.createDefault();
         Sheet.Set set = Sheet.createPropertiesSet();
-        set.setDisplayName("Armature");
-        set.setName(Armature.class.getName());
-        if (armature == null) {
-            return sheet;
-        }
+        set.setDisplayName("SkinningControl");
+        set.setName(SkinningControl.class.getName());
+        if (skinningControl != null) {
+            sheet.put(set);
+        } // else: empty sheet
         
-        sheet.put(set);
         return sheet;
     }
 
     @Override
     public Class getExplorerObjectClass() {
-        return Armature.class;
+        return SkinningControl.class;
     }
 
     @Override
     public Class getExplorerNodeClass() {
-        return JmeArmature.class;
+        return JmeSkinningControl.class;
     }
 
-    public Armature getArmature() {
-        return armature;
+    public SkinningControl getSkinningControl() {
+        return skinningControl;
     }
 
     @Override
     public Node[] createNodes(Object key, DataObject key2, boolean cookie) {
-        JmeBoneChildren children = new JmeBoneChildren(null, null);
-        JmeArmature jsc = new JmeArmature((Armature) key, children);
-        return new Node[]{jsc};
+        JmeJointChildren children = new JmeJointChildren(null, null);
+        return new Node[]{new JmeSkinningControl((SkinningControl)key, children)};
     }
 }
