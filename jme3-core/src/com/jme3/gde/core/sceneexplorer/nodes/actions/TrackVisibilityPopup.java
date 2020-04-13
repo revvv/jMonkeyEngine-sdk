@@ -31,7 +31,7 @@
  */
 package com.jme3.gde.core.sceneexplorer.nodes.actions;
 
-import com.jme3.gde.core.sceneexplorer.nodes.JmeAnimControl;
+import com.jme3.gde.core.sceneexplorer.nodes.animation.JmeAnimControl;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JCheckBoxMenuItem;

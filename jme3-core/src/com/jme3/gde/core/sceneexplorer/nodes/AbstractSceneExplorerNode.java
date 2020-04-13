@@ -124,6 +124,15 @@ public abstract class AbstractSceneExplorerNode extends AbstractNode implements 
         this.readOnly = readOnly;
         return this;
     }
+    
+    /**
+     * Whether this Node is read-only which means it cannot be deleted, cutted or copied.
+     * These are the actions you will see in the Context Menu of this Node.
+     * @return The Read Only Status
+     */
+    public boolean isReadOnly() {
+        return readOnly;
+    }
 
     //TODO: refresh does not work
     public void refresh(boolean immediate) {

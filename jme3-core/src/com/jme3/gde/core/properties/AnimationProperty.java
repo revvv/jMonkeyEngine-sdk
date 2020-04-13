@@ -35,7 +35,6 @@ import com.jme3.animation.AnimControl;
 import com.jme3.gde.core.scene.SceneApplication;
 import java.beans.PropertyEditor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import org.openide.nodes.PropertySupport;
 import org.openide.util.Exceptions;
@@ -65,22 +64,17 @@ public class AnimationProperty extends PropertySupport.ReadWrite<String> {
             return;
         }
         try {
-            SceneApplication.getApplication().enqueue(new Callable<Void>() {
-
-                public Void call() throws Exception {
-                    if ("null".equals(val)) {
-                        control.clearChannels();
-                        return null;
-                    }
-                    anim = val;
+            SceneApplication.getApplication().enqueue(() -> {
+                if ("null".equals(val)) {
                     control.clearChannels();
-                    control.createChannel().setAnim(val);
                     return null;
                 }
+                anim = val;
+                control.clearChannels();
+                control.createChannel().setAnim(val);
+                return null;
             }).get();
-        } catch (InterruptedException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (ExecutionException ex) {
+        } catch (InterruptedException | ExecutionException ex) {
             Exceptions.printStackTrace(ex);
         }
     }

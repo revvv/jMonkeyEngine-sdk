@@ -34,7 +34,7 @@ package com.jme3.gde.core.sceneexplorer.nodes.actions.impl.tracks;
 import com.jme3.animation.Animation;
 import com.jme3.animation.EffectTrack;
 import com.jme3.effect.ParticleEmitter;
-import com.jme3.gde.core.sceneexplorer.nodes.JmeAnimation;
+import com.jme3.gde.core.sceneexplorer.nodes.animation.JmeAnimation;
 import com.jme3.scene.Spatial;
 import java.awt.Component;
 import java.awt.Dialog;

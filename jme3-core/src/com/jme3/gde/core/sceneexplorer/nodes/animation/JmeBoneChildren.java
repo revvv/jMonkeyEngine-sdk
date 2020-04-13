@@ -29,17 +29,11 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.core.sceneexplorer.nodes;
+package com.jme3.gde.core.sceneexplorer.nodes.animation;
 
-import com.jme3.gde.core.sceneexplorer.nodes.animation.JmeAnimation;
-import com.jme3.gde.core.sceneexplorer.nodes.animation.JmeAnimControl;
-import com.jme3.animation.AnimControl;
-import com.jme3.animation.Animation;
-import com.jme3.animation.AudioTrack;
-import com.jme3.animation.BoneTrack;
-import com.jme3.animation.EffectTrack;
-import com.jme3.animation.Track;
+import com.jme3.animation.Bone;
 import com.jme3.gde.core.scene.SceneApplication;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,22 +46,22 @@ import org.openide.util.Exceptions;
 
 /**
  *
- * @author nehon
+ * @author normenhansen
  */
-public class JmeTrackChildren extends Children.Keys<Object> {
+public class JmeBoneChildren extends Children.Keys<Object> {
 
-    protected JmeAnimation jmeAnimation;
+    protected Bone rootBone;
+    protected JmeSkeletonControl jmeSkeletonControl;
     protected boolean readOnly = true;
     protected HashMap<Object, Node> map = new HashMap<Object, Node>();
     private DataObject dataObject;
-    private JmeAnimControl jmeControl;
 
-    public JmeTrackChildren() {
+    public JmeBoneChildren() {
     }
 
-    public JmeTrackChildren(JmeAnimation jmeAnimation, JmeAnimControl jmeControl) {
-        this.jmeAnimation = jmeAnimation;
-        this.jmeControl = jmeControl;
+    public JmeBoneChildren(JmeSkeletonControl jmeSkeletonControl, Bone rootBone) {
+        this.rootBone = rootBone;
+        this.jmeSkeletonControl = jmeSkeletonControl;
     }
 
     public void refreshChildren(boolean immediate) {
@@ -91,28 +85,10 @@ public class JmeTrackChildren extends Children.Keys<Object> {
 
                 public List<Object> call() throws Exception {
                     List<Object> keys = new LinkedList<Object>();
-                    Animation anim = jmeAnimation.getLookup().lookup(Animation.class);
-                    if (anim != null) {
-                        for (Track track : anim.getTracks()) {
-                            if (track instanceof BoneTrack) {
-                                if (jmeControl.isDisplayBoneTracks()) {
-                                    keys.add(track);
-                                }
-                            } else if (track instanceof EffectTrack) {
-                                if (jmeControl.isDisplayEffectTracks()) {
-                                    keys.add(track);
-                                }
-
-                            } else if (track instanceof AudioTrack) {
-                                if (jmeControl.isDisplayAudioTracks()) {
-                                    keys.add(track);
-                                }
-                            } else {
-                                keys.add(track);
-                            }
-
-                        }
-
+                    if (rootBone != null) {
+                        keys.addAll(rootBone.getChildren());
+                    } else {
+                        keys.addAll(Arrays.asList(jmeSkeletonControl.getSkeletonControl().getSkeleton().getRoots()));
                     }
 
                     return keys;
@@ -138,18 +114,17 @@ public class JmeTrackChildren extends Children.Keys<Object> {
 //            }
 //        }
 
-        if (key instanceof Track) {
-            return new Node[]{new JmeTrack((Track) key, jmeControl.getLookup().lookup(AnimControl.class), dataObject).setReadOnly(readOnly)};
+        if (key instanceof Bone) {
+            JmeBoneChildren children = new JmeBoneChildren(jmeSkeletonControl, (Bone) key);
+            children.setReadOnly(readOnly);
+            children.setDataObject(dataObject);
+            return new Node[]{new JmeBone(jmeSkeletonControl, (Bone) key, children).setReadOnly(readOnly)};
         }
         return new Node[]{Node.EMPTY};
     }
 
-    public void setAnimation(JmeAnimation jmeAnimation) {
-        this.jmeAnimation = jmeAnimation;
-    }
-
-    public void setAnimControl(JmeAnimControl jmeControl) {
-        this.jmeControl = jmeControl;
+    public void setSkeltonControl(JmeSkeletonControl jmeSkeletonControl) {
+        this.jmeSkeletonControl = jmeSkeletonControl;
     }
 
     public DataObject getDataObject() {

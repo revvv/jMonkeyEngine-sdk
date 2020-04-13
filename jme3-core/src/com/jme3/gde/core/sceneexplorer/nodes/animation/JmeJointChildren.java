@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2009-2010 jMonkeyEngine
+ *  Copyright (c) 2009-2020 jMonkeyEngine
  *  All rights reserved.
  * 
  *  Redistribution and use in source and binary forms, with or without
@@ -29,15 +29,14 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.core.sceneexplorer.nodes;
+package com.jme3.gde.core.sceneexplorer.nodes.animation;
 
-import com.jme3.animation.AnimControl;
-import com.jme3.animation.Animation;
+import com.jme3.anim.Joint;
 import com.jme3.gde.core.scene.SceneApplication;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Children;
@@ -45,21 +44,22 @@ import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 
 /**
- *
- * @author nehon
+ * Representation of multiple Joints in the Scene Explorer
+ * @author MeFisto94
  */
-public class JmeAnimChildren extends Children.Keys<Object> {
-
-    protected JmeAnimControl jmeAnimControl;
+public class JmeJointChildren extends Children.Keys<Object> {
+    protected Joint rootJoint;
+    protected JmeSkinningControl jmeSkinningControl;
     protected boolean readOnly = true;
-    protected HashMap<Object, Node> map = new HashMap<Object, Node>();
+    protected HashMap<Object, Node> map = new HashMap<>();
     private DataObject dataObject;
 
-    public JmeAnimChildren() {
+    public JmeJointChildren() {
     }
 
-    public JmeAnimChildren(JmeAnimControl jmeAnimControl) {
-        this.jmeAnimControl = jmeAnimControl;
+    public JmeJointChildren(JmeSkinningControl jmeSkinningControl, Joint rootJoint) {
+        this.rootJoint = rootJoint;
+        this.jmeSkinningControl = jmeSkinningControl;
     }
 
     public void refreshChildren(boolean immediate) {
@@ -79,50 +79,36 @@ public class JmeAnimChildren extends Children.Keys<Object> {
 
     protected List<Object> createKeys() {
         try {
-            return SceneApplication.getApplication().enqueue(new Callable<List<Object>>() {
-
-                public List<Object> call() throws Exception {
-                    List<Object> keys = new LinkedList<Object>();
-                    AnimControl control = jmeAnimControl.getLookup().lookup(AnimControl.class);
-                    if (control != null) {
-                        for (String animName : control.getAnimationNames()) {
-                            keys.add(control.getAnim(animName));
-                        }
-                    }
-
-                    return keys;
+            return SceneApplication.getApplication().enqueue(() -> {
+                List<Object> keys = new LinkedList<>();
+                if (rootJoint != null) {
+                    keys.addAll(rootJoint.getChildren());
+                } else {
+                    keys.addAll(Arrays.asList(jmeSkinningControl.getSkinningControl().getArmature().getRoots()));
                 }
+                
+                return keys;
             }).get();
-        } catch (InterruptedException ex) {
+        } catch (InterruptedException | ExecutionException ex) {
             Exceptions.printStackTrace(ex);
-        } catch (ExecutionException ex) {
-            Exceptions.printStackTrace(ex);
+            return null;
         }
-        return null;
     }
 
     @Override
     protected Node[] createNodes(Object key) {
-//        for (SceneExplorerNode di : Lookup.getDefault().lookupAll(SceneExplorerNode.class)) {
-//            if (di.getExplorerObjectClass().getName().equals(key.getClass().getName())) {
-//                Logger.getLogger(this.getClass().getName()).log(Level.FINE, "Found {0}", di.getExplorerNodeClass());
-//                Node[] ret = di.createNodes(key, dataObject, readOnly);
-//                if (ret != null) {
-//                    return ret;
-//                }
-//            }
-//        }
-
-        if (key instanceof Animation) {
-            JmeTrackChildren children = new JmeTrackChildren();
-            children.setReadOnly(readOnly);            
-            return new Node[]{new JmeAnimation(jmeAnimControl, (Animation) key, children, dataObject).setReadOnly(readOnly)};
+        if (key instanceof Joint) {
+            JmeJointChildren children = new JmeJointChildren(jmeSkinningControl, (Joint)key);
+            children.setReadOnly(readOnly);
+            children.setDataObject(dataObject);
+            return new Node[]{new JmeJoint(jmeSkinningControl, (Joint)key, children).setReadOnly(readOnly)};
+        } else {
+            return new Node[]{Node.EMPTY};
         }
-        return new Node[]{Node.EMPTY};
     }
 
-    public void setAnimControl(JmeAnimControl jmeAnimControl) {
-        this.jmeAnimControl = jmeAnimControl;
+    public void setSkinningControl(JmeSkinningControl jmeSkinningControl) {
+        this.jmeSkinningControl = jmeSkinningControl;
     }
 
     public DataObject getDataObject() {

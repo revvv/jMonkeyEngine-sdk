@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2009-2010 jMonkeyEngine
+ *  Copyright (c) 2009-2020 jMonkeyEngine
  *  All rights reserved.
  * 
  *  Redistribution and use in source and binary forms, with or without
@@ -29,16 +29,18 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.core.sceneexplorer.nodes;
+package com.jme3.gde.core.sceneexplorer.nodes.animation;
 
-import com.jme3.animation.Bone;
+import com.jme3.anim.Joint;
 import com.jme3.gde.core.icons.IconList;
 import com.jme3.gde.core.scene.SceneApplication;
+import com.jme3.gde.core.sceneexplorer.nodes.AbstractSceneExplorerNode;
+import com.jme3.gde.core.sceneexplorer.nodes.ClipboardSpatial;
+import com.jme3.gde.core.sceneexplorer.nodes.SceneExplorerNode;
 import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import javax.swing.Action;
 import org.openide.awt.Actions;
@@ -47,28 +49,27 @@ import org.openide.nodes.Sheet;
 import org.openide.util.Exceptions;
 
 /**
- *
- * @author normenhansen
+ * Visual representation of the Joint Class in the Scene Explorer
+ * @author MeFisto94
  */
 @org.openide.util.lookup.ServiceProvider(service = SceneExplorerNode.class)
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class JmeBone extends AbstractSceneExplorerNode {
-
+public class JmeJoint extends AbstractSceneExplorerNode {
     private static Image smallImage = IconList.bone.getImage();
-    private Bone bone;
-    private JmeSkeletonControl jmeSkeletonControl;
-    protected final DataFlavor BONE_FLAVOR = new DataFlavor(ClipboardSpatial.class, "Bone");
+    private Joint joint;
+    private JmeSkinningControl jmeSkinningControl;
+    protected final DataFlavor BONE_FLAVOR = new DataFlavor(ClipboardSpatial.class, "Joint");
 
-    public JmeBone() {
+    public JmeJoint() {
     }
 
-    public JmeBone(JmeSkeletonControl jmeSkeletonControl, Bone bone, JmeBoneChildren children) {
+    public JmeJoint(JmeSkinningControl jmeSkinningControl, Joint joint, JmeJointChildren children) {
         super(children);
-        this.jmeSkeletonControl = jmeSkeletonControl;
-        getLookupContents().add(bone);
+        this.jmeSkinningControl = jmeSkinningControl;
+        getLookupContents().add(joint);
         getLookupContents().add(this);
-        super.setName(bone.getName());
-        this.bone = bone;
+        super.setName(joint.getName());
+        this.joint = joint;
     }
 
     @Override
@@ -83,63 +84,56 @@ public class JmeBone extends AbstractSceneExplorerNode {
 
     @Override
     protected Sheet createSheet() {
-        //TODO: multithreading..
         Sheet sheet = super.createSheet();
         Sheet.Set set = Sheet.createPropertiesSet();
-        set.setDisplayName("Bone");
-        set.setName(Bone.class.getName());
-        Bone obj = bone;//getLookup().lookup(Spatial.class);
-        if (obj == null) {
-            return sheet;
-        }
-        sheet.put(set);
+        set.setDisplayName("Joint");
+        set.setName(Joint.class.getName());
+        
+        if (joint != null) {
+            sheet.put(set);
+        } // Otherwise: Empty Set
+        
         return sheet;
-
     }
 
     @Override
     public Action[] getActions(boolean context) {
-
         return new Action[]{
-                    Actions.alwaysEnabled(new AttachementNodeActionListener(), "Get attachement Node", "", false),};
+            Actions.alwaysEnabled(new AttachementNodeActionListener(), "Get attachement Node", "", false)
+        };
     }
 
     private class AttachementNodeActionListener implements ActionListener {
-
+        @Override
         public void actionPerformed(ActionEvent e) {
             fireSave(true);
             try {
-                SceneApplication.getApplication().enqueue(new Callable<Void>() {
-
-                    public Void call() throws Exception {
-                        jmeSkeletonControl.getSkeletonControl().getAttachmentsNode(bone.getName());
-                        return null;
-                    }
-                }).get();
-                ((AbstractSceneExplorerNode) jmeSkeletonControl.getParentNode()).refresh(false);
-            } catch (InterruptedException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (ExecutionException ex) {
+                SceneApplication.getApplication().enqueue(() -> 
+                    jmeSkinningControl.getSkinningControl().getAttachmentsNode(joint.getName())
+                ).get();
+                
+                ((AbstractSceneExplorerNode)jmeSkinningControl.getParentNode()).refresh(false);
+            } catch (InterruptedException | ExecutionException ex) {
                 Exceptions.printStackTrace(ex);
             }
-
         }
     }
 
+    @Override
     public Class getExplorerObjectClass() {
-        return Bone.class;
+        return Joint.class;
     }
 
     @Override
     public Class getExplorerNodeClass() {
-        return JmeBone.class;
+        return JmeJoint.class;
     }
 
     @Override
     public org.openide.nodes.Node[] createNodes(Object key, DataObject key2, boolean cookie) {
-        JmeBoneChildren children = new JmeBoneChildren(jmeSkeletonControl, (Bone) key);
+        JmeJointChildren children = new JmeJointChildren(jmeSkinningControl, (Joint)key);
         children.setReadOnly(cookie);
         children.setDataObject(key2);
-        return new org.openide.nodes.Node[]{new JmeBone(jmeSkeletonControl, (Bone) key, children).setReadOnly(cookie)};
+        return new org.openide.nodes.Node[]{new JmeJoint(jmeSkinningControl, (Joint)key, children).setReadOnly(cookie)};
     }
 }

@@ -32,16 +32,15 @@
 package com.jme3.gde.core.sceneexplorer.nodes.actions;
 
 import com.jme3.animation.LoopMode;
-import com.jme3.gde.core.sceneexplorer.nodes.JmeAnimation;
+import com.jme3.gde.core.sceneexplorer.nodes.animation.JmeAnimation;
 
 /**
- *
+ * A Dialog to edit the Loop Mode and Playback Speed of an AnimChannel (pre-3.3)
  * @author Nehon
  */
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class ChannelDialog extends javax.swing.JDialog {
-    
     JmeAnimation jmeAnim;
 
     /**

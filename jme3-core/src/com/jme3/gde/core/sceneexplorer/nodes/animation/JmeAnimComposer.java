@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2009-2016 jMonkeyEngine
+ *  Copyright (c) 2009-2020 jMonkeyEngine
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -29,51 +29,49 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.gde.core.sceneexplorer.nodes;
+package com.jme3.gde.core.sceneexplorer.nodes.animation;
 
-import com.jme3.animation.AnimControl;
+import com.jme3.anim.AnimComposer;
 import com.jme3.gde.core.icons.IconList;
-import com.jme3.gde.core.properties.AnimationProperty;
+import com.jme3.gde.core.sceneexplorer.nodes.JmeControl;
+import com.jme3.gde.core.sceneexplorer.nodes.JmeTrackChildren;
+import com.jme3.gde.core.sceneexplorer.nodes.SceneExplorerNode;
 import com.jme3.gde.core.sceneexplorer.nodes.actions.ControlsPopup;
-import com.jme3.gde.core.sceneexplorer.nodes.actions.TrackVisibilityPopup;
 import java.awt.Image;
 import javax.swing.Action;
 import org.openide.actions.DeleteAction;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.nodes.Sheet;
-import org.openide.util.HelpCtx;
-import org.openide.util.actions.BooleanStateAction;
 import org.openide.util.actions.SystemAction;
 
 /**
- *
- * @author normenhansen
+ * Visual representation of the AnimComposer Class in the Scene Explorer
+ * @author MeFisto94
  */
 @org.openide.util.lookup.ServiceProvider(service = SceneExplorerNode.class)
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class JmeAnimControl extends JmeControl {
-
-    private AnimControl animControl;
-    private JmeAnimation playingAnimation = null;
+public class JmeAnimComposer extends JmeControl {
+    private AnimComposer animComposer;
+    private JmeAnimClip playingAnimation = null;
     private boolean displayBoneTracks = false;
     private boolean displayEffectTracks = true;
     private boolean displayAudioTracks = true;
     private static Image smallImage = IconList.animControl.getImage();
 
-    public JmeAnimControl() {
+    public JmeAnimComposer() {
     }
 
-    public JmeAnimControl(AnimControl animControl, JmeAnimChildren children, DataObject obj) {
+    public JmeAnimComposer(AnimComposer animComposer, JmeAnimClipChildren children, DataObject obj) {
         super(children);
         dataObject = obj;
         children.setDataObject(dataObject);
-        this.animControl = animControl;
+        this.animComposer = animComposer;
         lookupContents.add(this);
-        lookupContents.add(animControl);
-        setName("AnimControl");
-        children.setAnimControl(this);
-        control = animControl;
+        lookupContents.add(animComposer);
+        setName("AnimComposer");
+        children.setAnimComposer(this);
+        control = animComposer;
     }
 
     @Override
@@ -88,27 +86,24 @@ public class JmeAnimControl extends JmeControl {
 
     @Override
     protected Sheet createSheet() {
-        //TODO: multithreading..
         Sheet sheet = Sheet.createDefault();
         Sheet.Set set = Sheet.createPropertiesSet();
-        set.setDisplayName("AnimControl");
-        set.setName(AnimControl.class.getName());
-        if (animControl == null) {
-            return sheet;
-        }
+        set.setDisplayName("AnimComposer");
+        set.setName(AnimComposer.class.getName());
 
-        set.put(new AnimationProperty(animControl));
-
-        sheet.put(set);
+        if (animComposer != null) {
+            //set.put(new AnimationProperty(animComposer));
+            sheet.put(set);
+        } // else: Empty Sheet
+        
         return sheet;
-
     }
 
     public boolean isPlaying() {
         return playingAnimation != null;
     }
 
-    public void setAnim(JmeAnimation anim) {
+    public void setAnimClip(JmeAnimClip anim) {
         if (playingAnimation != null) {
             playingAnimation.stop();
         }
@@ -118,7 +113,7 @@ public class JmeAnimControl extends JmeControl {
     @Override
     public Action[] getActions(boolean context) {
         return new Action[]{
-                    new TrackVisibilityPopup(this),
+                    //new TrackVisibilityPopup(this),
                     new ControlsPopup(this),
                     SystemAction.get(DeleteAction.class)
                 };
@@ -126,18 +121,18 @@ public class JmeAnimControl extends JmeControl {
 
     @Override
     public Class getExplorerObjectClass() {
-        return AnimControl.class;
+        return AnimComposer.class;
     }
 
     @Override
     public Class getExplorerNodeClass() {
-        return JmeAnimControl.class;
+        return JmeAnimComposer.class;
     }
 
     @Override
     public Node[] createNodes(Object key, DataObject key2, boolean cookie) {
-        JmeAnimChildren children = new JmeAnimChildren(this);
-        return new Node[]{new JmeAnimControl((AnimControl) key, children, key2)};
+        JmeAnimClipChildren children = new JmeAnimClipChildren(this);
+        return new Node[]{ new JmeAnimComposer((AnimComposer)key, children, key2)};
     }
 
     public boolean isDisplayAudioTracks() {
@@ -175,6 +170,7 @@ public class JmeAnimControl extends JmeControl {
         }
     }
 
+    /*
     class ToggleBoneTrackAction extends BooleanStateAction {
 
         @Override
@@ -199,7 +195,7 @@ public class JmeAnimControl extends JmeControl {
 
         @Override
         public HelpCtx getHelpCtx() {
-            return JmeAnimControl.this.getHelpCtx();
+            return JmeAnimComposer.this.getHelpCtx();
         }
     };
 
@@ -227,7 +223,7 @@ public class JmeAnimControl extends JmeControl {
 
         @Override
         public HelpCtx getHelpCtx() {
-            return JmeAnimControl.this.getHelpCtx();
+            return JmeAnimComposer.this.getHelpCtx();
         }
     };
 
@@ -255,7 +251,8 @@ public class JmeAnimControl extends JmeControl {
 
         @Override
         public HelpCtx getHelpCtx() {
-            return JmeAnimControl.this.getHelpCtx();
+            return JmeAnimComposer.this.getHelpCtx();
         }
     };
+    */
 }

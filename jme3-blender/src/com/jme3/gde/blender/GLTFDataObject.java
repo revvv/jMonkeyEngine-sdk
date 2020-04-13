@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2009-2017 jMonkeyEngine
+ *  Copyright (c) 2009-2020 jMonkeyEngine
  *  All rights reserved.
  * 
  *  Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,10 @@
  */
 package com.jme3.gde.blender;
 
+import com.jme3.asset.ModelKey;
 import com.jme3.gde.core.assets.SpatialAssetDataObject;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.plugins.gltf.GltfModelKey;
 import java.io.IOException;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -42,7 +45,6 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.util.NbBundle.Messages;
-import com.jme3.asset.ModelKey;
 
 @Messages({
     "LBL_GLTF_LOADER=GLTF Files"
@@ -50,8 +52,9 @@ import com.jme3.asset.ModelKey;
 @MIMEResolver.ExtensionRegistration(
     displayName="#LBL_GLTF_LOADER",
     mimeType="model/gltf+json",
-    //mimeType="model/gltf.binary",
-    extension={ "gltf"}
+    //mimeType="model/gltf-binary",
+    // glb has another mimeType but for us, this is irrelevant. The Actions are the same
+    extension={ "gltf", "glb" }
 )
 @DataObject.Registration(
     mimeType = "model/gltf+json", 
@@ -82,9 +85,23 @@ import com.jme3.asset.ModelKey;
     @ActionReference(id =
     @ActionID(category = "System", id = "org.openide.actions.PropertiesAction"), path = "Loaders/model/gltf+json/Actions", position = 1300)
 })
-public class GLTFDataObject extends SpatialAssetDataObject {
 
+/**
+ * This class enables the SDK to open and convert <code>.gltf</code> and 
+ * <code>glb</code> files.
+ * 
+ * @author MeFisto94
+ */
+public class GLTFDataObject extends SpatialAssetDataObject {
     public GLTFDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException, IOException {
         super(pf, loader);
     }
+
+    @Override
+    public synchronized ModelKey getAssetKey() {
+        GltfModelKey gltf = new GltfModelKey(super.getAssetKey().getName());
+        gltf.setExtrasLoader(GltfExtrasLoader.INSTANCE);
+        return gltf;
+    }
+    
 }
